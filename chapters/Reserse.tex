@@ -56,99 +56,113 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
 
     Souborové systémy v ZFS se už neváží přímo na konkrétní fyzické zařízení jak tomu bylo dříve, ale na pool jako celek. Historické spojení souborového systému s konkrétním fyzickým zařízením přinášela mnohá omezení. Například pokud jsme souborový systém chtěli rozšířit, museli jsme ho celý znovu vytvořit. Tato operace může být časově náročná, ale
     v ZFS tomu tak není.
-        \subsubsection{Vytváření poolu}
-        Výše popsaný pool můžeme v systému kdykoli dynamicky vytvořit bez potřeby jakéhokoli zásahu do systému. Stačí když máme k dizpozici potřebné zdroje (disk, partition, soubor) k vytvoření námi požadovaného poolu. Pokud máme požadované zdroje, stačí už jen vybrat unikátní jméno pro pool v kontextu ZFS a v systému provést například následující příkaz.
-        \begin{verbatim}
-        $ zpool create tank c1t2d0 c2t1d0
-        \end{verbatim}         
-        V případě dostupnosti disků c1t2d0 a c2t1d0, tento příkaz vytvoří pool jménem tank se zdroji  c1t2d0 a c2t1d0.
-        \subsubsection{Rozšiřování poolu}
-        Výhodou architektury poolů je možnost dynamického přidávání fyzických nebo virtuálních zařížení do poolu a tím získáváme možnost dynamického rozšiřování kapacity celého poolu.
-        Všechny souborové systémy vytvořené nad jedním poolem, sdílejí jeho prostředky. Tudíž když dojde k rozšíření kapacity poolu, rozšíříme i potenciální kapacitu souborových systémů unvnitř.
+    \subsection{Vlastnosti poolu}
+    ZFS si o každém vytvořeném poolu udržuje infromace, které používá pro správu. Každý pool má tedy seznam vlastnotí, které tento pool popisují a jednoznačně určují.
+    Hlavním identifikátorem poolu je jeho jméno. Toto jméno musí být v kontextu celého ZFS unikátní, protože je používáno v příkazech manipulujích s danným poolem.
 
-        Kapacita poolu se dá rozšířit hned několika typy zařízení. Mezi nejpoužívanější patří disk a partition nebo RAID. ZFS nabízí možnost do poolu přidat soubor jako zdroj.
-        Tato možnost se jeví jako velmi výhodná pro testování nebo zkoušení, jelikož jsem ji sám při vytváření této práce mnohokrát využil. V praxy tato možnost znamená přidání další
-        vrstvy ( souborového systému ) mezi ZFS a samotný zdroj dat. Tento fakt přináší značné zpomalení, a proto se tato možnost v praxy téměř nevyužívá.
+    Vlastnosti můžeme rozdělit na dvě skupiny. Na jedné straně jsou statické informace, které popisují stav poolu a nedají se změnit přímo. Jsou takzvaně read-only. Pod tímto druhem informací si můžeme představit informace týkající se úložného prostoru jako například velikost, obsazenost a volné místo. Velikost poolu nemůžeme změnit přímo nastavením vlastnosti na jinou hodnotu, ale můžeme přidat do poolu další zdroj, který tuto informaci změní.
+
+    Na druhé straně jsou informace, které můžeme měnit přímo buďto dynamicky, když je pool vytvořen nebo když pool vytváříme nebo importujeme. Nastavit u poolu můžeme například vlastnot readonly, která zajistí, že od doby kdy byla tato vlasnot nastavena lze z daného poolu data pouze číst a nikoliv data zapisovat. Další zajímavou vlastností je vlastnot bootfs, která odkazuje na souborový systém, který slouží pro boot operačního systému. Manuální nastavovaní této vlastnosti se nedoporučuje, protože špatné nastavení může vést k nenačtení operačního systému.        
+
+    Pro stručnost jsem z následujícího příkazu, který administrátorovi zobrazuje dostupné infromace o poolu, vybral pouze nejnutnější vlastnoti.
+    \begin{verbatim}    
+    $ zpool get all rpool
+    NAME   PROPERTY       VALUE                SOURCE
+    rpool  allocated      11.9G                -
+    rpool  bootfs         rpool/ROOT/solaris   local
+    rpool  capacity       38%                  -
+    rpool  dedupratio     1.19x                -
+    rpool  delegation     on                   default
+    rpool  failmode       wait                 default
+    rpool  free           18.9G                -
+    rpool  guid           9953515090955426044  -
+    rpool  health         ONLINE               -
+    rpool  listsnapshots  on                   local
+    rpool  readonly       off                  -
+    rpool  size           30.8G                -
+    rpool  version        37                   default
+    \end{verbatim}
+    \subsection{Vytváření poolu}
+    Výše popsaný pool můžeme v systému kdykoli dynamicky vytvořit bez potřeby jakéhokoli zásahu do systému. Stačí když máme k dizpozici potřebné zdroje (disk, partition, soubor) k vytvoření námi požadovaného poolu. Pokud máme požadované zdroje, stačí už jen vybrat unikátní jméno pro pool v kontextu ZFS a v systému provést například následující příkaz.
+    \begin{verbatim}
+    $ zpool create tank c1t2d0 c2t1d0
+    \end{verbatim}
+    V případě dostupnosti disků c1t2d0 a c2t1d0, tento příkaz vytvoří pool jménem tank se zdroji  c1t2d0 a c2t1d0.
+    \subsection{Rozšiřování poolu}
+    Výhodou architektury poolů je možnost dynamického přidávání fyzických nebo virtuálních zařížení do poolu a tím získáváme možnost dynamického rozšiřování kapacity celého poolu.
+    Všechny souborové systémy vytvořené nad jedním poolem, sdílejí jeho prostředky. Tudíž když dojde k rozšíření kapacity poolu, rozšíříme i potenciální kapacitu souborových systémů unvnitř.
+
+    Kapacita poolu se dá rozšířit hned několika typy zařízení. Mezi nejpoužívanější patří disk a partition nebo RAID. ZFS nabízí možnost do poolu přidat soubor jako zdroj.
+    Tato možnost se jeví jako velmi výhodná pro testování nebo zkoušení, jelikož jsem ji sám při vytváření této práce mnohokrát využil. V praxy tato možnost znamená přidání další
+    vrstvy ( souborového systému ) mezi ZFS a samotný zdroj dat. Tento fakt přináší značné zpomalení, a proto se tato možnost v praxy téměř nevyužívá.
         
-        \subsubsection{RAID} 
-        V praxy naopak často používaná možnost jak rozšířit nebo vytvořit pool je pomocí virtuálního zařízení RAID. Tato technologie nám dává možnost rekonstrukce ztracených dat v případě výpadku nějakého disku. Souborový systém nabízí softwarový RAID, který nám umožňuje nad fyzickými zařízeními ( disk, partition, soubor ) vytvářet virtuální zařízení následujících typů.
-        \begin{itemize}
-          \item RAID1 - zrcadlení
-          \item RAIDZ1 - stripování s jendím paritním diskem
-          \item RAIDZ2 - stripování se dvěma paritními disky
-          \item RAIDZ3 - stripování se třemi paritními disky
-        \end{itemize} 
-        <IMAGE>
-        
-        Zrcadlení (RAID1) můžeme pomocí ZFS vytvořit nad dvěma a více zařízeními. Tento typ virtuálního zařízení pak jednoduše replikuje všechny data z disků na všechny ostatní disky
-        ve virtuálním zřízení. Pokud zrcadlení vytvoříme nad třemi disky, nakonec budou data na všech třech discích stejná a v případě výpadku jednoho z nich o data nepřijdeme. Jiná situace je samozřejmě v případě výpadku všech třech disků najednou. RAID nám v tomto případě nepomůže a všechny data ztratíme. Nicméně pravděpodobnost, že dojde k výpadku všech
-        tří disků najednou, než stihneme alespoň jeden vyměnit, je malá.
-        \begin{lstlisting}[language=bash,caption={Vytváření mirror}]
-        $ zpool TODO mirror c1t1d0 c1t2d0 c2t1d0
-        \end{lstlisting}   
-        
-        Stripování (RAIDZN) je technika ukládání dat na disk v takzaných stripech. Vezměme v úvahu například virtuální zařízení RAIDZ1 s jedním paritním diskem, do kterého přidáme tři disky. Pokud pokud zapisujeme na toto virtuální zařízení data jsou tyto data rozdělena do stripů. Stripe je základní jednotou zápisu dat a v našem případě se část stripu ukládá na první disk, část na druhý a poslední část na třetí disk. Z dat je vypočtena takzvaná parita, která se následně uloží na paritní disk. Z této hodnoty v případě výpadku jednoho disku dokážeme zpět dopočítat data, která byla uložena na nefunkčním disku. V případě výpadku dvou a více disků najednou o data opět přijdeme. V případě stripování nám RAIDZ přináší i výhodu ve čtení dat z disků. Vzhledem k tomu, že data jsou rozložena na více discích, dokážeme číst z více disků najednou a tím docílit vyšší rychlosti čtení.
-        \begin{lstlisting}[language=bash,caption={Vytváření raidz1}]
-        $ zpool create raidz1 c1t1d0 c1t2d0 c2t1d0 c2t2d0
-        \end{lstlisting}   
-        
-        V případě stripování s více paritními disky jsme schopni obnovit data při výpadku dvou disků při dvou paritních discích atp.. Výhoda vyšší čtecí rychlosti je stále zachována, protože můžeme data načítat z více disků najednou.
-        \subsection{Zrušení poolu}
-        Stejně jako můžeme dynamicky pool vytvářet a rozšiřovat, můžeme pool i kdykoli zničit a uvolnit tak prostředky, které pool využíval. Tyto prostředky jsou ihned k dispozici a můžeme z nich vytvořit nový pool nebo je použít rozšíření jiného poolu. Jelikož všechny souborové systémy vytvořené nad poolem sdílejí jeho prostředky, jsou tyto souborové systémy zničeny spolu s poolem. Ke zničení poolu, který jsme dříve vytvořili můžeme použít následující příkaz.
-        \begin{verbatim}
-        $ zpool destroy tank
-        \end{verbatim}   
-        Pokud v systému existuje pool jménem tank, příkaz ho zničí bez ohledu na to kolik souborových systému nad tímto poolem bylo vytvořeno.         
-        \subsection{Vlastnosti poolu}
-        ZFS si o každém vytvořeném poolu udržuje infromace, které používá pro správu. Každý pool má tedy seznam vlastnotí, které tento pool popisují a jednoznačně určují.
-        Hlavním identifikátorem poolu je jeho jméno. Toto jméno musí být v kontextu celého ZFS unikátní, protože je používáno v příkazech manipulujích s danným poolem.
-        
-        Vlastnosti můžeme rozdělit na dvě skupiny. Na jedné straně jsou statické informace, které popisují stav poolu a nedají se změnit přímo. Jsou takzvaně read-only. Pod tímto druhem informací si můžeme představit informace týkající se úložného prostoru jako například velikost, obsazenost a volné místo. Velikost poolu nemůžeme změnit přímo nastavením vlastnosti na jinou hodnotu, ale můžeme přidat do poolu další zdroj, který tuto informaci změní. 
-        
-        Na druhé straně jsou informace, které můžeme měnit přímo buďto dynamicky, když je pool vytvořen nebo když pool vytváříme nebo importujeme. Nastavit u poolu můžeme například vlastnot readonly, která zajistí, že od doby kdy byla tato vlasnot nastavena lze z daného poolu data pouze číst a nikoliv data zapisovat. Další zajímavou vlastností je vlastnot bootfs, která odkazuje na souborový systém, který slouží pro boot operačního systému. Manuální nastavovaní této vlastnosti se nedoporučuje, protože špatné nastavení může vést k nenačtení operačního systému.
-        
-        Pro stručnost jsem z následujícího příkazu, který administrátorovi zobrazuje dostupné infromace o poolu, vybral pouze nejnutnější vlastnoti.
-         \begin{verbatim}
-        $ zpool get all rpool
-        NAME   PROPERTY       VALUE                SOURCE
-        rpool  allocated      11.9G                -              
-        rpool  bootfs         rpool/ROOT/solaris   local        
-        rpool  capacity       38%                  -        
-        rpool  dedupratio     1.19x                -
-        rpool  delegation     on                   default
-        rpool  failmode       wait                 default
-        rpool  free           18.9G                -
-        rpool  guid           9953515090955426044  -
-        rpool  health         ONLINE               -        
-        rpool  listsnapshots  on                   local
-        rpool  readonly       off                  -
-        rpool  size           30.8G                -
-        rpool  version        37                   default
-        \end{verbatim} 
-        
+    \subsection{RAID}
+    V praxy naopak často používaná možnost jak rozšířit nebo vytvořit pool je pomocí virtuálního zařízení RAID. Tato technologie nám dává možnost rekonstrukce ztracených dat v případě výpadku nějakého disku. Souborový systém nabízí softwarový RAID, který nám umožňuje nad fyzickými zařízeními ( disk, partition, soubor ) vytvářet virtuální zařízení následujících typů.
+    \begin{itemize}
+      \item RAID1 - zrcadlení
+      \item RAIDZ1 - stripování s jendím paritním diskem
+      \item RAIDZ2 - stripování se dvěma paritními disky
+      \item RAIDZ3 - stripování se třemi paritními disky
+    \end{itemize}
+    <IMAGE>
+
+    Zrcadlení (RAID1) můžeme pomocí ZFS vytvořit nad dvěma a více zařízeními. Tento typ virtuálního zařízení pak jednoduše replikuje všechny data z disků na všechny ostatní disky
+    ve virtuálním zřízení. Pokud zrcadlení vytvoříme nad třemi disky, nakonec budou data na všech třech discích stejná a v případě výpadku jednoho z nich o data nepřijdeme. Jiná situace je samozřejmě v případě výpadku všech třech disků najednou. RAID nám v tomto případě nepomůže a všechny data ztratíme. Nicméně pravděpodobnost, že dojde k výpadku všech
+    tří disků najednou, než stihneme alespoň jeden vyměnit, je malá.
+    \begin{verbatim}
+    $ zpool TODO mirror c1t1d0 c1t2d0 c2t1d0
+    \end{verbatim}
+
+    Stripování (RAIDZN) je technika ukládání dat na disk v takzaných stripech. Vezměme v úvahu například virtuální zařízení RAIDZ1 s jedním paritním diskem, do kterého přidáme tři disky. Pokud pokud zapisujeme na toto virtuální zařízení data jsou tyto data rozdělena do stripů. Stripe je základní jednotou zápisu dat a v našem případě se část stripu ukládá na první disk, část na druhý a poslední část na třetí disk. Z dat je vypočtena takzvaná parita, která se následně uloží na paritní disk. Z této hodnoty v případě výpadku jednoho disku dokážeme zpět dopočítat data, která byla uložena na nefunkčním disku. V případě výpadku dvou a více disků najednou o data opět přijdeme. V případě stripování nám RAIDZ přináší i výhodu ve čtení dat z disků. Vzhledem k tomu, že data jsou rozložena na více discích, dokážeme číst z více disků najednou a tím docílit vyšší rychlosti čtení.
+    \begin{verbatim}
+    $ zpool create raidz1 c1t1d0 c1t2d0 c2t1d0 c2t2d0
+    \end{verbatim}
+
+    V případě stripování s více paritními disky jsme schopni obnovit data při výpadku dvou disků při dvou paritních discích atp.. Výhoda vyšší čtecí rychlosti je stále zachována, protože můžeme data načítat z více disků najednou.
+    \subsection{Zrušení poolu}
+    Stejně jako můžeme dynamicky pool vytvářet a rozšiřovat, můžeme pool i kdykoli zničit a uvolnit tak prostředky, které pool využíval. Tyto prostředky jsou ihned k dispozici a můžeme z nich vytvořit nový pool nebo je použít rozšíření jiného poolu. Jelikož všechny souborové systémy vytvořené nad poolem sdílejí jeho prostředky, jsou tyto souborové systémy zničeny spolu s poolem. Ke zničení poolu, který jsme dříve vytvořili můžeme použít následující příkaz.
+    \begin{verbatim}
+    $ zpool destroy tank
+    \end{verbatim}
+    Pokud v systému existuje pool jménem tank, příkaz ho zničí bez ohledu na to kolik souborových systému nad tímto poolem bylo vytvořeno.
         
     \subsection{Souborový systém}
     Druhým ze stavebních kamenů ZFS jsou samotné souborové systémy. Jak jsem již zmínil dříve, souborový systém je způsob organizace dat do souborů v datových úložištích.
     Tradiční souborové systémy využívají k organizaci různých datových struktur. Souborový UFS využívá takzvaných inodů, což je datová struktura držící attributy souboru a informace o datových blocích. Souborový systém FAT nadruhou stranu využívá takzvané file allocation table. ZFS k tomuto účelu využívá stromové datové struktury, kterou můžete vidět na <IMAGE><CITATE Struktura>. Tato stromová struktura přináší zajímavý výhody o kterých si povíme v další kapitolách.
+    \subsection{Vlastnosti souborového systému} 
+    Stejně jako si ZFS udržuje u každého poolu jeho vlastnosti, udržuje si je také u každého souborového systému. Tyto vlastnosti jednoznačně určují souborový systém a popisují jeho chování. Souborový systém je jednoznačně určen svým indetifikátorem, který se skládá z nadřazený souborových systémů včetně poolu a samotného názvu danného systému. Identifikátor by mohl vypadat třeba následovně \emph{rpool/ROOT/solaris}.
+    
+    Vlastnosti souborových systému můžeme rozděli stejně jako u vlastností poolu na dvě kategorie. První kategorií jsou vlastnosti, které se dají pouze číst. V této skupině můžeme najít vlasnosti popisující využití místa v souborovém systému. Například kolik místa bylo spotřebováno snapshoty nebo vnořenými souborovými systémy, ale také spotřeba místa souborovým systémem samotným. Ve vlastnostech můžeme také najít poměr deduplikace a komprese nebo datum vytvoření danného souborového systému.
+    
+    V duhé kategorii jsou pak vlastnosti, které může administrátor změnit za běhu nebo při vytváření. Stejně jako na úrovní poolu tak i na úrovni souborového systému můžeme nastavit vlastnost readonly, která znemožní uživatelům zapisovat nebo měnit data v souborovém systému. Za zmíňku dále stojí vlastnost exec, která dovoluje v souborovém systému spouštět procesy. O další zajímavých vlastnostech se zmíním v kapitolách Kvóty \ref{quota}, Deduplikace \ref{dedup} a Mountpoint \ref{mount}.
+    
+    Administrátor může jednoduše zapínat, vypínat či měnit vlastnosti souborového systému pomocí příkazu \verb|$ zfs set property=value rpool|, popřípadě si zobrazit seznam všech dostupných vlastností o souborovém systému pomocí \verb|$ zfs get all rpool|.
+    
     \subsection{Hierarchie souborových systémů}
+    \label{hiararchy}
     Jednou z vlastností ZFS je možnost hieararchického vnořování souborových systémů do sebe. Fakt, že samotný pool jakožto zdroj místa pro souborové systémy se chová jako samostatný souborový systém, tuto vlastnost dokazuje. Přesvědčit se o tom můžeme pomocí následujícího příkazu, kterému místo jéma souborového systému předáme jméno poolu. Pokud příkaz proběhne dobře vypíše základní informace o souborovém systému.
     \begin{verbatim}
     $ zfs list rpool
     NAME    USED  AVAIL  REFER  MOUNTPOINT
     rpool  12.1G  18.2G  4.85M  /rpool
     \end{verbatim}
-    Pokud by takovýto souborový systém nexistoval, příkaz by vrátil chybovou hlášku.
-    \subsection{Vytváření souborového systému}        
+    Pokud by takovýto souborový systém nexistoval, příkaz by vrátil chybovou hlášku. 
     
-    Vytváření souborových systémů v ZFS je velice jednoduché. Jediné co potřebujeme k vytovření souborového systému je jednoznačný identifikátor. Tento identifikátor se skládá ze jména poolu, ve kterém chceme systém vytvořit a jména souborového systému. ZFS Nám dovoluje vytvořit v jednom poolu více souborových systémů, které prostředky sdílí rodičovského poolu.    
+    Jelikož pool je vlastně souborový systém a souborové systémy se váží na pool, jde už při vytváření souborového systému vně poolu o hierarchické vnořování. Pool tedy tvoří hlavní uzel v této hierarchické posloupnosti a všechny souborové systémy vytvořené nad tímto poolem jsou jeho potomkem. V jednom poolu můžeme vytvořit více souborových systémů a také je do sebe můžeme libovolně vnořovat. Nejlépe si můžeme tuto hierarchii ukázat na obrázku <IMAGE>, kde můžeme vidět jak se do sebe jednotlivé souborové systém vnořují.
+    
+    Díky této hierarchické struktuře se dá jednoduše zjistit kdo je předkem danného souborového systému a kdo jeho potomkem. Všechny nastavitelné vlastnosti kromě kvót a rezervací jsou zděděny od rodičovského souborového systému. Pokud žádný rodič nemá vlastnost nastavenou explicitně, je použita standardní hodnota.<CITE Dedicnost>
+    
+    Pokud chceme explicitně říct aby některá vlastnost byla zděděna od rodič můžeme použít příkaz \verb|$ zfs inherit property rpool|. Tento příkaz odnastaví dannou vlastnost ze souborového systému a pokusí se převzít hodnotu z rodiče. Pokud v žádném z rodičů není hodnota nastavená explicitně je použita standardní hodnota.
+    \subsection{Vytváření souborového systému}        
+    \label{createfs}
+    Vytváření souborových systémů v ZFS je velice jednoduché. Jediné co potřebujeme k vytovření souborového systému je jednoznačný identifikátor. Tento identifikátor se skládá posloupnosti předků oddělená lomítkem od počátečního poolu až po jméno danného souborového systému. Příkaz samotnému vytvoření pak pak může vypadat takto \verb|$ zfs create tank/pool/pool|. Pokud neexistují všichni předchůdci je potřeba použít přepínač \verb|-p| jinak příkaz selže.
+    
+    Při vytváření je možné specifikovat, které vlastnosti danný souborový systém bude mít. Mimo jiné existuje vlasnost encryption, která se dá nastavit pouze při vytváření. Po vytvoření souborového systému je vlastnost vedena jako readonly a nedá se změnit. Vlastnost encryprion umožnuje šifrování souborového systému pomocí různých kryptografických funkcí jako je například AES. Vlastnost encryption můžeme při vytváření dospecifikovat následovně.
     \begin{verbatim}
-    $ zfs create rpool/test  
-    \end{verbatim} 
-    Po provedení příkazu ZFS automaticky přiřadí nový souborový systém do požadovaného poolu. Navíc v jednom poolu můžeme takto vytvořit více souborových systémů, které do sebe můžeme dále vnořovat. O hierarchi více v kapitole \ref{hiararchy}.
+    $ zfs create -o enryption=on tank/pool/pool
+    \end{verbatim}    
     \subsection{Zrušení souborového systému}
-    Rušení souborový systému je v ZFS stejně snadné jako jejich vytváření.  
-    \subsection{Vlastnosti souborového systému}    
-    \label{hiararchy}
+    Rušení souborových systému je v ZFS stejně snadné jako jejich vytváření. Je důležité mít na paměti, že zrušením souborového systému, který má nějaké potomky, zrušíme i všechny jeho potomky. Pro samotné zrušení souborového systému pak již stačí vyvolat příkaz \verb|$ zfs destroy| s příslušným identifikátorem popřípadě přepínačem \verb|-r| pro zrušení všech potomků.
     \subsection{Konzistence}
     Starší souborové systémy jako například UFS zapisují data přímo do bloku, který mění. To může v některých případech, jako je selhání systému nebo výpadek proudu, vést k nekonzistenci souborového systémů. V takovém případě je nutné celý souborový systém zkontrolovat napříkald pomocí příkazu <code>fsck. Bohužel ani ten v některých případech
     nedokáže některé nekonzistence opravit. <CITATE>
@@ -163,13 +177,30 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     řadě dojde k atomické operaci, která připojí nově vzniklou větev se novými resp. změněnými bloky do stromu souborového systémů. Pokud v průběhu transakce dojde k výpadku
     celý souborový systém zůstává konzistentní, protože nebyla provedena atomická operace připojení k hlavnímu stromu.
     \begin{figure}[h]
-        \caption{Porovnání systémů souborů}
+        \caption{Demostrace copy on write}
         \label{cow}
-        \includegraphics{cow.pdf}
+        \includegraphics[scale=0.8]{cow.pdf}
     \end{figure}
-
-    \subsection{Kontrolní součty}
+    \subsection{Kvóty}
+    \label{quota}
+    %% Kvóty
+    Kvóty jsou v ZFS umožňují administrátorovi spravovat limity souborových systémů týkajících se využitého místa. Tyto limity tedy omezují možnosti využití dostupného místa v souborovém systému. Kvóty můžeme rozdělit do následujících kategorií podle toho koho omezují.
+    \begin{itemize}
+      \item Obecné - týkající se souborového systému
+      \item Uživatelské
+      \item Skupinové
+    \end{itemize}
+    
+    
+    %% Rezervace 
+    
     \subsection{Deduplikace}
+    \label{dedup}
+    \subsection{Mountpoint}
+    \label{mount}        
+    \subsection{Kontrolní součty}
+    \label{checksum}
     \subsection{Snapshot}
+    \label{snapshot}
 \section{Rozbor existujících řešení}
 
