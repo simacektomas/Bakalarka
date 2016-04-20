@@ -1,0 +1,13 @@
+http://e2fsprogs.sourceforge.net/ext2intro.html
+https://www.oracle.com/sun/index.html
+https://docs.oracle.com/cd/E19120-01/open.solaris/817-2271/gbcik/index.html
+http://zfsonlinux.org/faq.html
+http://www.osdevcon.org/2009/slides/zfs_internals_uli_graef.pdf
+http://docs.oracle.com/cd/E19253-01/819-5461/setup-1/index.html # Pozadavky na system
+http://docs.oracle.com/cd/E19253-01/819-5461/ftyue/index.html # Terminologie
+http://www.osdevcon.org/2009/slides/zfs_internals_uli_graef.pdf # Zfs structure
+http://docs.oracle.com/cd/E19253-01/819-5461/gazup/index.html # Dedicnost
+http://docs.oracle.com/cd/E19253-01/819-5461/gazvb/index.html # Kvoty
+https://blogs.oracle.com/bonwick/entry/zfs_dedup # Deduplikace
+http://docs.oracle.com/cd/E19253-01/819-5461/6n7ht6r3o/index.html # Mountpoint
+http://docs.oracle.com/cd/E23823_01/html/819-5461/gbbwa.html # Data integrity
