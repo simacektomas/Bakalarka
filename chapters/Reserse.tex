@@ -35,18 +35,18 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     Souborový systém Zettabyte byl původně vyvinut společností Sun Microsystems a následně integrován do operačního systémů Solaris od stejnojmenné společnosti.
     Jak už to tak v dnešním světě bývá v roce 2010 společnost Oracle akvizicí společnosti Sun Microsystem získala vlastnicví ZFS i operačního systému Solaris. Veškerý vývoj
     a podpora pro tyto systémy dnes pochází právě od firmy Oracle.
-    
-    Systém byl původně navrhnut pro použití čistě v operační systému Solaris s čímž se pojily i minimální požadavky pro provoz ZFS. 
+
+    Systém byl původně navrhnut pro použití čistě v operační systému Solaris s čímž se pojily i minimální požadavky pro provoz ZFS.
     \begin{itemize}
-      \item Architektura procesoru SPARC nebo x86 
+      \item Architektura procesoru SPARC nebo x86
       \item Operační systém Solaris 10 6/06 nebo novější
-      \item Minimální místo na disku 128 MB 
-      \item Minimální místo pro vytvoření poolu 64 MB 
+      \item Minimální místo na disku 128 MB
+      \item Minimální místo pro vytvoření poolu 64 MB
       \item Pro optimální výkon ZFS alespoň 1 GB operační paměti
     \end{itemize}
     <CITATE>
-    V dnešní době je již bylo ZFS přeneseno i na jiné operačních systém než je Solaris. Jako příklad můžeme vzít operační systém Linux a většinu jeho distribucí <CITATE> 
-    
+    V dnešní době je již bylo ZFS přeneseno i na jiné operačních systém než je Solaris. Jako příklad můžeme vzít operační systém Linux a většinu jeho distribucí <CITATE>
+
     \subsection{Struktura}
     Většina tradičních souborových systémů se váže na jedno konkrétní zařízení. Aby bylo možné adresovat více zařízení byl zaveden takzvaný volume manager který souborovému
     systému poskytoval iluzi, že se jedná o samostatné zařízení. <CITATE> Ve skutečnosti se pod touto vrstvou mohlo skrývat více disků. ZFS se v tomto směru vydalo opět svojí
@@ -62,10 +62,10 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
 
     Vlastnosti můžeme rozdělit na dvě skupiny. Na jedné straně jsou statické informace, které popisují stav poolu a nedají se změnit přímo. Jsou takzvaně read-only. Pod tímto druhem informací si můžeme představit informace týkající se úložného prostoru jako například velikost, obsazenost a volné místo. Velikost poolu nemůžeme změnit přímo nastavením vlastnosti na jinou hodnotu, ale můžeme přidat do poolu další zdroj, který tuto informaci změní.
 
-    Na druhé straně jsou informace, které můžeme měnit přímo buďto dynamicky, když je pool vytvořen nebo když pool vytváříme nebo importujeme. Nastavit u poolu můžeme například vlastnot readonly, která zajistí, že od doby kdy byla tato vlasnot nastavena lze z daného poolu data pouze číst a nikoliv data zapisovat. Další zajímavou vlastností je vlastnot bootfs, která odkazuje na souborový systém, který slouží pro boot operačního systému. Manuální nastavovaní této vlastnosti se nedoporučuje, protože špatné nastavení může vést k nenačtení operačního systému.        
+    Na druhé straně jsou informace, které můžeme měnit přímo buďto dynamicky, když je pool vytvořen nebo když pool vytváříme nebo importujeme. Nastavit u poolu můžeme například vlastnot readonly, která zajistí, že od doby kdy byla tato vlasnot nastavena lze z daného poolu data pouze číst a nikoliv data zapisovat. Další zajímavou vlastností je vlastnot bootfs, která odkazuje na souborový systém, který slouží pro boot operačního systému. Manuální nastavovaní této vlastnosti se nedoporučuje, protože špatné nastavení může vést k nenačtení operačního systému.
 
     Pro stručnost jsem z následujícího příkazu, který administrátorovi zobrazuje dostupné infromace o poolu, vybral pouze nejnutnější vlastnoti.
-    \begin{verbatim}    
+    \begin{verbatim}
     $ zpool get all rpool
     NAME   PROPERTY       VALUE                SOURCE
     rpool  allocated      11.9G                -
@@ -95,7 +95,7 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     Kapacita poolu se dá rozšířit hned několika typy zařízení. Mezi nejpoužívanější patří disk a partition nebo RAID. ZFS nabízí možnost do poolu přidat soubor jako zdroj.
     Tato možnost se jeví jako velmi výhodná pro testování nebo zkoušení, jelikož jsem ji sám při vytváření této práce mnohokrát využil. V praxy tato možnost znamená přidání další
     vrstvy ( souborového systému ) mezi ZFS a samotný zdroj dat. Tento fakt přináší značné zpomalení, a proto se tato možnost v praxy téměř nevyužívá.
-        
+
     \subsection{RAID}
     V praxy naopak často používaná možnost jak rozšířit nebo vytvořit pool je pomocí virtuálního zařízení RAID. Tato technologie nám dává možnost rekonstrukce ztracených dat v případě výpadku nějakého disku. Souborový systém nabízí softwarový RAID, který nám umožňuje nad fyzickými zařízeními ( disk, partition, soubor ) vytvářet virtuální zařízení následujících typů.
     \begin{itemize}
@@ -125,19 +125,19 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     $ zpool destroy tank
     \end{verbatim}
     Pokud v systému existuje pool jménem tank, příkaz ho zničí bez ohledu na to kolik souborových systému nad tímto poolem bylo vytvořeno.
-        
+
     \subsection{Souborový systém}
     Druhým ze stavebních kamenů ZFS jsou samotné souborové systémy. Jak jsem již zmínil dříve, souborový systém je způsob organizace dat do souborů v datových úložištích.
     Tradiční souborové systémy využívají k organizaci různých datových struktur. Souborový UFS využívá takzvaných inodů, což je datová struktura držící attributy souboru a informace o datových blocích. Souborový systém FAT nadruhou stranu využívá takzvané file allocation table. ZFS k tomuto účelu využívá stromové datové struktury, kterou můžete vidět na <IMAGE><CITATE Struktura>. Tato stromová struktura přináší zajímavý výhody o kterých si povíme v další kapitolách.
-    \subsection{Vlastnosti souborového systému} 
+    \subsection{Vlastnosti souborového systému}
     Stejně jako si ZFS udržuje u každého poolu jeho vlastnosti, udržuje si je také u každého souborového systému. Tyto vlastnosti jednoznačně určují souborový systém a popisují jeho chování. Souborový systém je jednoznačně určen svým indetifikátorem, který se skládá z nadřazený souborových systémů včetně poolu a samotného názvu danného systému. Identifikátor by mohl vypadat třeba následovně \emph{rpool/ROOT/solaris}.
-    
+
     Vlastnosti souborových systému můžeme rozděli stejně jako u vlastností poolu na dvě kategorie. První kategorií jsou vlastnosti, které se dají pouze číst. V této skupině můžeme najít vlasnosti popisující využití místa v souborovém systému. Například kolik místa bylo spotřebováno snapshoty nebo vnořenými souborovými systémy, ale také spotřeba místa souborovým systémem samotným. Ve vlastnostech můžeme také najít poměr deduplikace a komprese nebo datum vytvoření danného souborového systému.
-    
+
     V duhé kategorii jsou pak vlastnosti, které může administrátor změnit za běhu nebo při vytváření. Stejně jako na úrovní poolu tak i na úrovni souborového systému můžeme nastavit vlastnost readonly, která znemožní uživatelům zapisovat nebo měnit data v souborovém systému. Za zmíňku dále stojí vlastnost exec, která dovoluje v souborovém systému spouštět procesy. O další zajímavých vlastnostech se zmíním v kapitolách Kvóty \ref{quota}, Deduplikace \ref{dedup} a Mountpoint \ref{mount}.
-    
+
     Administrátor může jednoduše zapínat, vypínat či měnit vlastnosti souborového systému pomocí příkazu \verb|$ zfs set property=value rpool|, popřípadě si zobrazit seznam všech dostupných vlastností o souborovém systému pomocí \verb|$ zfs get all rpool|.
-    
+
     \subsection{Hierarchie souborových systémů}
     \label{hiararchy}
     Jednou z vlastností ZFS je možnost hieararchického vnořování souborových systémů do sebe. Fakt, že samotný pool jakožto zdroj místa pro souborové systémy se chová jako samostatný souborový systém, tuto vlastnost dokazuje. Přesvědčit se o tom můžeme pomocí následujícího příkazu, kterému místo jéma souborového systému předáme jméno poolu. Pokud příkaz proběhne dobře vypíše základní informace o souborovém systému.
@@ -146,23 +146,90 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     NAME    USED  AVAIL  REFER  MOUNTPOINT
     rpool  12.1G  18.2G  4.85M  /rpool
     \end{verbatim}
-    Pokud by takovýto souborový systém nexistoval, příkaz by vrátil chybovou hlášku. 
-    
+    Pokud by takovýto souborový systém nexistoval, příkaz by vrátil chybovou hlášku.
+
     Jelikož pool je vlastně souborový systém a souborové systémy se váží na pool, jde už při vytváření souborového systému vně poolu o hierarchické vnořování. Pool tedy tvoří hlavní uzel v této hierarchické posloupnosti a všechny souborové systémy vytvořené nad tímto poolem jsou jeho potomkem. V jednom poolu můžeme vytvořit více souborových systémů a také je do sebe můžeme libovolně vnořovat. Nejlépe si můžeme tuto hierarchii ukázat na obrázku <IMAGE>, kde můžeme vidět jak se do sebe jednotlivé souborové systém vnořují.
-    
+
     Díky této hierarchické struktuře se dá jednoduše zjistit kdo je předkem danného souborového systému a kdo jeho potomkem. Všechny nastavitelné vlastnosti kromě kvót a rezervací jsou zděděny od rodičovského souborového systému. Pokud žádný rodič nemá vlastnost nastavenou explicitně, je použita standardní hodnota.<CITE Dedicnost>
-    
+
     Pokud chceme explicitně říct aby některá vlastnost byla zděděna od rodič můžeme použít příkaz \verb|$ zfs inherit property rpool|. Tento příkaz odnastaví dannou vlastnost ze souborového systému a pokusí se převzít hodnotu z rodiče. Pokud v žádném z rodičů není hodnota nastavená explicitně je použita standardní hodnota.
-    \subsection{Vytváření souborového systému}        
+    \subsection{Vytváření souborového systému}
     \label{createfs}
     Vytváření souborových systémů v ZFS je velice jednoduché. Jediné co potřebujeme k vytovření souborového systému je jednoznačný identifikátor. Tento identifikátor se skládá posloupnosti předků oddělená lomítkem od počátečního poolu až po jméno danného souborového systému. Příkaz samotnému vytvoření pak pak může vypadat takto \verb|$ zfs create tank/pool/pool|. Pokud neexistují všichni předchůdci je potřeba použít přepínač \verb|-p| jinak příkaz selže.
-    
+
     Při vytváření je možné specifikovat, které vlastnosti danný souborový systém bude mít. Mimo jiné existuje vlasnost encryption, která se dá nastavit pouze při vytváření. Po vytvoření souborového systému je vlastnost vedena jako readonly a nedá se změnit. Vlastnost encryprion umožnuje šifrování souborového systému pomocí různých kryptografických funkcí jako je například AES. Vlastnost encryption můžeme při vytváření dospecifikovat následovně.
     \begin{verbatim}
     $ zfs create -o enryption=on tank/pool/pool
-    \end{verbatim}    
+    \end{verbatim}
     \subsection{Zrušení souborového systému}
-    Rušení souborových systému je v ZFS stejně snadné jako jejich vytváření. Je důležité mít na paměti, že zrušením souborového systému, který má nějaké potomky, zrušíme i všechny jeho potomky. Pro samotné zrušení souborového systému pak již stačí vyvolat příkaz \verb|$ zfs destroy| s příslušným identifikátorem popřípadě přepínačem \verb|-r| pro zrušení všech potomků.
+    Rušení souborových systému je v ZFS stejně snadné jako jejich vytváření. Je důležité mít na paměti, že zrušením souborového systému, který má nějaké potomky, zrušíme i všechny jeho potomky. Pro samotné zrušení souborového systému pak již stačí vyvolat příkaz \verb|$ zfs destroy| s příslušným identifikátorem popřípadě přepínačem \verb|-r| pro zrušení všech potomků.    
+    \subsection{Kvóty}
+    \label{quota}
+    %% Kvóty
+    Kvóty v ZFS umožňují administrátorovi spravovat limity souborových systémů týkajících se využitého místa. Tyto limity tedy omezují možnosti využití dostupného místa v souborovém systému. Kvóty můžeme rozdělit do následujících kategorií podle toho koho omezují.
+    \begin{itemize}
+      \item Obecné - týkající se souborového systému
+      \item Uživatelské
+      \item Skupinové
+    \end{itemize}
+
+    Obecné kvóty tedy omezují místo, které může využít souborový systém jako celek. K tomuto účelu v ZFS slouží vlastnost \emph{quota} u každého souborového systému, která stanovuje limit místa, které může danný souborový systém využít. V tomto případě se do využitého místa započítává i místo spotřebované potomky. <CITE Quota> Pokud bychom chtěli omezit souborový systém bez ohledu na to kolik místa využijí jeho potomci musíme použít vlastnost \emph{refquota}.
+    %% Rezervace
+
+    Vzhledem k faktu, že souborové systémy v jednom poolu sdílí dískové místo, ZFS přichází s vlastností \emph{reservation}. Tato vlastnost oproti kvótám garantuje souborovému systému diskové místo danné velikosti. <CITE Quota> Stejně jako v případě vlastnosti \emph{quota} je toto místo vyhrazeno pro souborový systém a věechny jeho potomky. Pokud bychom chtěli garantovat místo přímo souborovému systému, bez ohledu na to kolik místa využívají jeho potomci, musíme využít vlastnost \emph{refreservation}.
+
+    Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reservation} resp. \emph{refreservation} jsou vlastnostmi souborového systému, můžeme je nastavit stejně jako jakoukoli jinou vlastnost pomocí následujících příkazů.
+    \begin{verbatim}
+    $ zfs set quota=10G rpool/export/home
+    $ zfs set reservation=10G rpool/export/home
+    \end{verbatim}
+
+    Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation} jsou vyznačeny na obrázku \ref{quotavsreserv}.
+    %% Obrázek
+    \begin{figure}[h]
+        \caption{Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation}}
+        \label{quotavsreserv}
+    \end{figure}
+    %% Uživatelské a skupinové kvóty
+
+    Další možností jak omezit využití diskového místa je pomocí uživatelských resp. skupinových kvót. Tyto kvóty limitují uživatele resp. skupinu v tom, kolik místa můžou na souborovém systému využít. Každý souborový systém má svůj vlastní \emph{userspace} resp \emph{groupspace}, kde si udržuje informace o tom jaké limity jednotlivý uživatelé resp. skupiny mají.
+    Administrátor si může hodnoty uživatelský resp. skupinových kvót vypsat pomocí \verb|$ zfs userspace filesystem| resp. \verb|$ zfs groupspace filesystem|. Následující příkaz demonstruje jak vypadá výpis uživatelských kvót pro domací adresář.
+    \begin{verbatim}
+    $ zfs userspace rpool/export/home/simactom
+    TYPE        NAME       USED  QUOTA  SOURCE
+    POSIX User  root      1.50K   none  default
+    POSIX User  simactom   641M   none  default
+    \end{verbatim}
+
+    Pokud se uživatel resp. skupina v seznamu nenachází nebo je u něj uvedena hodnota \emph{none}, uživatelské resp. skupinové kvóty se na něj nevztahují. Je-li v seznamu uvedena hodnota, pak uživatel v danném souborovém systému nesmí překročit tuto hodnotu. Pokud by tuto hodnotu překročil systém ho varuje a požadovanou akci neprovede. Přiřazení kvóty uživately resp. skupině provedeme pomocí následujících příkazů
+    \begin{verbatim}
+    $ zfs userquota@username=value filesystem
+    $ zfs groupquota@username=value filesystem
+    \end{verbatim}
+
+    ZFS nabízí ještě vlastnost \emph{defaultuserquota} resp. \emph{defaultgroupquota}, kterou lze nastavit na určitou hodnotu. Tento limit se použije v případě, že hodnotu uživatelské resp. skupinové kvóty nastavíme na \emph{default}.
+    \subsection{Deduplikace}
+    \label{dedup}
+    Jednou z další vlastností, které ZFS nabízí je deduplikace. Jak již z názvu vyplívá, jedná se o proces, který zabraňuje duplikaci dat na disku a tím šetří místo na disku. Deduplikace se obecně dá rozdělit na následující úrovně.
+    \begin{itemize}
+      \item Úroveň souborů
+      \item Úroveň datavých bloků 
+      \item Úroveň bytů
+    \end{itemize}
+    
+    K identifikaci stejných souborů, datových bloků nebo bytů se využívá hašovácí funkce. Data jsou pomocí této funkce zahešována a výsledné haše porovnány na rovnost. Pokud se haše rovnají a používáme hašovací funkci SHA256, můžeme s pravděpodobností , že se data opravdu rovnají.<CITATE Deduplikace> Pokud je administrátor z nějakého důvodu stále nedůvěřivý může u vlastnosti deduplikace nastavit hodnotu \emph{verify}, která zajistí celkové porovnání datových částí se 100\% pravděpodobností.
+    
+    Deduplikace na úrovni souborů využívá nejméně systémových prostředků, protože se data hašují a porovnávají po velký částech. Na druhou stranu sebemenší změna v souboru vyžaduje přepočítání haše, který se již bude lišit od původního.<CITATE Deduplikace> Souborový systém pak rozpozná že se soubory liší a uspořené místo bude zaplněno změněným souborem.
+    
+    Deduplikace datových bloků vyžaduje oproti deduplikaci souborů vyšší využití systémových prostředků, ale na druhou stranu přináší v jistých situacích lepší úsporu místa. <CITATE Deduplikace>      
+    V poslední řadě existuje deduplikace na urovni bytů je ze všech uvedených úrovní nejnáročnější na využití prostředků. Tato možnost se používá jen ve speciálních případech.
+    
+    ZFS z výše uvedených možností nabízí právě deduplpikaci na úrovni datových bloků, protože tato jednotka deduplikace přináší nejvíce výhod v obecných případech použití.<CITATE Deduplikace> Na obrázku \ref{blockdedup} můžeme vidět, jak dochází k úspoře místa pokud je v ZFS souborovém systému zapnutá vlastnost \emph{dedup}.
+    \begin{figure}[!h]
+        \caption{Ukázka deduplikce na úrovni datový bloků}
+        \label{blockdedup}
+        \includegraphics[scale=0.8]{dedup.pdf}
+    \end{figure}        
     \subsection{Konzistence}
     Starší souborové systémy jako například UFS zapisují data přímo do bloku, který mění. To může v některých případech, jako je selhání systému nebo výpadek proudu, vést k nekonzistenci souborového systémů. V takovém případě je nutné celý souborový systém zkontrolovat napříkald pomocí příkazu <code>fsck. Bohužel ani ten v některých případech
     nedokáže některé nekonzistence opravit. <CITATE>
@@ -180,66 +247,12 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
         \caption{Demostrace copy on write}
         \label{cow}
         \includegraphics[scale=0.8]{cow.pdf}
-    \end{figure}
-    \subsection{Kvóty}
-    \label{quota}
-    %% Kvóty
-    Kvóty jsou v ZFS umožňují administrátorovi spravovat limity souborových systémů týkajících se využitého místa. Tyto limity tedy omezují možnosti využití dostupného místa v souborovém systému. Kvóty můžeme rozdělit do následujících kategorií podle toho koho omezují.
-    \begin{itemize}
-      \item Obecné - týkající se souborového systému
-      \item Uživatelské
-      \item Skupinové
-    \end{itemize}
-    
-    Obecné kvóty tedy omezují místo, které může využít souborový systém jako celek. K tomuto účelu v ZFS slouží vlastnost \emph{quota} u každého souborového systému, která stanovuje limit místa, které může danný souborový systém využít. V tomto případě se do využitého místa započítává i místo spotřebované potomky. <CITE Quota> Pokud bychom chtěli omezit souborový systém bez ohledu na to kolik místa využijí jeho potomci musíme použít vlastnost \emph{refquota}.
-    %% Rezervace
-     
-    Vzhledem k faktu, že souborové systémy v jednom poolu sdílí dískové místo, ZFS přichází s vlastností \emph{reservation}. Tato vlastnost oproti kvótám garantuje souborovému systému diskové místo danné velikosti. <CITE Quota> Stejně jako v případě vlastnosti \emph{quota} je toto místo vyhrazeno pro souborový systém a věechny jeho potomky. Pokud bychom chtěli garantovat místo přímo souborovému systému, bez ohledu na to kolik místa využívají jeho potomci, musíme využít vlastnost \emph{refreservation}. 
-    
-    Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reservation} resp. \emph{refreservation} jsou vlastnostmi souborového systému, můžeme je nastavit stejně jako jakoukoli jinou vlastnost pomocí následujících příkazů.
-    \begin{verbatim}
-    $ zfs set quota=10G rpool/export/home
-    $ zfs set reservation=10G rpool/export/home
-    \end{verbatim}   
-        
-    Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation} jsou vyznačeny na obrázku \ref{quotavsreserv}.
-    %% Obrázek 
-    \begin{figure}[h]
-        \caption{Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation}}
-        \label{quotavsreserv}        
-    \end{figure}
-    %% Uživatelské a skupinové kvóty
-    
-    Další možností jak omezit využití diskového místa je pomocí uživatelských resp. skupinových kvót. Tyto kvóty limitují uživatele resp. skupinu v tom, kolik místa můžou na souborovém systému využít. Každý souborový systém má svůj vlastní \emph{userspace} resp \emph{groupspace}, kde si udržuje informace o tom jaké limity jednotlivý uživatelé resp. skupiny mají.
-    Administrátor si může hodnoty uživatelský resp. skupinových kvót vypsat pomocí \verb|$ zfs userspace filesystem| resp. \verb|$ zfs groupspace filesystem|. Následující příkaz demonstruje jak vypadá výpis uživatelských kvót pro domací adresář.     
-    \begin{verbatim}
-    $ zfs userspace rpool/export/home/simactom
-    TYPE        NAME       USED  QUOTA  SOURCE
-    POSIX User  root      1.50K   none  default
-    POSIX User  simactom   641M   none  default
-    \end{verbatim}
-    
-    Pokud se uživatel resp. skupina v seznamu nenachází nebo je u něj uvedena hodnota \emph{none}, uživatelské resp. skupinové kvóty se na něj nevztahují. Je-li v seznamu uvedena hodnota, pak uživatel v danném souborovém systému nesmí překročit tuto hodnotu. Pokud by tuto hodnotu překročil systém ho varuje a požadovanou akci neprovede. Přiřazení kvóty uživately resp. skupině provedeme pomocí následujících příkazů
-    \begin{verbatim}
-    $ zfs userquota@username=value filesystem
-    $ zfs groupquota@username=value filesystem
-    \end{verbatim}   
-        
-    ZFS nabízí ještě vlastnost \emph{defaultuserquota} resp. \emph{defaultgroupquota}, kterou lze nastavit na určitou hodnotu. Tento limit se použije v případě, že hodnotu uživatelské resp. skupinové kvóty nastavíme na \emph{default}.
-    
-    
-        
-    
-
-    
-    
-    
-    \subsection{Deduplikace}
-    \label{dedup}
-    \subsection{Mountpoint}
-    \label{mount}        
-    \subsection{Kontrolní součty}
+    \end{figure}    
+    \subsection{Integrita dat}
     \label{checksum}
+    Integrita dat je vlastnost, která zajišťuje shodnost dat zapsaných na disku s daty, které z disku čteme.
+    \subsection{Mountpoint}
+    \label{mountpoint}
     \subsection{Snapshot}
     \label{snapshot}
 \section{Rozbor existujících řešení}
