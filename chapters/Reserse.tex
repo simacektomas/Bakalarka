@@ -128,7 +128,12 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
 
     \subsection{Souborový systém}
     Druhým ze stavebních kamenů ZFS jsou samotné souborové systémy. Jak jsem již zmínil dříve, souborový systém je způsob organizace dat do souborů v datových úložištích.
-    Tradiční souborové systémy využívají k organizaci různých datových struktur. Souborový UFS využívá takzvaných inodů, což je datová struktura držící attributy souboru a informace o datových blocích. Souborový systém FAT nadruhou stranu využívá takzvané file allocation table. ZFS k tomuto účelu využívá stromové datové struktury, kterou můžete vidět na <IMAGE><CITATE Struktura>. Tato stromová struktura přináší zajímavý výhody o kterých si povíme v další kapitolách.
+    Tradiční souborové systémy využívají k organizaci různých datových struktur. Souborový UFS využívá takzvaných inodů, což je datová struktura držící attributy souboru a informace o datových blocích. Souborový systém FAT nadruhou stranu využívá takzvané file allocation table. ZFS k tomuto účelu využívá stromové datové struktury, kterou můžete vidět na obrázku <CITATE Struktura>. \begin{figure}[!h]
+        \caption{Struktura souborového systému ZFS}
+        \label{structure}        
+    \end{figure}
+    
+    Tato stromová struktura přináší zajímavý výhody o kterých si povíme v další kapitolách.
     \subsection{Vlastnosti souborového systému}
     Stejně jako si ZFS udržuje u každého poolu jeho vlastnosti, udržuje si je také u každého souborového systému. Tyto vlastnosti jednoznačně určují souborový systém a popisují jeho chování. Souborový systém je jednoznačně určen svým indetifikátorem, který se skládá z nadřazený souborových systémů včetně poolu a samotného názvu danného systému. Identifikátor by mohl vypadat třeba následovně \emph{rpool/ROOT/solaris}.
 
@@ -162,7 +167,7 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     $ zfs create -o enryption=on tank/pool/pool
     \end{verbatim}
     \subsection{Zrušení souborového systému}
-    Rušení souborových systému je v ZFS stejně snadné jako jejich vytváření. Je důležité mít na paměti, že zrušením souborového systému, který má nějaké potomky, zrušíme i všechny jeho potomky. Pro samotné zrušení souborového systému pak již stačí vyvolat příkaz \verb|$ zfs destroy| s příslušným identifikátorem popřípadě přepínačem \verb|-r| pro zrušení všech potomků.    
+    Rušení souborových systému je v ZFS stejně snadné jako jejich vytváření. Je důležité mít na paměti, že zrušením souborového systému, který má nějaké potomky, zrušíme i všechny jeho potomky. Pro samotné zrušení souborového systému pak již stačí vyvolat příkaz \verb|$ zfs destroy| s příslušným identifikátorem popřípadě přepínačem \verb|-r| pro zrušení všech potomků.
     \subsection{Kvóty}
     \label{quota}
     %% Kvóty
@@ -213,24 +218,25 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     Jednou z další vlastností, které ZFS nabízí je deduplikace. Jak již z názvu vyplívá, jedná se o proces, který zabraňuje duplikaci dat na disku a tím šetří místo na disku. Deduplikace se obecně dá rozdělit na následující úrovně.
     \begin{itemize}
       \item Úroveň souborů
-      \item Úroveň datavých bloků 
+      \item Úroveň datavých bloků
       \item Úroveň bytů
     \end{itemize}
-    
+
     K identifikaci stejných souborů, datových bloků nebo bytů se využívá hašovácí funkce. Data jsou pomocí této funkce zahešována a výsledné haše porovnány na rovnost. Pokud se haše rovnají a používáme hašovací funkci SHA256, můžeme s pravděpodobností , že se data opravdu rovnají.<CITATE Deduplikace> Pokud je administrátor z nějakého důvodu stále nedůvěřivý může u vlastnosti deduplikace nastavit hodnotu \emph{verify}, která zajistí celkové porovnání datových částí se 100\% pravděpodobností.
-    
+
     Deduplikace na úrovni souborů využívá nejméně systémových prostředků, protože se data hašují a porovnávají po velký částech. Na druhou stranu sebemenší změna v souboru vyžaduje přepočítání haše, který se již bude lišit od původního.<CITATE Deduplikace> Souborový systém pak rozpozná že se soubory liší a uspořené místo bude zaplněno změněným souborem.
-    
-    Deduplikace datových bloků vyžaduje oproti deduplikaci souborů vyšší využití systémových prostředků, ale na druhou stranu přináší v jistých situacích lepší úsporu místa. <CITATE Deduplikace>      
+
+    Deduplikace datových bloků vyžaduje oproti deduplikaci souborů vyšší využití systémových prostředků, ale na druhou stranu přináší v jistých situacích lepší úsporu místa. <CITATE Deduplikace>
     V poslední řadě existuje deduplikace na urovni bytů je ze všech uvedených úrovní nejnáročnější na využití prostředků. Tato možnost se používá jen ve speciálních případech.
-    
+
     ZFS z výše uvedených možností nabízí právě deduplpikaci na úrovni datových bloků, protože tato jednotka deduplikace přináší nejvíce výhod v obecných případech použití.<CITATE Deduplikace> Na obrázku \ref{blockdedup} můžeme vidět, jak dochází k úspoře místa pokud je v ZFS souborovém systému zapnutá vlastnost \emph{dedup}.
     \begin{figure}[!h]
         \caption{Ukázka deduplikce na úrovni datový bloků}
         \label{blockdedup}
         \includegraphics[scale=0.8]{dedup.pdf}
-    \end{figure}        
+    \end{figure}
     \subsection{Konzistence}
+    \label{consitence}
     Starší souborové systémy jako například UFS zapisují data přímo do bloku, který mění. To může v některých případech, jako je selhání systému nebo výpadek proudu, vést k nekonzistenci souborového systémů. V takovém případě je nutné celý souborový systém zkontrolovat napříkald pomocí příkazu <code>fsck. Bohužel ani ten v některých případech
     nedokáže některé nekonzistence opravit. <CITATE>
 
@@ -241,19 +247,49 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     ZFS přichází s transakčním systémem a technikou copy on write. Tato technika zajišťuje neustálou konzistenci souborového systému i v okamžiku výpadku, a proto není třeba žurnálu. Data na disku nejsou nikdy přímo přepisována.
 
     Transakce může vypadat následovně. Nejprve dojde ke zkopírování bloků, které mají být změněny. Poté dojde kopii a změně metadat, které se týkají změněných bloků. V poslední
-    řadě dojde k atomické operaci, která připojí nově vzniklou větev se novými resp. změněnými bloky do stromu souborového systémů. Pokud v průběhu transakce dojde k výpadku
-    celý souborový systém zůstává konzistentní, protože nebyla provedena atomická operace připojení k hlavnímu stromu.
+    řadě dojde k atomické operaci, která připojí větev s novými resp. změněnými bloky do stromu souborového systémů. Přůběh transakce je naznačet na obrázku \ref{cow}. Pokud v průběhu transakce dojde k výpadku celý souborový systém zůstává konzistentní, protože nebyla provedena atomická operace připojení k hlavnímu stromu.
     \begin{figure}[h]
         \caption{Demostrace copy on write}
         \label{cow}
         \includegraphics[scale=0.8]{cow.pdf}
-    \end{figure}    
+    \end{figure}
     \subsection{Integrita dat}
     \label{checksum}
-    Integrita dat je vlastnost, která zajišťuje shodnost dat zapsaných na disku s daty, které z disku čteme.
+    Od souborového systému očekáváme, že při čtení dat z určitého datového bloku z disku, dostame data, která do tohoto bloku byla dříve zapsána. Pokud tomu tak není, měl by to souborový systém detekovat a vrátit chybu.<CITATE Integrity>
+    
+    Vlastnost neustálé konzistence souborového systému ZFS, zmíněná výše v kapitole \ref{consitence}, zajišťuje, že chybná data se v souborovém systému mohou vyskytnout jen skrze hardwarovou chybu. <CITATE integrity2> 
+    
+    ZFS dokáže tyto chyby hardwaru detekovat pomocí tzv. kontrolních součtů. Tyto součty vznikají a jsou přepočítávány při každé změně bloku v souborovém sytému. Jak jsme mohli vidět na obrázku \ref{structure}, součty nejsou uloženy v bloku, kterého se týkají, ale v bloku jemu nadřazeném. Při každém požadavku na čtení dojde k vypočítání kontrolního součtu na základě dat, které se v souborovém systému momentálně nachází a poté dojde k porovnání vypočteného součtu se součtem uloženým v nadřzeném bloku.<CITATE integrity> Tím ZFS dokáže rozhodnout zda je blok požkozený či nikoliv.
+    
+    Díky těmto kontrolním součtům se souborový systém dokáže v určitých situacích sám opravovat. Tato situace nastává v případě, že blok, při jehož čtení došlo k chybě, je součástí redundatního virtuálního zařízení jako je například RAID-Z nebo mirror. V tomto případě ZFS přečte datový blok i z replikovaného disku popřípadě sestaví blok pomocí parity a následně opraví chybný blok, při jehož čtení došlo k chybě. Aplikace dostane správná data i přes to, že při prvním čtení došlo k chybě. Obrázek \ref{selfhealing} názorně ukazuje postup při detekci chyby.
+    \begin{figure}[h]
+        \caption{Demostrace samopravování}
+        \label{selfhealing}        
+    \end{figure}   
+    
+    Ačkoliv dochází k ověřování integrity dat automaticky při každém čtení z disku, je možné tento proces manuálně vyvola o věřit pomocí následující sekvence příkazů.
+    \begin{verbatim}
+    $ zpool scrub pool
+    $ zpool status pool
+    pool: pool
+    state: ONLINE
+    scan: scrub repaired 0 in 6s with 0 errors on Thu Apr 21 07:19:59 2016
+    \end{verbatim}
+
     \subsection{Mountpoint}
     \label{mountpoint}
+    Mounpoint je jednou ze základních vlastností všech souborových systémů. Je to vlastně cesta k bodu v adresářovém stromu operačního systému, kde má danný souborový systém být připojen.
+    
+    Jelikož se ZFS snaží administrátorům maximálně ulehčit práci, stará se o automatické připojování souborových systémů samo. K účelům připojování souborových systémů v ZFS slouží jejich vlastnost \emph{mountpoint}, kde administrátor může specifikovat, kam se má danný souborový systém připojit. Pokud administrátror tuto vlastnost explicitně neurčí, je odvozena od vlasnosti rodičovského souborového systému. 
+    
+    Pro připojování souborových systémů ZFS se dají použít i tradiční nástroje \emph{mount} a \emph{umount}. V tradičních souborových systémech jako je například UFS se pro automatické připojování používal soubor \emph{/etc/vsfstab}, kdeadministrátor specifikoval co a kam se má připojit. Operační systém po startu tento soubor zpracoval da vyznačené souborové systémy připojil.
+    
+    Jak jsem již zmínil ZFS proces automatického připojování provádi samo. Pokud by administrátor chtěl využívat automatického připojování pomocí souboru \emph{/etc/vsfstab}, je možné nastavit vlastnost \emph{mountpoint} souborového systému na hodnotu \emph{legacy}. Tím administrátor řekne, že se o souborový systému bude starat sám a ZFS ho již automaticky připojovat nebude. 
     \subsection{Snapshot}
     \label{snapshot}
+    \begin{figure}[h]
+        \caption{Vytváření snapshotu}
+        \label{snapshot}
+    \end{figure}
 \section{Rozbor existujících řešení}
 
