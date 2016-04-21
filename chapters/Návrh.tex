@@ -1,0 +1,64 @@
+Následující kapitola popisuje návrh nástroje pro administraci souborového systému ZFS.
+\section{Požadavky}
+Na začátku bychom si měli stanovit funkcionalitu, kterou budeme po apliakci vyžadovat. Ještě jednou připomenu, že hlavním cílem je vytvořit graficky orientovaný administrátorský nástroj pro správu souborového systému ZFS. 
+
+Souborový systém ZFS byl původně integrován v operačním systému Solaris. I přes to, že dnes již existují operační systém na, které bylo ZFS přeneseno, hlavní platformou aplikace bude právě operační systém Solaris.
+
+Jelikož má nástroj být grafického charakteru, můžeme brát jako první požadavek na aplikaci přítomnost uživatelského rozhraní. O tom jáké druhy uživatelského rozhraní přiapdají v úvahu si povíme hned v následující kapitole.
+
+Jak jsem se již zmínil v úvodu, účelem toho nástroje má být ulehčení a zpřehlednění práce administrátora při správě souborového systému ZFS a to i pro začínajícího administrátora.  Bylo by tedy vhodné, aby zvolené uživatelské rozhraní bylo přehledné a jednoduché na používání. Dalším ulehčením pro administrátora by bylo zajisté vzdálené ovládání tohoto nástroje.
+
+Na konci předchozí kapitoly jsme se dozvěděli, že většina nástrojů využívá takový způsob sběru dat, který uživateli v některých situací znemožňuje vidět přímo aktuílní data. Tohoto problému bychom se při návrhu měli vyvarovat a zvolit takový způsob, který by uživateli aktuální data při každém jeho požadavku zobrazil.
+
+Další nedostatek, který jsme objevli při analýze již vytvořených nástrojů pro správu ZFS, je ten, že většina těchto nástrojů vůbec neposkytuje funkce pro administraci. Dovolují nám tedy danný souborový systém sledovat, ale né ho ovlivňovat, vytvářet nebo nastavovat jeho vlastnosti. Jelikož je ZFS rozsáhlý souborový systém, obsahuje i velké množství funkcí a příkazů, které ho administrují. Bylo by tedy dobré některé základní funkce a příkazy pro administraci ZFS do tohoto nástroje zahrnout. 
+
+Posledním bodem požadavků by měla být bezpečnost. Hlavním důvodem proč se starat o bezpečnost apliakace je fakt, že pomocí ZFS lze jednoduchým příkazem zničit vše co se na disku nachází. Jelikož se z disku načítá při startu i operační systém, mohli by následky být fatální. Příklad jak se před tímto problémem chránit si můžeme vzít z Unixových operčních systémů. Na těchto systémech existuje uzivatel \emph{root}, který v systému může dělat uplně vše a poté obyčejní uživatelé, kteří nebezpečné příkazy vykonávat nemohou. To nás může přivést na myšlenku, že aplikace bude přístupná pouze specifikovaným uživatelům.
+
+Pro shrnutí můžeme požadavky na administrátorský nástroj shrnout do následujících bodu.
+\begin{itemize}
+    \item Solaris
+    \item Uživatelské rozhraní
+    \item Jednoduchost a přehlednost
+    \item Vzdálený přístup
+    \item Aktualita dat
+    \item Základní funkce pro administraci
+    \item Bezpečnost  
+    
+Splnění těchto požadavků by mělo vést k výsledku, který bychom od administrátorského nástroje mohli očekávat.
+\end{itemize}
+\section{Možnosti uživatelských rozhraní}
+Při návrhu se naskytli následující možnosti pro volbu uživatelského rozhraní.
+    \subsection{Příkazová řádka}
+    Každý uživatel, který se někdy nějakým způsobem setkal s administrací unixových operačních systémemů by měl mít alespoň nějaké povědomí o tom co je to příkazová řádka. Příkazová řádka je v unixu nástroj, který zkušení administrátoři využívají snad nejraději. Je rychlá, jednoduchá a jediné co potřebujete vědět je, jaký příkaz napsat a co danný příkaz udělá. Vše se obejde bez myši a kdejakého klikání.
+    
+    Na druhou stranu pro začínajícího uživatele může být složité si všechny příkazy pamatovat a nějakou dobu trvá než s tímto nástrojem uživatel získá potřebné zkušenosti. Pokud uživatel příkazy příliš neovládá je to pro něj spíše zpomalení práce než zrychlení.
+    
+    Jelikož jsme si v požadavcích stanovali, že náš nástroj má být jednoduchý, přehledný, uživatelsky příjemný na používání i pro začínající uživatele, je tato volba nevhodná.
+    \subsection{Grafické rozhraní}
+    Jelikož jsme zavrhli příkazovou řádku, je třeba přijít s něčím co bude pro uživatele přívětivé. Každý z vás se již jistě setkal s pojmem grafické rozhraní. Pokud ne, pod pojmem grafické rozhraní si můžete představit například kalkulačku z opearačního systému Windows. Prakticky všechno v operačním systému Windows má svoje grafické rozhraní.
+    
+    Jestliže jsme vyřešili problém s uživatelským komfortem pak nám zbývá zvážit možnost vzdáleného přístupu. Ano i v tomto případě bychom byli schopni tento požadavek splnit. Jde o to jak by to pro nás bylo pohodlné. Pokaždé kdybychom chtěli ZFS administrovat, museli bychom mít dotyčnou aplikaci nainstalovanou. Netvrdím, že je to nepřekonatelný problém, ale existuje ještě jedno komfortnější a dnes stále populárnější řešení.
+    \subsection{Webové rozhraní}
+    Poslední možností je použití webového rozhraní. Hlavní výhodou toho řešení je fakt, že pro přístup k aplikaci potřebujete jen webový prohlížeč. Ten je dnes přítomný v drtivé většině operační systémů. Tato skutečnost ná přináší možnost přistupovat z webového prohlížeče v libovolném operačním systému k aplikaci, která poběží na operačním systému Solaris.
+    
+    Webové stránky jsou navíc známé většině uživatelům a tak by při správném návrhu stránek neměl být sebemenší problém s jednoduchostí a přehledností tohoto nástroje.
+    
+    Zbytek požadavků jako je bezpečnost jednoduše splníme pomocí správné implementace tohoto řešení.
+\section{Architektura aplikace}
+                                                         
+    \subsection{Objektový návrh}
+    \subsection{Architektura MVC}    
+    \begin{figure}[h]
+        \caption{Architektura MVC}
+        \label{mvc}
+    \end{figure}
+        \subsubsection{Model}
+        \subsubsection{View}
+        \subsubsection{Controller}
+\section{Přístup do aplikace}
+\section{Bezpečnost}
+    \subsection{HTTP}
+    \subsection{HTTPS}
+    \subsection{HTTP Bascic Authentication}
+    \subsection{Systémový uživatel}
+\section{Integrace do systému}
