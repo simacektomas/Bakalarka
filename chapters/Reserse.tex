@@ -130,9 +130,9 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     Druhým ze stavebních kamenů ZFS jsou samotné souborové systémy. Jak jsem již zmínil dříve, souborový systém je způsob organizace dat do souborů v datových úložištích.
     Tradiční souborové systémy využívají k organizaci různých datových struktur. Souborový UFS využívá takzvaných inodů, což je datová struktura držící attributy souboru a informace o datových blocích. Souborový systém FAT nadruhou stranu využívá takzvané file allocation table. ZFS k tomuto účelu využívá stromové datové struktury, kterou můžete vidět na obrázku <CITATE Struktura>. \begin{figure}[!h]
         \caption{Struktura souborového systému ZFS}
-        \label{structure}        
+        \label{structure}
     \end{figure}
-    
+
     Tato stromová struktura přináší zajímavý výhody o kterých si povíme v další kapitolách.
     \subsection{Vlastnosti souborového systému}
     Stejně jako si ZFS udržuje u každého poolu jeho vlastnosti, udržuje si je také u každého souborového systému. Tyto vlastnosti jednoznačně určují souborový systém a popisují jeho chování. Souborový systém je jednoznačně určen svým indetifikátorem, který se skládá z nadřazený souborových systémů včetně poolu a samotného názvu danného systému. Identifikátor by mohl vypadat třeba následovně \emph{rpool/ROOT/solaris}.
@@ -153,7 +153,11 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     \end{verbatim}
     Pokud by takovýto souborový systém nexistoval, příkaz by vrátil chybovou hlášku.
 
-    Jelikož pool je vlastně souborový systém a souborové systémy se váží na pool, jde už při vytváření souborového systému vně poolu o hierarchické vnořování. Pool tedy tvoří hlavní uzel v této hierarchické posloupnosti a všechny souborové systémy vytvořené nad tímto poolem jsou jeho potomkem. V jednom poolu můžeme vytvořit více souborových systémů a také je do sebe můžeme libovolně vnořovat. Nejlépe si můžeme tuto hierarchii ukázat na obrázku <IMAGE>, kde můžeme vidět jak se do sebe jednotlivé souborové systém vnořují.
+    Jelikož pool je vlastně souborový systém a souborové systémy se váží na pool, jde už při vytváření souborového systému vně poolu o hierarchické vnořování. Pool tedy tvoří hlavní uzel v této hierarchické posloupnosti a všechny souborové systémy vytvořené nad tímto poolem jsou jeho potomkem. V jednom poolu můžeme vytvořit více souborových systémů a také je do sebe můžeme libovolně vnořovat. Nejlépe si můžeme tuto hierarchii ukázat na obrázku \ref{fshierarchy}, kde můžeme vidět jak se do sebe jednotlivé souborové systém vnořují.
+    \begin{figure}[h]
+        \caption{Hierarchie souborových systémů ZFS}
+        \label{fshierarchy}
+    \end{figure}
 
     Díky této hierarchické struktuře se dá jednoduše zjistit kdo je předkem danného souborového systému a kdo jeho potomkem. Všechny nastavitelné vlastnosti kromě kvót a rezervací jsou zděděny od rodičovského souborového systému. Pokud žádný rodič nemá vlastnost nastavenou explicitně, je použita standardní hodnota.<CITE Dedicnost>
 
@@ -256,17 +260,17 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     \subsection{Integrita dat}
     \label{checksum}
     Od souborového systému očekáváme, že při čtení dat z určitého datového bloku z disku, dostame data, která do tohoto bloku byla dříve zapsána. Pokud tomu tak není, měl by to souborový systém detekovat a vrátit chybu.<CITATE Integrity>
-    
-    Vlastnost neustálé konzistence souborového systému ZFS, zmíněná výše v kapitole \ref{consitence}, zajišťuje, že chybná data se v souborovém systému mohou vyskytnout jen skrze hardwarovou chybu. <CITATE integrity2> 
-    
+
+    Vlastnost neustálé konzistence souborového systému ZFS, zmíněná výše v kapitole \ref{consitence}, zajišťuje, že chybná data se v souborovém systému mohou vyskytnout jen skrze hardwarovou chybu. <CITATE integrity2>
+
     ZFS dokáže tyto chyby hardwaru detekovat pomocí tzv. kontrolních součtů. Tyto součty vznikají a jsou přepočítávány při každé změně bloku v souborovém sytému. Jak jsme mohli vidět na obrázku \ref{structure}, součty nejsou uloženy v bloku, kterého se týkají, ale v bloku jemu nadřazeném. Při každém požadavku na čtení dojde k vypočítání kontrolního součtu na základě dat, které se v souborovém systému momentálně nachází a poté dojde k porovnání vypočteného součtu se součtem uloženým v nadřzeném bloku.<CITATE integrity> Tím ZFS dokáže rozhodnout zda je blok požkozený či nikoliv.
-    
+
     Díky těmto kontrolním součtům se souborový systém dokáže v určitých situacích sám opravovat. Tato situace nastává v případě, že blok, při jehož čtení došlo k chybě, je součástí redundatního virtuálního zařízení jako je například RAID-Z nebo mirror. V tomto případě ZFS přečte datový blok i z replikovaného disku popřípadě sestaví blok pomocí parity a následně opraví chybný blok, při jehož čtení došlo k chybě. Aplikace dostane správná data i přes to, že při prvním čtení došlo k chybě. Obrázek \ref{selfhealing} názorně ukazuje postup při detekci chyby.
     \begin{figure}[h]
         \caption{Demostrace samopravování}
-        \label{selfhealing}        
-    \end{figure}   
-    
+        \label{selfhealing}
+    \end{figure}
+
     Ačkoliv dochází k ověřování integrity dat automaticky při každém čtení z disku, je možné tento proces manuálně vyvola o věřit pomocí následující sekvence příkazů.
     \begin{verbatim}
     $ zpool scrub pool
@@ -279,17 +283,53 @@ Tato kapitola popisuje strukturu souborového systému Zettabyte, jeho základn�
     \subsection{Mountpoint}
     \label{mountpoint}
     Mounpoint je jednou ze základních vlastností všech souborových systémů. Je to vlastně cesta k bodu v adresářovém stromu operačního systému, kde má danný souborový systém být připojen.
-    
-    Jelikož se ZFS snaží administrátorům maximálně ulehčit práci, stará se o automatické připojování souborových systémů samo. K účelům připojování souborových systémů v ZFS slouží jejich vlastnost \emph{mountpoint}, kde administrátor může specifikovat, kam se má danný souborový systém připojit. Pokud administrátror tuto vlastnost explicitně neurčí, je odvozena od vlasnosti rodičovského souborového systému. 
-    
+
+    Jelikož se ZFS snaží administrátorům maximálně ulehčit práci, stará se o automatické připojování souborových systémů samo. K účelům připojování souborových systémů v ZFS slouží jejich vlastnost \emph{mountpoint}, kde administrátor může specifikovat, kam se má danný souborový systém připojit. Pokud administrátror tuto vlastnost explicitně neurčí, je odvozena od vlasnosti rodičovského souborového systému.
+
     Pro připojování souborových systémů ZFS se dají použít i tradiční nástroje \emph{mount} a \emph{umount}. V tradičních souborových systémech jako je například UFS se pro automatické připojování používal soubor \emph{/etc/vsfstab}, kdeadministrátor specifikoval co a kam se má připojit. Operační systém po startu tento soubor zpracoval da vyznačené souborové systémy připojil.
-    
-    Jak jsem již zmínil ZFS proces automatického připojování provádi samo. Pokud by administrátor chtěl využívat automatického připojování pomocí souboru \emph{/etc/vsfstab}, je možné nastavit vlastnost \emph{mountpoint} souborového systému na hodnotu \emph{legacy}. Tím administrátor řekne, že se o souborový systému bude starat sám a ZFS ho již automaticky připojovat nebude. 
+
+    Jak jsem již zmínil ZFS proces automatického připojování provádi samo. Pokud by administrátor chtěl využívat automatického připojování pomocí souboru \emph{/etc/vsfstab}, je možné nastavit vlastnost \emph{mountpoint} souborového systému na hodnotu \emph{legacy}.<CITATE Mountpoint> Tím administrátor řekne, že se o souborový systému bude starat sám a ZFS ho již automaticky připojovat nebude.
     \subsection{Snapshot}
     \label{snapshot}
+    ZFS snapshot je stav danného souborového systému v čase, kdy byl snapshot pořízen. Jedná se tedy o kopii danného souborového systému, která se nedá měnit. Je takzvaně readonly.<CITATE Snapshot>
+    
+    Díky stromové architektuře souborového systému ZFS je pořizování těchto kopií velice elegantní a nenáročné. Pro vytvoření snapshotu můžeme použít příkaz \verb|$ zfs snapshot filesystem@snapshot|, kde \emph{filesystem} je jméno souborového systémů, jehož stav chceme zachytit a \emph{snapshot} je jméno konkrétního stavu.
+     
+    Po provední příkazu k vytvoření snapshotu dojde ke zkopírování kořene souborového systému jehož snapshot tovříme. Tento kořen se stane havním kořenem snapshotu jakožto nového souborového systému. V tuto chvíli máme k dispozici dva odkazy na jeden souborový systém. Jelikož snapshot je souborový systém určený pouze ke čtení, nemůžeme pomocí něj zmenit data v aktivním souborovém systému. Velikost snapshotu je v tuto chvíli nulová, protože nedošlo k žádnému kopírování dat. Pokud se ovšem data v aktivním souborovém systému změní, je nutné aby snapshot stále odkazoval na stará data. Toho docílíme tak, že stará data zkopírujeme a zvětšíme tak velikost snapshotu.<CITATE Snapshot> Rozšiřování velikosti snapshotu tedy závisí na množství změněných dat od chvíle, kdy byl snapshot vytvořen. Proces vytváření snapshotu a rozšiřování jeho velikosti je názorně ukázán na obrázku \ref{snapshotproces}.
     \begin{figure}[h]
         \caption{Vytváření snapshotu}
-        \label{snapshot}
+        \label{snapshotproces}
     \end{figure}
+    
+    Rekurivní tvorba snapshotů se provádí rychle pomocí jedné atomické operace. Snapshoty jsou vytvořeny naráz všechny dohromady nebo vytvořeny vůbec. Výhodou atomické operace je fakt, že data ve všech snapshotech jsou konzistentní vzhledem k jednomu časovému okamžiku.<CITATE Snapshot>
+    
+    Snapshot pro souborový systém a všechny jeho potomky můžeme vytvořit pomocí následujícího příkazu.
+    \begin{verbatim}
+    $ zfs snapshot -r rpool/export/home@snap
+    $ zfs list -t snapshot -r rpool/export/home
+    NAME                             USED  AVAIL  REFER  MOUNTPOINT
+    rpool/export/home@snap              0      -    33K  -
+    rpool/export/home/simactom@snap     0      -   641M  -
+    \end{verbatim}
+    Druhý příkaz v pořadí pak ukazuje skutečnost, že se snapshoty opravdu vytvořili i pro všechny potomky danného souborového systému a že je jejich velikost opravdu nulová.
+    
+    Snapshot se dá použít k navrácení souborového systému do stavu, v jakém se nacházel v okmažiku vytvoření snapshotu. Veškeré změny, které proběhly v souborovém systému od vytvoření snapshotu budou smazány. K vyvolání tohoto procesu stačí použít příkaz \verb|$ zfs rollback snapshot |, kde \emph{snapshot} je celé jméno snapshotu. Jelikož se každý snapshot váže přímo s určitým souborovým systémem, není třeba zadávat jméno souborového systému, který chceme navrátit do původního stavu.
+    
 \section{Rozbor existujících řešení}
-
+    V následující kapitole jsem si vybral několik nástrojů sloužící pro monitorování a správu souborového systému ZFS, které se pokusím popsat.
+    \subsection{zfsmon}
+    Jedním z nástrojů, které jsem si vybral, je \emph{Zfsmon}. Tento nástroj slouží pro monitorování ZFS souborových systémů na více oddělených souborových serverch. Aplikace má dvě oddělené části.
+    
+    První částí je script, který běží na počítači se souborovým systémem ZFS, který chceme monitorovat. Tento script je spouštěn pomocí crontabu a zajišťuje aktualizaci informací v databázi, která je součástí webové aplikace. Crontab je program, který zajišťuje automatické spouštění scriptů v systému. Doporučený interval spouštění scriptu je 15 minut.<CITATE Zfsmon>
+    
+    Druhou částí aplikace zfsmon je samotná webová aplikace, která se stará o zobrazování dat z databáze. V databázi se nacházejí informace o stavu jednotlivých souborových systémů z různých serverů. Aplikace zobrazuje informace klientovi na požádání v podobě HTML stránek.
+    
+    Velkou výhodou této aplikace je, že dokáže zobrazovat informace z více oddělených úložišť najednou. Nadruhou stranu způsob zpracování dat přináší značnou nevýhodu, která spočívá v intervalu aktualizace dat v databázi. V průběhu tohoto intervalu aplikace znemožňuje uživateli vidět aktuální data ze ZFS úložiště. Uživatel je nucen počkat na konec tohoto intervalu, kdy jsou opět nahrána aktuální data do databáze. Další nevýhodou toho nástroje je absence veškeré funkcionality, která by s týkala administrace souborového systému ZFS.
+    
+    Tento nástroj nám tedy umožňuje kvalitně monitorovat informace z více zdrojů najednou, ale neposkytuje nám možnost jakékoli administrace minitorovaných souborových systémů.     
+    \subsection{zfswatcher}
+    Jen ve stručnosti zmíním pár informací o nástroji jménem \emph{Zfswatcher}.
+     
+    Tento nástroj slouží jako webové rozhraní pro sledování souborových systémů ZFS. Stejně jako předchozí nástroj zpracovává periodicky data a zobrazuje je pomocí HTML stránek, s čímž souvisí stejný problém, který jsem popsal u předchozího nástroje. Oproti nástroji \emph{Zfsmon} umí zobrazovat informace pouze z jednoho souborového serveru. Nadruhou stranu tento nástroj umí v případě změny nějaké informace poslat upozornění v podobě e-mailu nebo zalogování do logu.<CITATE zfswatcher>
+    \subsection{ZFS administration console}
+    Na závěr této kapitoli bych chtěl jen zmínit nástroj \emph{smcwebserver}. Tento nástroj je součástí operačního systému Solaris 10 6/06 a umožňuje administrátorovi spravovat některé funkce tohoto operačního systému. Mimo jiné se část tohoto nástroje věnuje právě správě souborového systému ZFS. Bohužel v novější verzi Solarisu 11 se tento nástroj již nevyskytuje.         
