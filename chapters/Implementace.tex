@@ -1,0 +1,51 @@
+Obsahem následující kapitoly je můj postup implementace nástroje pro správu ZFS. Dále tato kapitola obashuje návod, jak vytvořený nástroj nainstalovat do operačního systému Solaris a poté nakonfigurovat. Na konci kapitoli uvádím TODO.
+\section{Python}
+Než začneme s implementací, je nutné si ujasnit v jakém jazyce budeme aplikaci psát. 
+
+V operační systému Solaris příkazouvou řádku interpretuje \emph{shell}, který nám dovoluje využívat funkce tohoto opeačního systému. Jak jsem zmínil v minulích kapitolách, ZFS je součástí Solarisu a \emph{shell} nám tedy dovoluje využívat jeho rozhraní, které je dostupné právě z příkazové řádky. Z počátku se tedy volba skriptování v \emph{shellu} zdála jako dobrá volba. Nicméně \emph{shell} nám nedovoluje využívat výhody objektového programování, protože nepodporuje třídy. To je v rozporu s naším návrhem, který využívá objektové architektury MVC.
+
+Z výše uvedeného důvodu jsem se rozhodl pro volbu skriptovacího jazyka \emph{python}. Hlavním důvodem této volby je podpora objektového návrhu, kterou využijeme pro implementaci architektury MVC. Další výhodou tohoto jazyka je jeho přenositelnot. Interpret \emph{pythonu} totiž existuje pro nejrůznější operační systému jako je Linux, Windows a samozřejmě náš Solaris. Tento fakt nám ale v konečném důsledku nebude moc užitečný, protože ZFS je dostupné primárně jen pro Solaris a impelentaci našeho nástroje budeme směrovat tímto směrem.
+\section{HTTP Server}
+V kapitole \ref{} jsme zvolili pro naší aplikaci webové rozhraní. Pro implementaci tohoto řešení budeme muset zvolit nějaký webový server, který nám bude zprostředkovávát komunikaci pomocí HTTPS protokolu mezi naší aplikací a webovým klientem ( prohlížečem ). Od našeho webového serveru budeme požadavat podporu HTTPS protokolu, tedy šifrování přenosu dat a možnost authentizace uživatelů pomocí metody Basic protokolu HTTP.
+    \subsection{Implementované řešení}
+    Jednou z možností je vybrat si z velkého množství webových serverů, které jsou již implementované. Mezi nejznámější a nejrozšířenější zástupce patří například \emph{Apache}. Tato komplexní implementace webového serveru by jistě dokázala splnit všechny naše požadavky, ale přinesla by s sebou jistě mnoho funkcí, které by naše aplikace vůbec nevyužila. Nehledě na to by byl administrátor nucen tento webový server nainstalovat a správně nakonfigurovat, aby odpovídal naším požadavkům. Z tothoto důvodu jsem se rozhodl zvolit vlastní řešení webového serveru, který bude přesně odpovídat požadavkům aplikace.
+    \subsection{Vlastní řešení}
+    Implementace vlastního řešení bude využívat dvou standardních knihoven jazyka \emph{python} a bude se skládat z následujícíh tříd.
+    \begin{itemize}
+      \item \verb|WzfsadmServer|
+      \item \verb|WzfsadmRequestHandler|
+      \item \verb|Authenticator|
+    \end{itemize}
+    
+    Tyto třídy dohromady budou tvořit webový server, který bude zprostředkovávat komunikaci mezi vlastní aplikací a webovým prohlížečem. Součástí těchto tříd budou i funkce pro zabezpečení celé aplikace.
+    \subsubsection{Třída WzfsadmServer}
+    Jelikož HTTP je textový protokol přenášený pomocí TCP protokolu, jako základ celého serveru použijeme třídu \verb|TCPServer|, která zajistí funkcionalitu TCP serveru a třídu \verb|ThreadingMixIn| zajišťující zpracování více požadavků v jednom okamžiku. Obě tyto třídy jsou součástí knihovny \verb|SocketServer|<CITATE SocketServer>, která je standardní součástí jazyka \emph{python}.
+    
+    Třída \verb|WzfsadmServer| reprezentující vlastní webový server, bude potomkem tříd \verb|TCPServer| a \verb|ThreadingMixIn| abychom dosáhli požadované funkcionality. To znamená, že zdědí metody obou rodičovských tříd a bude tyto metody moci využívat. Některé tyto metody budeme nuceni přepsat pro dosažení zabezpečení přenosu dat.
+    
+    Hlavním úkolem této třídy je poslouchat příchozí spojení na předem stanoveném síťovém rozhraní a portu. Tyto informace budou instanci této třídy předány při jejím vytváření. Při vytváření instance dojde k vytvoření hlavního socketu, který následně propojíme se stanovenou IP adresou a síťovým portem. Dále už jen vyčkává do, okmažiku kdy se klient pokusí připojit. V okamžiku kdy se klient připojí, je vytvořen nový socket, který bude slouži pro výměnu dat mezi klientem a serverem. Na této úrovni jsme schopni filtrovat IP adresy, které se k serveru budou moci připojovat. V konfiguračním souboru serveru budeme schopni napříkald stanovit, že se serverem lze komunikovat pouze z lokálního počítače.
+    
+    Pro samotnou výměnu dat mezi serverem a klientem, použijeme specializovanou třídu \verb|WzfsadmRequestHandler|, která bude umět komunikovat pomocí HTTP protkolu. Při každém připojení klienta k serveru vytvoříme instanci této třídy a předáme ji odkaz na spojení, kde bude docházet k výměně dat. Tato instance pak danný HTTP požadave vyřídí a server ukončí připojení s klientem.
+    
+    Jelikož chceme aby bylo připojení šifrováno, musíme už při vytváření instance třídy \verb|WzfsadmRequestHandler| předat odkaz na šifrované spojení. Pro tento účel budeme muset přepsat metodu \verb|get_request()| knihovní třídy \verb|TCPServer|. Tato metoda vrací odkaz na spojení, které umožňuje přenost dat a které předáváme třídě \verb|WzfsadmRequestHandler|. Aby tato metoda vracela odkaz na šifrované spojení, použijeme knihovnu \verb|ssl| a její funkci \verb|wrap_socket()|, která původní spojení začne šifrovat pomocí stanovené šifrovací metody. 
+    
+    Aby bylo možné využít šifrování pomocí knihovny \verb|ssl|, budeme muset vytvořit privání klíč pro šifrování a certifikát, kterým se server bude authentizovat klientům. Tuto dvojici můžeme vytvořit například pomocí nástroje \verb|openssl|. Cestu k souborům s klíčem a certifikátem pak předáme funkci \verb|wrap_socket()| při jejím volání.
+    \subsubsection{Třída WzfsadmRequestHandler}
+    Součástí webového serveru je již zmíněná třída \verb|WzfsadmRequestHandler|, která bude zajišťovat vlastní komunikaci s klientem pomocí HTTP protokolu. Při vytváření jí předáváme odkaz na šifrované připojení, tudíž veškerá komunikace je zabezpečená pomocí HTTPS protokolu. Tato třída je potomkem třídy \verb|BaseHTTPRequestHandler|, která je součástí standardní knihovny \verb|BaseHTTPServer|. Tuto třídu si opět budeme muset přízpůsobit, protože v základu nepodporuje metodu Basic protokolu HTTP, kterou chceme používat pro authentizaci uživatelů.
+    
+    Úprava bude vcelku jednoduchá. Do metody, která zpracovává jednotlivé požadavky, přidáme volání funkce, která ověří, zda-li klient poslal authentizační údaje. Poznáme to tak, že v hlavičkách požadavku HTTP protokolu bude obsažena hlavička \emph{Authorization}. Pokud klient tyto údaje nepošle, odpovíme na požadavek HTTP kódem 401 (Unauthorize). Jestliže údaje v hlavičkách najdeme pokusíme se uživatele ověřit. K tomuto účelu vytvoříme instaci třídy \verb|Authenticator| a na ní zavoláme metodu \verb|authenticate|, které ověřované údaje předáme. Metoda nám pak vrátí zprávu zda byl či nebyl uživatel authentizován. Pokud metoda vrátí úspěch, uživatel je authentizován a je mu povolen vstup do aplikace. Jestliže metoda vrátí neúspěch, je odeslán HTTP kód 401 (Unauthorize).
+    
+    Pokud chceme metodou Basic chránit celou aplikaci, musíme do hlaviček každé HTTP odpovědi zahrnout hlavičku \emph{WWW-Authenticate} jejíž hodnotou bude \emph{Basic}. Tíme dáme webovému prohlížeči na straně klienta najevo, že vyžadujeme authentizaci uživatelů.
+    
+    V dalším kroku se v případě správné authentizace uživatele zavolá požadovaná HTTP metoda. Jelikož pro naše účely naší aplikace budou stačit prostředky, které nabízí metoda GET, ostatní metody nebude náš webový server podporovat. V případě, že klient pošle požadavek na jinou HTTP metodu než je GET, server odpoví kódem 501 (Not Implemented).
+    
+    
+    \subsubsection{Třída Authenticator}
+    
+\section{Applikace}
+\section{Backend}
+\section{Frontend} 
+\section{Instalace}
+\section{Konfigurace}
+\section{Spuštění}
+\section{Testy}
