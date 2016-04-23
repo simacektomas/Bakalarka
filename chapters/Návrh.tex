@@ -2,7 +2,7 @@ Následující kapitola popisuje návrh nástroje pro administraci souborového 
 \section{Požadavky}
 Na začátku bychom si měli stanovit funkcionalitu, kterou budeme po apliakci vyžadovat. Ještě jednou připomenu, že hlavním cílem je vytvořit graficky orientovaný administrátorský nástroj pro správu souborového systému ZFS.
 
-Souborový systém ZFS byl původně integrován v operačním systému Solaris. I přes to, že dnes již existují operační systém na, které bylo ZFS přeneseno, hlavní platformou aplikace bude právě operační systém Solaris.
+Souborový systém ZFS byl původně integrován v operačním systému Solaris. I přes to, že dnes již existují operační systémy na, které bylo ZFS přeneseno, hlavní platformou aplikace bude právě operační systém Solaris.
 
 Jelikož má nástroj být grafického charakteru, můžeme brát jako první požadavek na aplikaci přítomnost uživatelského rozhraní. O tom jáké druhy uživatelského rozhraní přiapdají v úvahu si povíme hned v následující kapitole.
 
@@ -95,12 +95,12 @@ Aplikace je nyní přístupná jen pro oprávněné uživatele, kteří se authe
       \item uživatel root
       \item role (RBAC)
     \end{itemize}
-    
+
     První možností je zvolit uzivatele \emph{root}. Tento uživatel má právo na všechny operace v systému. Může tedy uživatelům měnit hesla, přidávat a odebírat uživatele a tak dále. Volba tohoto uživatele by sice náš problém vyřešila, ale přinesla by další bezpečnostní rizika. Pokud bychom supustili aplikaci s identitou uživatele root, pak by tato aplikace mohla v systému provádět uplně všechno. To ale my nepotřebujeme. Ná bude stačit pokud aplikace bude moci využívat přesně ty nástroje, které ke svá správné funkčnosti potřebuje. Dalším rizikem je fakt, že by potenciální útočník mohl tyto práva nějakým způsobem využít.
-    
+
     Druhá možnost, která přichází v úvahu, je použití tzv. RBAC. Jedná se o rozšíření bezpečnostního modelu, které nám umožňuje kontrolovat přístup uživatelů k úkonům, které jsou normálně povoleny pouze pro superuživatele \emph{root}. V nerozšířeném bezpečnostním modelu jste buď uživatelem s omezenými možnosti a nebo jste superuživatel a můžete všechno.
     Ve zkratce RBAC umožnuje vytváření tzv. rolí, které se chovají téměř jako normální uživatel. Rozdíl je v tom, že na roli se nedá přihlásit přímo. Do systému se nejprve musí přihlásit klasický uživatel, které si poté smí přiřadit určitě role. Rolím jsou pak přiřazovány bezpečnostní profily, které obsahují jednotlivá privilegia.
-    
+
     Pro bezpečnost našeho nástroje si tedy vytvoříme roli, které přiřadíme potřebná oprávnění pro vykonávání následujících příkazů.
     \begin{itemize}
       \item zfs
@@ -109,27 +109,37 @@ Aplikace je nyní přístupná jen pro oprávněné uživatele, kteří se authe
       \item fdisk
       \item TODO
     \end{itemize}
-    
-    Aplikaci pak budeme spouštět pod touto rolí. Ve výsledku aplikace bude mít veškerá oprávnění pro svoji správnou činnost a bezpečnostní rizika budou minimální.    
+
+    Aplikaci pak budeme spouštět pod touto rolí. Ve výsledku aplikace bude mít veškerá oprávnění pro svoji správnou činnost a bezpečnostní rizika budou minimální.
     \subsection{HTTP Bascic Authentication}
     \label{httpauth}
     Basic Authetication je způsob authentikace uživatelů pomocí portokolu HTTP. Pokud webový server vyžaduje tuto metodu ověření, uživatel je před přístupem k obashu vyžádán o authentizaci pomocí jména a hesla. Jméno a heslo je pak spolu s požadavek odesláno webovému server k ověření.<CITATE AUTH RFC>
-    
+
     Pro naší aplikaci to znamená, že webový server bude muset umět ověřit uživatele oproti lokální databázy. Pokud se uživatelské jméno a heslo odeslané webový prohlížečem bude shodovat s uživatelskými údaji v lokální databázi, bude uživateli umožněn vstup do nástroje.
-    
+
     Pro úkázku si můžeme úkázat jak takováto komunikace server a prohlížeče vypadá. V první řadě prohlížeč odešle normální požadavek bez uživatelských údajů. Jakmile server zjistí, že se v požadavku nevyskytuje hlavička \emph{Authorization}, odešle webovému prohlížeči HTTP odpověď s kódem 401 (Unauthorized). Do hlaviček odpovědi server přidá hlavičku \emph{WWW-Authenticate}, kde specifiku jakou metodu authentikace očekává. V našem případě se bude jednat o metodu \emph{Basic}. Prohlížeč nyní již ví, že server vyžaduje authentizaci a vyžádá uživatele o zadání jména a hesla. Uživateslké údaje se pak poskládají do správného formátu ( jméno:heslo ) a zakódují pomocí base64\footnote{Kódování není šifrování. Kódování je způsob jak data upravit pro přenos. Pokud třetí osoba tyto data zízká je z nich schopná rekonstruovat původní data.} kódování. Požadavek je odeslán znovu, ale tentokrát už prohlížeč přidá hlavičku \emph{Authorize}. Obsahem této hlavičky je jméno metody, kterou prohlížeč použil pro authetikaci a samotné zakódované údaje. Server následně požadavek znovu projde a pokusí se ověřit uživatele oproti lokální databázi. Pokud se údaje shodují, uživatel je připuštěn k chráněnému obsahu. Jestli se údaje neshodují je opět odeslána HTTP odpověď s kódem 401 (Unatuhorized).<CITATE AUTH RFC>
-    
+
     Náš administrační nástroj bude tedy tuto metodu využívat pro účely authentizace uživatelů. Do všech částí aplikace bude umožněn vstup pouze authentizovaným uživatelů.
-    
+
     \subsection{HTTPS}
     \label{https}
     Jak jsem již dříve zmiňoval HTTP protokol neumožňuje nijak šifrovat data, která jsou přenášena. Jelikož jsou po síti přenášena citlivá data jako je uživatelské jméno a heslo, musíme šifrování tohoto přenosu zajistit. HTTPS je protokol, který nám přesně tohle nabízí. Tento protokol ve svém základu využívá ke komunikaci HTTP protokol, ale rozdíl oproti klasickému HTTP je v tom, že přenášená data jsou šifrována pomocí SSL nebo TSL.
-     
+
     V první fázi spojení probíhá takzvaný handshake. V první části tohoto procesu dochází k výměně zpráv a dohodnutí se na šifrovacím algoritmu. Dále si vymění nezbytné kryptografické parametry. Následně si vymění své certifikáty aby se vzájemně mohli identifikovat.<CITATE TSL Handshake> Pokud handshake proběhne v pořádku, klient může začít posílat první požadavek stejně jako pomocí HTTP protokolu.
-    
+
     Použití protokolu HTTPS zajistí naší aplikaci, že bude pro útočníka téměř nemožné získat uživateslké údaje, které byli použity pro vstup do aplikace.
-    
-    
+    \subsection{Shrnutí}
     Pro shrnutí ještě jednou zopakuji jaké bezpečnostní opatření budou provedeny pro zajištění aplikace. Vytvoříme systémovou roli pomocí RBAC, která bude mít privilegia k vykonávání potřebných operací. Výsledná aplikace bude spouštěna pod touto rolí. K autentizaci uživatelů, kteří budou přistupovat k aplikaci, použijeme metodu \emph{Basic} protokolu HTTP. Uživatele budeme ověřovat proti lokální databázi uživatelů. A konečně celý přenos dat mezi webovým serverem a klientem zašifrujeme pomocí protokolu HTTPS.
 
-\section{Integrace do systému} 
+\section{Integrace do systému}
+Pro ulehčení správy celé aplikace ji zaregistrujeme v operačním systému jako službu. Docílíme tím toho, že se operační systém bude sám starat o zapínání, vypínání a restarování celé aplikace. Samozřejmě, že budeme stále schopni explicitně říct jestli má danná aplikace běžet nebo ne.
+
+Service Management Facility (SMF) je v operačním systému Solaris nástroj pro spravování služeb. Nahrazuje tím tradiční způsob spravování služeb pomocí \emph{init} scriptů, který byl běžný v dřívějších verzí opearčního systému Solaris a ostatní unixových operačních systémů. Velkou výhodou SMF je možnost definování zavislostí danné služby na ostatní službách. Tím dokážeme stanovit, že se danná služba nespustí dokud nebudou spuštěny všechny služby stanovené v závislostech. SMF uchovává veškeré informace o startu, běhu i ukončování služby v logu. Administrátor má tedy kdykoli možnost tyto logy prozkoumat a získat požadované informace. V pozadí každé služby zaregistrované v SMF je takzvaný manifest. <CITATE SMF>
+    \subsection{Manifest}
+    Manifest je XML dokument, který dannou službu popisuje. Právě zde administrátor stanovuje, na kterých službách bude tato služba závislá nebo jak se danná služba jmenuje. V našem případě to znamená, že si budeme muset tento manifest vytvořit a zaregistrovat službu v SMF. Administrátor pak bude schopen službu spravovat pomocí jednoduchých příkazů.
+    \subsection{Metody}
+    Důležitou součástí manifestu jsou metody, které SMF říkají, jak má dannou službu zaponout nebo vypnout. V těchto metodách se může spouštět více procesů, které jsou svázány dohromady jako součást danné služby. Administrátor se pak stará jenom o službu jako takovou a nemusí vůbec vědět jaké procesy byli v rámci služby spuštěny.<CITATE SMF> Mimo jiné můžeme v manifestu určit takzvaný kontext metod. Tato vlastnost nám dovoluje určit pod jakým uživatelem mají být jednotlivé metody vykonávány. V kontextu naší aplikace to znamená, že metody služby budou spouštěny pod námi vytvořenou rolí, která bude mít dostatečná práva.
+    \subsection{Shrnutí}
+    Zaregistrování aplikace jako služby v operačním systému Solaris nám přinese následující výhody ve správě této aplikace. Administrátor bude mít jasný přehled na tím zda danná služba běží nebo neběží. Dále bude moci jednoduše dannou službu spustit popřípadě zastavit. Pokud dojde k nějakému problému při spuštění danné služby, SMF administrátorovi poskytne informace o zdroji tohoto problému. V poslední řadě SMF také umožňí automatické spuštění služby při startu systému.
+    
+
