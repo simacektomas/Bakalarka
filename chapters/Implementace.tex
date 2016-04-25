@@ -49,9 +49,10 @@ V kapitole \ref{} jsme zvolili pro naší aplikaci webové rozhraní. Pro implem
 
     Součástí této třídy budou i funkce pro přidávání uživatelů do lokální databáze.
 \section{Směrování}
+\label{route}
 Druhou částí aplikace bude logická část, kde bude docházet k vyhodnocování jednotlivých požadavků. Tato část bude implementována pomocí MVC architektury, která nám pomůže oddělit logiku aplikace od vrstvy, které bude interagovat se souborovým systémem ZFS. Po zpracování požadavku dojde k vygenerování HTML stránky, která bude pomocí webového serveru odeslána k uživateli.
 
-Aby mohlo dojít k vygenerování požadované stránky, budeme muset z URL rozpoznat, která akce se má vykonat. Vytvoříme směrovač, který bude mapovat URL adresy na metody tříd logické vrstvy. Pro tento účel stanovíme následující pravidla, podle kterých budeme interpterovat URL předanou od webového serveru. Pokud URL adresa obsahuje znak \emph{?}, rozdělíme jí v tomto bodě na dvě části. Část před tímto znakem určuje jméno třídy a metody, kterou budeme volat. Část po znkau \emph{?} reprezentuje parametry, které volané metodě předáme. Jestliže adresa neobsahuje parametry, voláme požadovanou metodu bez parametrů. Pro ukázku požadovaná adresa, kterou nám předá web server, může vypadat následovně.
+Aby mohlo dojít k vygenerování požadované stránky, budeme muset z URL rozpoznat, která akce se má vykonat. Vytvoříme směrovač, který bude mapovat URL adresy na metody tříd logické vrstvy. Pro tento účel stanovíme následující pravidla, podle kterých budeme interpterovat URL předanou od webového serveru. Pokud URL adresa obsahuje znak \emph{?}, rozdělíme jí v tomto bodě na dvě části. Část před tímto znakem určuje jméno třídy a metody, kterou budeme volat. Část po znaku \emph{?} reprezentuje parametry, které volané metodě předáme. Jestliže adresa neobsahuje parametry, voláme požadovanou metodu bez parametrů. Pro ukázku požadovaná adresa, kterou nám předá web server, může vypadat následovně.
 \begin{verbatim}
 /zpool/detail?pool=rpool
 \end{verbatim}
@@ -70,7 +71,7 @@ Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
     \subsection{Třída Api}
     Abychom zajistili třídám logické vrstvy přístup k metodám datové vrstvy, vytvoříme třídu \verb|Api|, která bude zajišťovat dynamické načítání tříd z datové vrstvy. Logická vrstva jednoduše zavolá na instanci této třídy metodu \verb|TODO()|, které předá název požadovaného modulu. Tato metoda zkontroluje zda daný modul existuje a splňuje požadavky stanovené v kapitole \ref{package} a v případě úspěchu daný modul načte. Následně dojde k vytvoření instance hlavní třídy modulu a k jejímu předání do logické vrstvy. V tomto okmažiku má logická vrstva k dispozici všechny metody, které načtený modul poskytuje.
 
-    Velkou výhodou toho přístupu je fakt, že po dobu zpracovávání poždavku nám stačí načíst pouze moduly, které nutně potřebujeme ke zpracování požadavku. Dynamické načítání modulů nám tedy poskytne jistou úsporu ve využití operační paměti systému.    
+    Velkou výhodou toho přístupu je fakt, že po dobu zpracovávání poždavku nám stačí načíst pouze moduly, které nutně potřebujeme ke zpracování požadavku. Dynamické načítání modulů nám tedy poskytne jistou úsporu ve využití operační paměti systému.
     \subsection{Struktura modulu}
     \label{package}
     Všechny moduly a jejich součásti budou součástí adreářového stromu aplikace. Budou se nacházet v adresáři \emph{app/modules} a budou mít následující strukturu.
@@ -84,25 +85,75 @@ Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
 	}
 
 
-    Každý modul bude uložen ve svém adrešáři, které se bude jmenovat podle názvu modulu, za kterým bude následovat klíčové slovo \emph{Module}. Pro popis struktury adresáře modulu budeme používat jméno \emph{PoolMngt}. V první řadě adreář modulu musí obsahovat soubor \verb|__init__.py|. Tento soubor říká interpretu python, že se jedná o modul a umožní nám ho jednoduše načítat. 
-    
+    Každý modul bude uložen ve svém adrešáři, které se bude jmenovat podle názvu modulu, za kterým bude následovat klíčové slovo \emph{Module}. Pro popis struktury adresáře modulu budeme používat jméno \emph{PoolMngt}. V první řadě adreář modulu musí obsahovat soubor \verb|__init__.py|. Tento soubor říká interpretu python, že se jedná o modul a umožní nám ho jednoduše načítat.
+
     Hlavní součástí modulu bude soubor se zdrojovýmí kódy. Název souboru bude opět odpovídat názvu modulu, ale tentokrát bude následovat klíčové slovo \emph{Source}.
     Všechny vedlejší třídy, které bude modul využívat budou definovány právě uvnitř tohoto souboru spolu s definicí hlavní třídy. Hlavní třída modulu bude nabízet metody, které bude logická vrstva moci využívat. Název této třídy se musí shodovat s názvem modulu.
-    
+
     Poslední nepovinnou součástí modulu je konfigurační soubor s koncovkou \emph{conf}, který bude ve formátu JSON.
-    
+
     \subsubsection{Třída BaseModule}
     Abychom umožnili jednotnou inicializaci modulů, vytvoříme třídu \verb|BaseModule|, která bude rodičem každé hlavní třídy jednotlivých modulů. Tato třída umožní zdědit metodu \verb|init()|, která bude zavolána při každém načtení modulu do aplikce a umožní načtení konfiguračního souboru jednotným způsobem.
-    
+
     \subsection{Základní moduly}
-    Výsledná implementace požadovaného nástroje obsahuje následující moduly, které zajišťují 
+    Výsledná implementace požadovaného nástroje obsahuje následující moduly.
+    \begin{itemize}
+      \item \verb|ZpoolMngt|
+      \item \verb|DeviceMngt|
+      \item \verb|DatasetMngt|
+    \end{itemize}
 
+    Každý z těchto modulů implementuje metody týkající se specifické části ZFS. Modul \verb|ZpoolMngt| obahuje metody, které nám umožní spravu poolů. Funkcionalita tohoto modulu spočívá hlavně ve shromaždování informací, vyváření a ničení poolů.
+     
+    Druhý modul v pořadí \verb|DeviceMngt| podporuje funkci předchozího modulu, protože implementuje metody, které se týkají správy zařízení. Dovoluje nám rozšířit pool další zařízení nebo nám umožňuje změnit stav zařízení a mnoho dalšího.
+     
+    Poslední implemenovaný modul \verb|DatasetMngt| poskytuje metody pro správu jednotlivých souborových systémů. Modul obsahuje metody pro vytváření a ničení souborových systémů dále umožňuje nastavi jednotlivé vlastnosti popřípadě vytvořit snapsthot.
+
+    Dohromady nám implementované moduly poskytují dostatečnou funkcionalitu pro vytvoření administačního nástroje, který by umožňoval správu základních mechanizmů souborového systému ZFS.
 \section{Logická vrstva}
-Logická vrstva naší aplikace bude řídit tok dat mezi prezentační vrstvou a vrstvou, která bude komunikovat se souborovým systémem ZFS. Jednotlivé třídy této vrstvy budou představovat logické celky správy ZFS. Každá metoda těchto tříd bude představovat akci aplikace, kterou uživatel může vyvolat zadáním odpovídající URL adresy.
-    \subsection{Modularita}
+Dlaší vrstvou aplikace bude logická vrstva. Tato část bude mít za úkol provádět požadované akce na souborovém systému ZFS pomocí datové vrstvy. Data obdržené od datové vrsvy následně zpracuje a požádá prezentační vrstvu o vygenerování HTML stránky s pomocí těchto dat. Výsledek je prostřednicvím webového serveru odeslán uživateli, který si ho pomocí webového prohlížeče může zobrazit.
 
+Třídy logické vrstvy budeme nazívat kontroléry. Kontroléry budou obsahovat metody, které budou představovat jednotlivé akce, které aplkace bude umět provádět. Na základě směrování popsaného v \ref{route} dojde k dynamickému načtení kontroléru a vyvolání požadované metody. Tato metoda už bude mít přesně stanoveno, jaké metody datové vrstvy využije a jakou HTML stránku vygeneruje pomoc prezentační vrstvy.
+    \subsection{Kontrolér}
+    V adresářové struktuře aplikace opět stanovíme adresář, kde najdeme jednotlivé definice kontrolerů. V případě naší aplikace veškeré zdrojové kódy tříd logické vrstvy najdeme v adresáři \emph{app/controllers}.
+    \dirtree{%
+		.1 app.\DTcomment{Adrešář v kořenovém adresáři aplikace}.
+		.2 controllers.\DTcomment{Adresář logické vrstvy}.
+        .3 DashboardConttoller.py.\DTcomment{Zrojový kód kontroléru}.        
+	}
+
+    Právě odtud bude třída \emph{App}, nerá se stará o směrování, dynamicky načítat požadované kontroléry. Stejně jako v případě datové vrstvy nám dynamické načítání umožní načítat pouze ten kontrolér, který potřebujeme ke zpracování danného požadavku.
+    
+    \subsection{Třída BaseController}
+    Abychom dosáhli jednotnosti logické vrstvy, vytvoříme nadtřídu \verb|BaseController|, ze které budou všechny kontroléry logické vrstvy dědit. V této třídě stanovíme metody pro předávání výsledného HTML dokumentu webserveru a také pro řešení chybových sistuací, které mohou nastat zejména v datové vrstvě. Pokud dojdě k nějaké chybě během vykonávání nějakého příkazu nad souborovým systémem, datová vrstva tento stav ohlásí a předá logické vrstvě zprávu o tom co se stalo. V této situaci dojde k vygenerování speciální stránky, které uživatele infromuje o tom co se stalo.
+    \subsection{Základní kontroléry}
+    Do výsledné aplikace budou zařazeny následující kontroléry.
+    \begin{itemize}
+      \item \verb|DashboardConroller|      
+      \item \verb|DatasetConroller|
+      \item \verb|DeviceConroller|
+      \item \verb|ZpoolConroller|
+    \end{itemize}
+    
+    Třída \verb|DashboardConroller| bude zajišťovat zobrazování úvodní stránky aplikace. Obsahem této stránky bude přehled základních informací týkajících se souborového systému obecně, vytvořených poolů nebo například všech dostupných souborových systémů.
+    
+    Stránky, které se týkají administrace souborových systémů v ZFS, bude řídit \verb|DatasetConroller|. Tento kontorlér bude umožňovat zobrait detailní informace o jednotlivích souborových systémem a bude také nabízet funkce pro jejich administraci. Nebude tedy chybět možnost souborové systémy ničit, vytvářet, nastavovat nebo vytvářet jejich snapshoty.
+    V případě kontrolerů \verb|DeviceConroller| a \verb|ZpoolConroller| se bude jednat o podobné funkce.
+    
+    Výsledná aplikace bude generovat HTML stránky, které v sobě ponesou odkazy na metody výšše zmíněných kontrolerů. Uživatel tedy vůbec nemusí znát strukturu aplikace a jednotlivé metody kontolerů, protože mu budou nabídnuty právě prostřednictvím těchto stránek. Stánky mezi sebou budou logicky provázané tak, aby se uživatel mohl po aplikaci libovolně a pohodlně pohybovat.
 
 \section{Prezentační vrstva}
+Poslední vrstvou apliklace je tzv. prezentační vrstva. Jediným úkolem tété vrstvy je na základě obdržených dat vygenerovat požadovanou HTML sránku. Tato vrstva bude v naší aplikaci zastoupena jedinou třídou \verb|BaseView|. Vzhledem k dynamické povaze dat, které budeme v aplikaci vykreslovat jsem se rozhodl použít šablonovacího systému \emph{Jinja2}<CITATE Jinja2>, který je pro python dostupný. Tento systém nám umožní vytvoření jedné šablony, která bude následně použita k zobrazování více různých stránek. Například si můžeme vzít v úvahu zobrazování souborových systémů. Stránka zobrazující detail danného souborového systému se bude vždy skládat ze stejných komponentů a bude mít stejné rozložení bez ohledu na to jaký souborový systém právě zobrazujeme. Do šablony vložíme pouze data, která jsou pro danný systém specifická.
+    \subsection{Třída BaseView}
+    Třída \verb|BaseView| bude mít jedinou metodu \verb|render_template()|, která vyplní požadovanou šablonu předanými daty. Kontroléry logické vrstvy se tak mohou rozhodnout jakou šablonu chtějí vykreslit a jakými daty jí má metoda naplinit. Výsledek je předán zpět do logické vrstvy, která se postará o jeho odeslání.
+    \subsection{Jinja2}
+    Pro generování šablon třída \verb|BaseView| využívá modulu \emph{Jinja2}. Při vytváření instance této třídy dojde k inicializaci potřebných proměnných a stanovení adresáře, ze kterého se budou šablony načítat. Tento adresář se v našem příapdě bude jmenovat \emph{template} a bude se nacházet uvnit adresáře s aplikací. Modul se pak při každém požadavku na vykreslení šablony podívá do tohoto adresáře a dynamicky načte potřebnou šablonu. Ta je následně vypněna daty a vrácena jako textový řetězec.
+
+    Na závěr chci podotknout, že změna týkající se rozložení, vzhledu popřípadě přidání nějakého komponentu do výsledné HTML stánky je velice jednoduchá. Stačí změnit požadovanou šablonu a výsledek se promítnek okamžitě při dalším požadavku na tuto stránku. V logice aplikace nemusíme vůbec nic měnit.
+\section{Rozšiřitelnost}
+
+
+    
 \section{Startup}
 \section{Instalace}
 \section{Konfigurace}
