@@ -1,6 +1,6 @@
 Obsahem následující kapitoly je můj postup implementace nástroje pro správu ZFS. Dále tato kapitola obashuje návod, jak vytvořený nástroj nainstalovat do operačního systému Solaris a poté nakonfigurovat. Na konci kapitoli uvádím TODO.
 \section{Python}
-Než začneme s implementací, je nutné si ujasnit v jakém jazyce budeme aplikaci psát. 
+Než začneme s implementací, je nutné si ujasnit v jakém jazyce budeme aplikaci psát.
 
 V operační systému Solaris příkazouvou řádku interpretuje \emph{shell}, který nám dovoluje využívat funkce tohoto opeačního systému. Jak jsem zmínil v minulích kapitolách, ZFS je součástí Solarisu a \emph{shell} nám tedy dovoluje využívat jeho rozhraní, které je dostupné právě z příkazové řádky. Z počátku se tedy volba skriptování v \emph{shellu} zdála jako dobrá volba. Nicméně \emph{shell} nám nedovoluje využívat výhody objektového programování, protože nepodporuje třídy. To je v rozporu s naším návrhem, který využívá objektové architektury MVC.
 
@@ -8,44 +8,104 @@ Z výše uvedeného důvodu jsem se rozhodl pro volbu skriptovacího jazyka \emp
 \section{HTTP Server}
 V kapitole \ref{} jsme zvolili pro naší aplikaci webové rozhraní. Pro implementaci tohoto řešení budeme muset zvolit nějaký webový server, který nám bude zprostředkovávát komunikaci pomocí HTTPS protokolu mezi naší aplikací a webovým klientem ( prohlížečem ). Od našeho webového serveru budeme požadavat podporu HTTPS protokolu, tedy šifrování přenosu dat a možnost authentizace uživatelů pomocí metody Basic protokolu HTTP.
     \subsection{Implementované řešení}
-    Jednou z možností je vybrat si z velkého množství webových serverů, které jsou již implementované. Mezi nejznámější a nejrozšířenější zástupce patří například \emph{Apache}. Tato komplexní implementace webového serveru by jistě dokázala splnit všechny naše požadavky, ale přinesla by s sebou jistě mnoho funkcí, které by naše aplikace vůbec nevyužila. Nehledě na to by byl administrátor nucen tento webový server nainstalovat a správně nakonfigurovat, aby odpovídal naším požadavkům. Z tothoto důvodu jsem se rozhodl zvolit vlastní řešení webového serveru, který bude přesně odpovídat požadavkům aplikace.
-    \subsection{Vlastní řešení}
-    Implementace vlastního řešení bude využívat dvou standardních knihoven jazyka \emph{python} a bude se skládat z následujícíh tříd.
+    Jednou z možností je vybrat si z velkého množství webových serverů, které jsou již implementované. Mezi nejznámější a nejrozšířenější zástupce patří například \emph{Apache}. Tato komplexní implementace webového serveru by jistě dokázala splnit všechny naše požadavky, ale přinesla by s sebou jistě i mnoho funkcí, které by naše aplikace vůbec nevyužila. Nehledě na to by byl administrátor nucen tento webový server nainstalovat a správně nakonfigurovat, aby odpovídal naším požadavkům. Z tothoto důvodu jsem se rozhodl zvolit vlastní řešení webového serveru, který bude přesně odpovídat požadavkům aplikace.
+    \subsection{Vlastní řešení webového serveru}
+    Implementace vlastního řešení webovýho serveru bude využívat dvou standardních knihoven jazyka \emph{python} a bude se skládat z následujícíh tříd.
     \begin{itemize}
       \item \verb|WzfsadmServer|
       \item \verb|WzfsadmRequestHandler|
       \item \verb|Authenticator|
     \end{itemize}
-    
-    Tyto třídy dohromady budou tvořit webový server, který bude zprostředkovávat komunikaci mezi vlastní aplikací a webovým prohlížečem. Součástí těchto tříd budou i funkce pro zabezpečení celé aplikace.
+
+    Tyto třídy dohromady budou tvořit webový server, který bude zprostředkovávat komunikaci mezi logickou částí aplikace a webovým prohlížečem. Součástí těchto tříd budou i funkce pro zabezpečení celé aplikace.
     \subsubsection{Třída WzfsadmServer}
     Jelikož HTTP je textový protokol přenášený pomocí TCP protokolu, jako základ celého serveru použijeme třídu \verb|TCPServer|, která zajistí funkcionalitu TCP serveru a třídu \verb|ThreadingMixIn| zajišťující zpracování více požadavků v jednom okamžiku. Obě tyto třídy jsou součástí knihovny \verb|SocketServer|<CITATE SocketServer>, která je standardní součástí jazyka \emph{python}.
-    
+
     Třída \verb|WzfsadmServer| reprezentující vlastní webový server, bude potomkem tříd \verb|TCPServer| a \verb|ThreadingMixIn| abychom dosáhli požadované funkcionality. To znamená, že zdědí metody obou rodičovských tříd a bude tyto metody moci využívat. Některé tyto metody budeme nuceni přepsat pro dosažení zabezpečení přenosu dat.
-    
+
     Hlavním úkolem této třídy je poslouchat příchozí spojení na předem stanoveném síťovém rozhraní a portu. Tyto informace budou instanci této třídy předány při jejím vytváření. Při vytváření instance dojde k vytvoření hlavního socketu, který následně propojíme se stanovenou IP adresou a síťovým portem. Dále už jen vyčkává do, okmažiku kdy se klient pokusí připojit. V okamžiku kdy se klient připojí, je vytvořen nový socket, který bude slouži pro výměnu dat mezi klientem a serverem. Na této úrovni jsme schopni filtrovat IP adresy, které se k serveru budou moci připojovat. V konfiguračním souboru serveru budeme schopni napříkald stanovit, že se serverem lze komunikovat pouze z lokálního počítače.
-    
-    Pro samotnou výměnu dat mezi serverem a klientem, použijeme specializovanou třídu \verb|WzfsadmRequestHandler|, která bude umět komunikovat pomocí HTTP protkolu. Při každém připojení klienta k serveru vytvoříme instanci této třídy a předáme ji odkaz na spojení, kde bude docházet k výměně dat. Tato instance pak danný HTTP požadave vyřídí a server ukončí připojení s klientem.
-    
-    Jelikož chceme aby bylo připojení šifrováno, musíme už při vytváření instance třídy \verb|WzfsadmRequestHandler| předat odkaz na šifrované spojení. Pro tento účel budeme muset přepsat metodu \verb|get_request()| knihovní třídy \verb|TCPServer|. Tato metoda vrací odkaz na spojení, které umožňuje přenost dat a které předáváme třídě \verb|WzfsadmRequestHandler|. Aby tato metoda vracela odkaz na šifrované spojení, použijeme knihovnu \verb|ssl| a její funkci \verb|wrap_socket()|, která původní spojení začne šifrovat pomocí stanovené šifrovací metody. 
-    
+
+    Pro samotnou výměnu dat mezi serverem a klientem, použijeme specializovanou třídu \verb|WzfsadmRequestHandler|, která bude umět komunikovat pomocí HTTP protkolu. Při každém připojení klienta k serveru vytvoříme instanci této třídy a předáme ji odkaz na spojení, kde bude docházet k výměně dat. Tato instance pak danný HTTP požadavek vyřídí a předá řízení zpět.
+
+    Jelikož chceme aby bylo připojení šifrováno, musíme už při vytváření instance třídy \verb|WzfsadmRequestHandler| předat odkaz na šifrované spojení. Pro tento účel budeme muset přepsat metodu \verb|get_request()| knihovní třídy \verb|TCPServer|. Tato metoda vrací odkaz na spojení, které umožňuje přenost dat a které předáváme třídě \verb|WzfsadmRequestHandler|. Aby tato metoda vracela odkaz na šifrované spojení, použijeme knihovnu \verb|ssl| a její funkci \verb|wrap_socket()|, která původní spojení začne šifrovat pomocí stanovené šifrovací metody.
+
     Aby bylo možné využít šifrování pomocí knihovny \verb|ssl|, budeme muset vytvořit privání klíč pro šifrování a certifikát, kterým se server bude authentizovat klientům. Tuto dvojici můžeme vytvořit například pomocí nástroje \verb|openssl|. Cestu k souborům s klíčem a certifikátem pak předáme funkci \verb|wrap_socket()| při jejím volání.
+
+    Ke spuštění serveru stačí vytvořit instanci třídy \verb|WzfsadmServer| s požadovanými parametry a následně na této instanci zavolat metodu \verb|serve_forever()|. Od této chvíle bude server naslouchat na stanovené adrese a portu dokud nebude ukončen.
+
+
     \subsubsection{Třída WzfsadmRequestHandler}
-    Součástí webového serveru je již zmíněná třída \verb|WzfsadmRequestHandler|, která bude zajišťovat vlastní komunikaci s klientem pomocí HTTP protokolu. Při vytváření jí předáváme odkaz na šifrované připojení, tudíž veškerá komunikace je zabezpečená pomocí HTTPS protokolu. Tato třída je potomkem třídy \verb|BaseHTTPRequestHandler|, která je součástí standardní knihovny \verb|BaseHTTPServer|. Tuto třídu si opět budeme muset přízpůsobit, protože v základu nepodporuje metodu Basic protokolu HTTP, kterou chceme používat pro authentizaci uživatelů.
-    
-    Úprava bude vcelku jednoduchá. Do metody, která zpracovává jednotlivé požadavky, přidáme volání funkce, která ověří, zda-li klient poslal authentizační údaje. Poznáme to tak, že v hlavičkách požadavku HTTP protokolu bude obsažena hlavička \emph{Authorization}. Pokud klient tyto údaje nepošle, odpovíme na požadavek HTTP kódem 401 (Unauthorize). Jestliže údaje v hlavičkách najdeme pokusíme se uživatele ověřit. K tomuto účelu vytvoříme instaci třídy \verb|Authenticator| a na ní zavoláme metodu \verb|authenticate|, které ověřované údaje předáme. Metoda nám pak vrátí zprávu zda byl či nebyl uživatel authentizován. Pokud metoda vrátí úspěch, uživatel je authentizován a je mu povolen vstup do aplikace. Jestliže metoda vrátí neúspěch, je odeslán HTTP kód 401 (Unauthorize).
-    
+    Dlaší součástí webového serveru je již zmíněná třída \verb|WzfsadmRequestHandler|, která bude zajišťovat vlastní komunikaci s klientem pomocí HTTP protokolu. Při vytváření jí předáváme odkaz na šifrované připojení, tudíž veškerá komunikace je zabezpečená pomocí HTTPS protokolu. Tato třída je potomkem třídy \verb|BaseHTTPRequestHandler|, která je součástí standardní knihovny \verb|BaseHTTPServer|. Tuto třídu si opět budeme muset přízpůsobit, protože v základu nepodporuje metodu Basic protokolu HTTP, kterou chceme používat pro authentizaci uživatelů.
+
+    Úprava bude vcelku jednoduchá. Do metody, která zpracovává jednotlivé požadavky, přidáme volání funkce, která ověří, zda-li klient poslal authentizační údaje. Poznáme to tak, že v hlavičkách požadavku HTTP protokolu bude obsažena hlavička \emph{Authorization}. Pokud klient tyto údaje nepošle, odpovíme na požadavek HTTP kódem 401 (Unauthorize). Jestliže údaje v hlavičkách najdeme pokusíme se uživatele ověřit. K tomuto účelu vytvoříme instaci třídy \verb|Authenticator| a na ní zavoláme metodu \verb|authenticate()|, které ověřované údaje předáme. Metoda nám pak vrátí zprávu zda byl či nebyl uživatel authentizován. Pokud metoda vrátí úspěch, uživatel je authentizován a je mu povolen vstup do aplikace. Jestliže metoda vrátí neúspěch, je odeslán HTTP kód 401 (Unauthorize).
+
     Pokud chceme metodou Basic chránit celou aplikaci, musíme do hlaviček každé HTTP odpovědi zahrnout hlavičku \emph{WWW-Authenticate} jejíž hodnotou bude \emph{Basic}. Tíme dáme webovému prohlížeči na straně klienta najevo, že vyžadujeme authentizaci uživatelů.
-    
-    V dalším kroku se v případě správné authentizace uživatele zavolá požadovaná HTTP metoda. Jelikož pro naše účely naší aplikace budou stačit prostředky, které nabízí metoda GET, ostatní metody nebude náš webový server podporovat. V případě, že klient pošle požadavek na jinou HTTP metodu než je GET, server odpoví kódem 501 (Not Implemented).
-    
-    
+
+    V dalším kroku se v případě správné authentizace uživatele zavolá požadovaná HTTP metoda. Jelikož pro naše účely naší aplikace budou stačit prostředky, které nabízí metoda GET, ostatní metody nebude náš webový server podporovat. V případě, že klient pošle požadavek na jinou HTTP metodu než je GET, server odpoví kódem 501 (Not Implemented). Uvnitř metody, která reprezentuje HTTP metodu GET, server ověří, jestli požadovaná URL odpovídá souboru. Server bude tento soubor hledat v adresáři, který mu nastavíme pomocí konfiguračního souboru. Pokud URL odpovídá nějakému souboru ve stanoveném adresáři, je obasah souboru odeslán klientovi a volání metody ukončeno. V opačném případě server vytvoří instanci třídy \verb|App| reprezentující naší aplikaci. Následně na této instanci zavolá metodu \verb|route|, které předá URL požadovanou klientem. Aplikace požadavek zpracuje a server v konečné fázi odešle výsledek zpět uživateli.
+
+    Jakmile dojde k odeslání zprávy uživateli, řízení je předáno zpět serveru, který čeká na další požadavek.
     \subsubsection{Třída Authenticator}
+    Poslední třídou, která přímo souvisí s funkcionalitou webového serveru, je třída \verb|Authenticator|. Metoda \verb|authenticate()| této třídy má za úkol zkontrolovat validitu uživatelského jména a hesla, které přišli spolu s požadavkem. Tyto užtivatelské údaje ověří oproti lokální databázi uložené v předem určeném souboru s předepsanou srukturou. Každá řádka tohoto souboru bude reprezentovat uživatele, který se k aplikaci bude moci připojit. Formát dat uložených v souboru bude následující. Řádka se bude skládat ze tří sloupců oddělených dvojtečkou. V prvním sloupci bude uloženo uživatelské jméno. Ve druhém sloupci bude následovat jméno hašovací funkce použité při tvorbě hashe uživatelského hesla a konečně v posledním sloupci pak bude hexadecimální reprezentace tohoto hashe. Soubor bude postupně procházen a uživatelské údaje porovnány. Pokud nebude nalezena shoda, authentizace uživatele bude vyhodnocena jako chybná.
+
+    Součástí této třídy budou i funkce pro přidávání uživatelů do lokální databáze.
+\section{Směrování}
+Druhou částí aplikace bude logická část, kde bude docházet k vyhodnocování jednotlivých požadavků. Tato část bude implementována pomocí MVC architektury, která nám pomůže oddělit logiku aplikace od vrstvy, které bude interagovat se souborovým systémem ZFS. Po zpracování požadavku dojde k vygenerování HTML stránky, která bude pomocí webového serveru odeslána k uživateli.
+
+Aby mohlo dojít k vygenerování požadované stránky, budeme muset z URL rozpoznat, která akce se má vykonat. Vytvoříme směrovač, který bude mapovat URL adresy na metody tříd logické vrstvy. Pro tento účel stanovíme následující pravidla, podle kterých budeme interpterovat URL předanou od webového serveru. Pokud URL adresa obsahuje znak \emph{?}, rozdělíme jí v tomto bodě na dvě části. Část před tímto znakem určuje jméno třídy a metody, kterou budeme volat. Část po znkau \emph{?} reprezentuje parametry, které volané metodě předáme. Jestliže adresa neobsahuje parametry, voláme požadovanou metodu bez parametrů. Pro ukázku požadovaná adresa, kterou nám předá web server, může vypadat následovně.
+\begin{verbatim}
+/zpool/detail?pool=rpool
+\end{verbatim}
+
+V kontextu naší aplikace tato adresa bude zobrazovat detailní informace o poolu jmnénem \emph{rpool}.
+    \subsection{Třída App}
+    Princip směrování požadavků k jednotlivím třídám v naší aplikaci zajišťuje třída \verb|App|. Této tří při jejím vytváření předáme URL, která je vyžadována od klienta a webový server zavolá její metodu \verb|route()|. Uvnitř dojde ke zpracování adresy výše popsaným způsobem, což nám zajistí jméno třídy logické vrstvy aplikace a jméno metody, kterou máme na této třídě zavolat. Pokud požadovaná třída a metoda neexistují je klientovi vrácena odpověď s kódem 404 (Not found). V opačném případě je třída dynamicky načtena z předem stanoveného adresáře a následně vytvořena její instance. V posledním kroku se na této instanci zavolá požadovaná metoda, které předáme dostupné parametry. Volání teto metody povede k vygenerování HTML stránky, která je následně předána webovému serveru k odeslání.
+
+    Hlavním účelem třídy \verb|App| je tedy zpracovat URL adresu a následně vytvořit třídu, která se postará o zpracování požadavku. Webový server poté od této třídy obrží HTML stránku, která byla aplikací vygenerována.
+
+\section{Datová vrstva}
+Datová vrstva je v terminologi MVC architektury vrstva, která pracuje s daty. Naše aplikace si ale přímo žádna data držet nebude, protože ZFS si všechny datové struktury spravuje samo. Nabízí nám pouze rozhraní, které můžeme využívat pomocí \emph{shellových} příkazů. Datová vrstva naší aplikace bude tedy zprostředkovávát komunikaci a tok dat mezi ZFS a logickou vrsvou aplikace. Třídy této vrstvy budou využívat právě zmíněného rozhraní. Metody těchto tříd na základě dat, které obdrží z logické vrstvy, sestaví potřebný ZFS příkaz a pomocí \emph{shellu} ho vykonají na příkazové řádce. Výsledek operace a požadovaná data pak předají zpět do logické vrstvy, kde se zpracují.
+
+Jelikož nástroj nebude implementovat všechny funkce souborového systému ZFS, bylo by vhodné navrhnout tuto vrstvu způsobem, který by umožňoval jednoduché rozšíření její funkcionality.
+Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou specializovat na určitý typ komunikace s ZFS. V každém z modulů bude hlavní třída, která bude poskytovat logické vrstě rozhraní pro komunikaci se souborovým systémem ZFS. Pro ilustraci si můžeme představit, že jeden z modulů aplikace bude sloužit pro správu ZFS poolu. Hlavní třída tohoto modulu pak bude poskytovat metody k vytváření, ničení, rozšiřování a modifikaci systémových poolů. V okamžiku, kdy logická vrstva bude chtít komunikovat s ZFS, bude požadovaný modul dynamicky načten do aplikace.
+    \subsection{Třída Api}
+    Abychom zajistili třídám logické vrstvy přístup k metodám datové vrstvy, vytvoříme třídu \verb|Api|, která bude zajišťovat dynamické načítání tříd z datové vrstvy. Logická vrstva jednoduše zavolá na instanci této třídy metodu \verb|TODO()|, které předá název požadovaného modulu. Tato metoda zkontroluje zda daný modul existuje a splňuje požadavky stanovené v kapitole \ref{package} a v případě úspěchu daný modul načte. Následně dojde k vytvoření instance hlavní třídy modulu a k jejímu předání do logické vrstvy. V tomto okmažiku má logická vrstva k dispozici všechny metody, které načtený modul poskytuje.
+
+    Velkou výhodou toho přístupu je fakt, že po dobu zpracovávání poždavku nám stačí načíst pouze moduly, které nutně potřebujeme ke zpracování požadavku. Dynamické načítání modulů nám tedy poskytne jistou úsporu ve využití operační paměti systému.    
+    \subsection{Struktura modulu}
+    \label{package}
+    Všechny moduly a jejich součásti budou součástí adreářového stromu aplikace. Budou se nacházet v adresáři \emph{app/modules} a budou mít následující strukturu.
+    \dirtree{%
+		.1 app.\DTcomment{Adrešář v kořenovém adresáři aplikace}.
+		.2 modules.\DTcomment{Adresář pro moduly}.
+        .3 PoolMngtModule.\DTcomment{Adresář modulu}.
+        .4 \_\_init\_\_.py.\DTcomment{Soubor pro inicializaci modulu}.
+        .4 PoolMngtSource.py.\DTcomment{Zdrojové kódy modulu}.
+        .4 PoolMngt.conf.\DTcomment{Konfigurační soubor}.
+	}
+
+
+    Každý modul bude uložen ve svém adrešáři, které se bude jmenovat podle názvu modulu, za kterým bude následovat klíčové slovo \emph{Module}. Pro popis struktury adresáře modulu budeme používat jméno \emph{PoolMngt}. V první řadě adreář modulu musí obsahovat soubor \verb|__init__.py|. Tento soubor říká interpretu python, že se jedná o modul a umožní nám ho jednoduše načítat. 
     
-\section{Applikace}
-\section{Backend}
-\section{Frontend} 
+    Hlavní součástí modulu bude soubor se zdrojovýmí kódy. Název souboru bude opět odpovídat názvu modulu, ale tentokrát bude následovat klíčové slovo \emph{Source}.
+    Všechny vedlejší třídy, které bude modul využívat budou definovány právě uvnitř tohoto souboru spolu s definicí hlavní třídy. Hlavní třída modulu bude nabízet metody, které bude logická vrstva moci využívat. Název této třídy se musí shodovat s názvem modulu.
+    
+    Poslední nepovinnou součástí modulu je konfigurační soubor s koncovkou \emph{conf}, který bude ve formátu JSON.
+    
+    \subsubsection{Třída BaseModule}
+    Abychom umožnili jednotnou inicializaci modulů, vytvoříme třídu \verb|BaseModule|, která bude rodičem každé hlavní třídy jednotlivých modulů. Tato třída umožní zdědit metodu \verb|init()|, která bude zavolána při každém načtení modulu do aplikce a umožní načtení konfiguračního souboru jednotným způsobem.
+    
+    \subsection{Základní moduly}
+    Výsledná implementace požadovaného nástroje obsahuje následující moduly, které zajišťují 
+
+\section{Logická vrstva}
+Logická vrstva naší aplikace bude řídit tok dat mezi prezentační vrstvou a vrstvou, která bude komunikovat se souborovým systémem ZFS. Jednotlivé třídy této vrstvy budou představovat logické celky správy ZFS. Každá metoda těchto tříd bude představovat akci aplikace, kterou uživatel může vyvolat zadáním odpovídající URL adresy.
+    \subsection{Modularita}
+
+
+\section{Prezentační vrstva}
+\section{Startup}
 \section{Instalace}
 \section{Konfigurace}
 \section{Spuštění}
 \section{Testy}
+
