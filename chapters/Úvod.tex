@@ -1,21 +1,25 @@
 
 Tato práce se věnuje návrhu a implementaci grafického nástroje pro monitorování a správu souborového systému Zettabyte.
 
-Souborový systém Zettabyte, dále jen ZFS ( Zettabyte file system ), je jeden z mnoha souborových systémů, se kterými se dnes můžeme setkat.
+Souborový systém Zettabyte, dále jen ZFS (Zettabyte file system), je jeden z mnoha souborových systémů, se kterými se dnes můžeme setkat.
 Byl vyvinut společností Sun Microsystems a integrován do operačního systému Solaris. Tento souborový systém dokáže spravovat velké množství dat
-díky své 128-bitové architektuře a mimo jiné nabízí funkce pro ověřování integrity dat, správu fyzických úložišť jako například vlastní 
-softwarový RAID a v neposlední řadě také šifrování dat.
+díky své 128-bitové architektuře a mimo jiné nabízí funkce pro ověřování integrity dat, správu fyzických úložišť, vlastní softwarový RAID a v neposlední
+řadě také šifrování dat. Hlavním nedostatkem ZFS je absence pohodlného grafického rozhraní pro jeho správu.
 
 Hlavním cílém této bakalářské práce je navrhnout a implementovat graficky orientovanou nadstavbu souborového systému Zettabyte, která bude zjednodušovat
 a zpříjemňovat správu tohoto systému.
 
-Struktura této bakalářské práce se skládá ze čtyř hlavních kapitol. V první kapitole je vysvětluji, proč by měl být tento administrátorský nástroj
-implementován a jaký přínos by měl pro různé skupiny uživatelů. V druhé kapitole se věnuji analýze struktury ZFS a jeho funkcí. Dále je v této kapitole
-proveden průzkum již vytvořených grafických nástrojů pro správu ZFS. V předposlední kapitole jsou stanoveny požadavky a popsán návrh výsledného nástroje.
-Ve čtvrté a zároveň poslední kapitole je rozebrána implementace aplikace, její instalace, nastavení a samotné spuštění. Po kapitolách následuje sturčný 
+Struktura této bakalářské práce se skládá ze TODO hlavních kapitol.
+V první kapitole je vysvětleno, proč by měl být tento administrátorský nástroj
+implementován a jaký přínos by měl pro různé skupiny uživatelů.
+Druhá kapitola popisuje souborové systémy obecně, představuje jejich nejznámější zástupce a v závěrečné části této kapitoly uvádím krátké porovnání vybraných souborových systémů.
+Ve třetí kapitole jsou přiblíženy záklaní principy souborového systému ZFS. Popisuji zde některé funkce, které ZFS administrátorovi nabízí.
+Čtvrtá kapitola se zabývá analýzou implementovaných grafických rozhraních, kde se snažím najít výhody těchto nástrojů, které bych mohl použít pro následnou implementaci. Na druhou stranu se snažím najít i problémy těchto nástrojů, kterým je třeba se při vlastní implementaci vyvarovat.
+Úvod páté kapitoly definuje požadavky, které bude nutné v implementaci splnit. Hlavní částí této kapitoly je návrh architektury a bezpečnostních opatření pro výslednou aplikaci.
+Téma poslední šesté kapitoly je samotná implementace navrhnutého nástroje, popis instalace, nastavení a spuštění aplikace. Po kapitolách následuje sturčný
 závěr, kde shrnuji zda bylo dostaženo stanovený cílů a uvadím možnosti rozšíření výsledné aplikace.
 
-Na přiloženém médiu jsou dostupné zdrojové kódy administrátorského nástroje.
+Nutnou součástí této práce jsou zdrojové kódy aplikace sloužící pro správu souborového systému ZFS dostupné na přiloženém médiu.
 
 
 
