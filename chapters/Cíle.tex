@@ -1,18 +1,13 @@
-V této kapitole je popsaný problém, který tato bakalářská práce řeší a přínos případného řešení.
+V této kapitole je přiblížena problematika, kterou se tato bakalářská práce zabývá. V závěru jsou zmíněny výhody, které by případné vyřešení problemantiky mohlo přinést.
 
 \section{Problematika}
-Následující problém si můžeme zobecnint na většinu systému či programů, které slouží k administraci.
-
-Pro efektivní a rychlou správu systémů je nutné danný systém, jeho možnosti a funkce, důkladně znát. Pro rozsáhlé systémy platí, že 
-s rostoucím těchto funkcí a možností, které systém nabízí roste i potřeba všechny tyto funkce znát a umět správně ovládat.
-V příapdě ZFS, které uživateli nabízí pouze CLI, se jedná o desítky možností a funckcí, kterými může administrátor ZFS ovládat.
+Následující problém si můžeme zobecnint na většinu nástrojů či aplikací, které slouží k administraci nějakého systému.
+% CHTELO BY TO PORADNE DOSPECIFIKOVAT
+Aby administrátor mohl rychle a efektivně spravovat tento systém, musí důkladně znát všechny jeho funkce a možnosti. U rozsáhlých sytémů platí, že s rostoucím počtem funkcí , které systém nabízí, roste i složitost jeho administrace. V příapdě ZFS, které uživateli nabízí pouze rozhraní na příkazové řádce, se jedná o desítky příkazů, kterými může administrátor ZFS ovládat. I přes to, že je veškerá funkcionalita ZFS popsána v manuálnových stránkách, je nutné tyto příkazy znát. 
 Většinu informací o ZFS lze najít v manuálových stránkách nebo na webových stránkách společnosti Oracle, kde se nachází mnoho
-podrobných online návodů jak ZFS administrovat. 
+podrobných online návodů jak ZFS administrovat.
 
-Pro zkušené administrátory, kteří se v prostředí tohoto souborového systému
-pohybují jíž delší dobu, je CLI pravděpodobně nejrychlejší a nejefektivnější volbou. Na druhou stranu pro většinu začínajících uživatelů,
-kteří potřebují nejprve pochopit jak systém funguje, může množství nabízených funkcí přijít zahlcující. 
+Pro zkušené administrátory, kteří se v prostředí tohoto souborového systému pohybují jíž delší dobu, je příkazová řádka pravděpodobně nejrychlejší a nejefektivnější volbou. Potřebný příkaz stačí napsat do příkazové řádky a sytém ho provede. Na druhou stranu existují uživatelé, kteří se teprve seznamují se souborvým systémem ZFS a nemají potřebné znalosti. Jelikož v ZFS nexistuje grafické rozhraní, kde by byla funkcionalita sdružena na jednom místě, musí začínající uživatelé využívat stále manuálových stránek, aby se dozvěděli k čemu danný příkaz slouží. K tomuto účelu společnost Oracle, která je nyní vlastníkem souborového systému ZFS, vydává mnoho online návodů, jak tento systém administrovat. 
 \section{Řešení}
-Z důvodu uvedených výše jsem se rozhodl navrhnout a implementovat graficky orientovaný administrátorský nástroj pro ZFS,
-který by sdružoval funkcionalitu ZFS do jedhono místa, odkud by administrátor mohl pohodlně ovládat funkce systému. 
-\section{Přínos}
+Z výše uvedených důvodů jsem se rozhodl navrhnout a implementovat graficky orientovaný administrátorský nástroj pro ZFS,
+který by sdružoval funkcionalitu ZFS do jedhono místa, odkud by administrátor mohl pohodlně ovládat funkce systému. Tento nástroj by měl být určený především seznámení se uživatelů se souborovým systémem ZFS a jeho funkcemi.
