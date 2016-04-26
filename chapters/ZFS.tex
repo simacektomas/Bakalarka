@@ -183,59 +183,58 @@ $ zfs groupquota@username=value filesystem
 ZFS nabízí ještě vlastnost \emph{defaultuserquota} resp. \emph{defaultgroupquota}, kterou lze nastavit na určitou hodnotu. Tento limit se použije v případě, že hodnotu uživatelské resp. skupinové kvóty nastavíme na \emph{default}.
 \section{Deduplikace}
 \label{dedup}
-Jednou z další vlastností, které ZFS nabízí je deduplikace. Jak již z názvu vyplívá, jedná se o proces, který zabraňuje duplikaci dat na disku a tím šetří místo na disku. Deduplikace se obecně dá rozdělit na následující úrovně.
+Jednou z další vlastností, které ZFS nabízí je deduplikace. Jak již z názvu vyplívá, jedná se o proces, který zabraňuje duplikaci dat na disku a tím šetří i místo. Deduplikace se obecně dá rozdělit na následující úrovně.
 \begin{itemize}
   \item Úroveň souborů
   \item Úroveň datavých bloků
-  \item Úroveň bytů
+  \item Úroveň bajtů
 \end{itemize}
 
-K identifikaci stejných souborů, datových bloků nebo bytů se využívá hašovácí funkce. Data jsou pomocí této funkce zahešována a výsledné haše porovnány na rovnost. Pokud se haše rovnají a používáme hašovací funkci SHA256, můžeme s pravděpodobností , že se data opravdu rovnají.<CITATE Deduplikace> Pokud je administrátor z nějakého důvodu stále nedůvěřivý může u vlastnosti deduplikace nastavit hodnotu \emph{verify}, která zajistí celkové porovnání datových částí se 100\% pravděpodobností.
+K identifikaci stejných souborů, datových bloků nebo bytů se využívá hašovácí funkce. Data jsou pomocí této funkce zahešována a výsledné haše porovnány na rovnost. Pokud se haše rovnají a používáme hašovací funkci SHA256, můžeme s velkou pravděpodobností říct, že jsou data opravdu totožná.<CITATE Deduplikace> Pokud je administrátor z nějakého důvodu stále nedůvěřivý může u vlastnosti deduplikace nastavit hodnotu \emph{verify}, která zajistí celkové porovnání datových částí se 100\% pravděpodobností.
 
 Deduplikace na úrovni souborů využívá nejméně systémových prostředků, protože se data hašují a porovnávají po velký částech. Na druhou stranu sebemenší změna v souboru vyžaduje přepočítání haše, který se již bude lišit od původního.<CITATE Deduplikace> Souborový systém pak rozpozná že se soubory liší a uspořené místo bude zaplněno změněným souborem.
 
 Deduplikace datových bloků vyžaduje oproti deduplikaci souborů vyšší využití systémových prostředků, ale na druhou stranu přináší v jistých situacích lepší úsporu místa. <CITATE Deduplikace>
-V poslední řadě existuje deduplikace na urovni bytů je ze všech uvedených úrovní nejnáročnější na využití prostředků. Tato možnost se používá jen ve speciálních případech.
 
-ZFS z výše uvedených možností nabízí právě deduplpikaci na úrovni datových bloků, protože tato jednotka deduplikace přináší nejvíce výhod v obecných případech použití.<CITATE Deduplikace> Na obrázku \ref{blockdedup} můžeme vidět, jak dochází k úspoře místa pokud je v ZFS souborovém systému zapnutá vlastnost \emph{dedup}.
+V poslední řadě existuje deduplikace na urovni bajtů, která je ze všech uvedených úrovní nejnáročnější na využití výpočetních prostředků. Tato možnost se používá jen ve speciálních případech.
+
+ZFS z výše uvedených možností nabízí právě deduplikaci na úrovni datových bloků, protože tato jednotka deduplikace přináší nejvíce výhod v obecných případech použití.<CITATE Deduplikace> Na obrázku \ref{blockdedup} můžeme vidět, jak dochází k úspoře místa pokud je v ZFS souborovém systému zapnutá vlastnost \emph{deduplikace}.
 \begin{figure}[!h]
     \caption{Ukázka deduplikce na úrovni datový bloků}
     \label{blockdedup}
     \includegraphics[scale=0.8]{dedup.pdf}
 \end{figure}
-\subsection{Konzistence}
+\section{Konzistence}
 \label{consitence}
-Starší souborové systémy jako například UFS zapisují data přímo do bloku, který mění. To může v některých případech, jako je selhání systému nebo výpadek proudu, vést k nekonzistenci souborového systémů. V takovém případě je nutné celý souborový systém zkontrolovat napříkald pomocí příkazu <code>fsck. Bohužel ani ten v některých případech
+Starší souborové systémy, jako například UFS, zapisují data přímo do bloku, který mění. To může v některých případech, jako je selhání systému nebo výpadek proudu, vést k nekonzistenci souborového systémů. V takovém případě je nutné celý souborový systém zkontrolovat napříkald pomocí příkazu \verb|fsck|. Bohužel ani ten v některých případech
 nedokáže některé nekonzistence opravit. <CITATE>
 
-Některé systémy souborů využívají žurnálů k udržení konzistence. Žurnál jse speciální záznam kam se ukládá co a kde se bude měnit, poté
-je provedena vlastní akce. A v poslední fázi se do žurnálu zapíše, že akce byla provedena. Když systém zkolabuje v jakémkoli kroku, je možné ho při startu například pomocí
-fsck dostat opět do konzistentního stavu.
+Některé souborové systémy využívají tzv. žurnálů k udržování konzistence dat. Žurnál jse speciální záznam, kam se ukládájí informace o tom, co a kde se bude měnit. Po provedení popisované akce se do žurnálu zapíše, že danná operace byla provedena. Když systém zkolabuje v jakémkoli kroku tohoto postupu, je možné ho při startu sytému dostat do konzistentního stavu. K tomuto účelu se opět využívá nástroj \verb|fsck|.
 
 ZFS přichází s transakčním systémem a technikou copy on write. Tato technika zajišťuje neustálou konzistenci souborového systému i v okamžiku výpadku, a proto není třeba žurnálu. Data na disku nejsou nikdy přímo přepisována.
 
-Transakce může vypadat následovně. Nejprve dojde ke zkopírování bloků, které mají být změněny. Poté dojde kopii a změně metadat, které se týkají změněných bloků. V poslední
-řadě dojde k atomické operaci, která připojí větev s novými resp. změněnými bloky do stromu souborového systémů. Přůběh transakce je naznačet na obrázku \ref{cow}. Pokud v průběhu transakce dojde k výpadku celý souborový systém zůstává konzistentní, protože nebyla provedena atomická operace připojení k hlavnímu stromu.
+Transakce může vypadat následovně. Nejprve dojde ke zkopírování bloků, které mají být změněny. Poté dojde ke kopii a změně metadat, které se týkají změněných bloků. V poslední
+řadě dojde k atomické operaci, která připojí větev s novými resp. změněnými bloky do stromu souborového systémů. Přůběh transakce je naznačen na obrázku \ref{cow}. Pokud v průběhu transakce dojde k výpadku celý souborový systém zůstává konzistentní, protože nedošlo ke změně původních dat. Celá transakce buď proběhla v pořádku nebo nebyla přijata vůbec.
 \begin{figure}[h]
     \caption{Demostrace copy on write}
     \label{cow}
     \includegraphics[scale=0.8]{cow.pdf}
 \end{figure}
-\subsection{Integrita dat}
+\section{Integrita dat}
 \label{checksum}
 Od souborového systému očekáváme, že při čtení dat z určitého datového bloku z disku, dostame data, která do tohoto bloku byla dříve zapsána. Pokud tomu tak není, měl by to souborový systém detekovat a vrátit chybu.<CITATE Integrity>
 
 Vlastnost neustálé konzistence souborového systému ZFS, zmíněná výše v kapitole \ref{consitence}, zajišťuje, že chybná data se v souborovém systému mohou vyskytnout jen skrze hardwarovou chybu. <CITATE integrity2>
 
-ZFS dokáže tyto chyby hardwaru detekovat pomocí tzv. kontrolních součtů. Tyto součty vznikají a jsou přepočítávány při každé změně bloku v souborovém sytému. Jak jsme mohli vidět na obrázku \ref{structure}, součty nejsou uloženy v bloku, kterého se týkají, ale v bloku jemu nadřazeném. Při každém požadavku na čtení dojde k vypočítání kontrolního součtu na základě dat, které se v souborovém systému momentálně nachází a poté dojde k porovnání vypočteného součtu se součtem uloženým v nadřzeném bloku.<CITATE integrity> Tím ZFS dokáže rozhodnout zda je blok požkozený či nikoliv.
+ZFS dokáže tyto chyby detekovat pomocí tzv. kontrolních součtů. Tyto součty vznikají a jsou přepočítávány při každé změně bloku v souborovém sytému. Jak jsme mohli vidět na obrázku \ref{structure}, součty nejsou uloženy v bloku, kterého se týkají, ale v bloku jemu nadřazeném. Při každém požadavku na čtení dojde k vypočítání kontrolního součtu na základě dat, které se v souborovém systému momentálně nachází a poté dojde k porovnání vypočteného součtu se součtem uloženým v nadřzeném bloku.<CITATE integrity> Tím ZFS dokáže rozhodnout zda je blok požkozený či nikoliv.
 
-Díky těmto kontrolním součtům se souborový systém dokáže v určitých situacích sám opravovat. Tato situace nastává v případě, že blok, při jehož čtení došlo k chybě, je součástí redundatního virtuálního zařízení jako je například RAID-Z nebo mirror. V tomto případě ZFS přečte datový blok i z replikovaného disku popřípadě sestaví blok pomocí parity a následně opraví chybný blok, při jehož čtení došlo k chybě. Aplikace dostane správná data i přes to, že při prvním čtení došlo k chybě. Obrázek \ref{selfhealing} názorně ukazuje postup při detekci chyby.
+Díky těmto kontrolním součtům se souborový systém dokáže v určitých situacích sám opravovat. Tato situace nastává v případě, že blok, při jehož čtení došlo k chybě, je součástí redundatního virtuálního zařízení jako je například RAID-Z nebo mirror. V tomto případě ZFS přečte datový blok i z replikovaného disku popřípadě sestaví blok pomocí parity a následně opraví chybný blok, při jehož čtení došlo k chybě. Aplikace dostane správná data i přes to, původně načtená datový blok byl chybný. Obrázek \ref{selfhealing} názorně ukazuje postup při detekci chyby.
 \begin{figure}[h]
     \caption{Demostrace samopravování}
     \label{selfhealing}
 \end{figure}
 
-Ačkoliv dochází k ověřování integrity dat automaticky při každém čtení z disku, je možné tento proces manuálně vyvola o věřit pomocí následující sekvence příkazů.
+Ačkoliv dochází k ověřování integrity dat automaticky při každém čtení z disku, je možné tento proces manuálně vyvolat a ověřit pomocí následující sekvence příkazů.
 \begin{verbatim}
 $ zpool scrub pool
 $ zpool status pool
@@ -244,28 +243,28 @@ state: ONLINE
 scan: scrub repaired 0 in 6s with 0 errors on Thu Apr 21 07:19:59 2016
 \end{verbatim}
 
-\subsection{Mountpoint}
+\section{Mountpoint}
 \label{mountpoint}
-Mounpoint je jednou ze základních vlastností všech souborových systémů. Je to vlastně cesta k bodu v adresářovém stromu operačního systému, kde má danný souborový systém být připojen.
+Mounpoint je jednou ze základních vlastností všech souborových systémů. Je to vlastně cesta k bodu v adresářovém stromu operačního systému, kde má být danný souborový systém připojen.
 
 Jelikož se ZFS snaží administrátorům maximálně ulehčit práci, stará se o automatické připojování souborových systémů samo. K účelům připojování souborových systémů v ZFS slouží jejich vlastnost \emph{mountpoint}, kde administrátor může specifikovat, kam se má danný souborový systém připojit. Pokud administrátror tuto vlastnost explicitně neurčí, je odvozena od vlasnosti rodičovského souborového systému.
 
-Pro připojování souborových systémů ZFS se dají použít i tradiční nástroje \emph{mount} a \emph{umount}. V tradičních souborových systémech jako je například UFS se pro automatické připojování používal soubor \emph{/etc/vsfstab}, kdeadministrátor specifikoval co a kam se má připojit. Operační systém po startu tento soubor zpracoval da vyznačené souborové systémy připojil.
+Pro připojování souborových systémů ZFS se dají použít i tradiční nástroje \emph{mount} a \emph{umount}. V tradičních souborových systémech jako je například UFS se pro automatické připojování používal soubor \emph{/etc/vsfstab}, kdea dministrátor specifikoval co a kam se má připojit. Operační systém po svém startu tento soubor zpracoval a vyznačené souborové systémy automaticky připojil.
 
 Jak jsem již zmínil ZFS proces automatického připojování provádi samo. Pokud by administrátor chtěl využívat automatického připojování pomocí souboru \emph{/etc/vsfstab}, je možné nastavit vlastnost \emph{mountpoint} souborového systému na hodnotu \emph{legacy}.<CITATE Mountpoint> Tím administrátor řekne, že se o souborový systému bude starat sám a ZFS ho již automaticky připojovat nebude.
-\subsection{Snapshot}
+\section{Snapshot}
 \label{snapshot}
 ZFS snapshot je stav danného souborového systému v čase, kdy byl snapshot pořízen. Jedná se tedy o kopii danného souborového systému, která se nedá měnit. Je takzvaně readonly.<CITATE Snapshot>
 
-Díky stromové architektuře souborového systému ZFS je pořizování těchto kopií velice elegantní a nenáročné. Pro vytvoření snapshotu můžeme použít příkaz \verb|$ zfs snapshot filesystem@snapshot|, kde \emph{filesystem} je jméno souborového systémů, jehož stav chceme zachytit a \emph{snapshot} je jméno konkrétního stavu.
+Díky stromové architektuře souborového systému ZFS je pořizování těchto kopií velice elegantní a nenáročné. Pro vytvoření snapshotu můžeme použít příkaz \verb|$ zfs snapshot filesystem@snapshot|, kde \emph{filesystem} je jméno souborového systémů, jehož stav chceme zachytit a \emph{snapshot} je pojmenování konkrétního stavu tohoto systému.
 
-Po provední příkazu k vytvoření snapshotu dojde ke zkopírování kořene souborového systému jehož snapshot tovříme. Tento kořen se stane havním kořenem snapshotu jakožto nového souborového systému. V tuto chvíli máme k dispozici dva odkazy na jeden souborový systém. Jelikož snapshot je souborový systém určený pouze ke čtení, nemůžeme pomocí něj zmenit data v aktivním souborovém systému. Velikost snapshotu je v tuto chvíli nulová, protože nedošlo k žádnému kopírování dat. Pokud se ovšem data v aktivním souborovém systému změní, je nutné aby snapshot stále odkazoval na stará data. Toho docílíme tak, že stará data zkopírujeme a zvětšíme tak velikost snapshotu.<CITATE Snapshot> Rozšiřování velikosti snapshotu tedy závisí na množství změněných dat od chvíle, kdy byl snapshot vytvořen. Proces vytváření snapshotu a rozšiřování jeho velikosti je názorně ukázán na obrázku \ref{snapshotproces}.
+Po provední příkazu k vytvoření snapshotu dojde ke zkopírování kořene souborového systému jehož snapshot tovříme. Tento kořen se stane havním kořenem snapshotu jakožto nového souborového systému. V tuto chvíli máme k dispozici dva odkazy na jeden souborový systém. Jelikož snapshot je souborový systém určený pouze ke čtení, nemůžeme pomocí něj zmenit data v aktivním souborovém systému. Velikost snapshotu je v tuto chvíli nulová, protože nedošlo k žádnému kopírování dat. Pokud se ovšem data v aktivním souborovém systému změní, je nutné, aby snapshot stále odkazoval na stará data. Toho docílíme tak, že stará data zkopírujeme a zvětšíme tak velikost snapshotu.<CITATE Snapshot> Rozšiřování velikosti snapshotu tedy závisí na množství změněných dat od chvíle, kdy byl snapshot vytvořen. Proces vytváření snapshotu a rozšiřování jeho velikosti je názorně ukázán na obrázku \ref{snapshotproces}.
 \begin{figure}[h]
     \caption{Vytváření snapshotu}
     \label{snapshotproces}
 \end{figure}
 
-Rekurivní tvorba snapshotů se provádí rychle pomocí jedné atomické operace. Snapshoty jsou vytvořeny naráz všechny dohromady nebo vytvořeny vůbec. Výhodou atomické operace je fakt, že data ve všech snapshotech jsou konzistentní vzhledem k jednomu časovému okamžiku.<CITATE Snapshot>
+Rekurivní tvorba snapshotů se provádí rychle pomocí jedné atomické operace. Snapshoty jsou vytvořeny naráz všechny dohromady nebo nejsou vytvořeny vůbec. Výhodou atomické operace je fakt, že data ve všech snapshotech jsou konzistentní vzhledem k jednomu časovému okamžiku.<CITATE Snapshot>
 
 Snapshot pro souborový systém a všechny jeho potomky můžeme vytvořit pomocí následujícího příkazu.
 \begin{verbatim}
@@ -275,6 +274,6 @@ NAME                             USED  AVAIL  REFER  MOUNTPOINT
 rpool/export/home@snap              0      -    33K  -
 rpool/export/home/simactom@snap     0      -   641M  -
 \end{verbatim}
-Druhý příkaz v pořadí pak ukazuje skutečnost, že se snapshoty opravdu vytvořili i pro všechny potomky danného souborového systému a že je jejich velikost opravdu nulová.
+Druhý příkaz v pořadí ukazuje skutečnost, že snapshoty byly opravdu vytvořeny i pro všechny potomky danného souborového systému a že jejich velikost je opravdu nulová.
 
 Snapshot se dá použít k navrácení souborového systému do stavu, v jakém se nacházel v okmažiku vytvoření snapshotu. Veškeré změny, které proběhly v souborovém systému od vytvoření snapshotu budou smazány. K vyvolání tohoto procesu stačí použít příkaz \verb|$ zfs rollback snapshot |, kde \emph{snapshot} je celé jméno snapshotu. Jelikož se každý snapshot váže přímo s určitým souborovým systémem, není třeba zadávat jméno souborového systému, který chceme navrátit do původního stavu. 
