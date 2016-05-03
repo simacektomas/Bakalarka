@@ -184,13 +184,22 @@ V prvním sloupci je název bezpečnostního profilu, ke kterému se právo vzta
 
 Celou aplikaci budeme spouštět pod takto vytvořenou rolí, která bude mít přiřazený bezpečnostní profil s požadovanými právy.
 \subsection{Startup skript}
-Startup skript bude umět aplikaci spustit, zastavit a restartovat.
+Startup skript bude umět aplikaci spustit, zastavit a restartovat. Jelikož jsme použili RBAC práva, bude tento skript napsaný v \emph{profile shellu}, který umí tyto práva interpretovat. Parametrem skriptu budou klíčová slova \emph{start}, \emph{stop} a \emph{restart}, která budou určovat prováděnou akci.
 
+Při startu aplikace skript spustí soubor \emph{run.py}, který spustí webový server a celou aplikaci. Standardní výstup přesměruje do souboru \emph{default\_log} a chybový výstup do souboru \emph{default\_log}. Oba tyto soubory se budou nacházet v adresáři \emph{/var/log/wzfsadm}, který bude sloužit pro uchovávání logů aplikace. V závěru je uložen identifikátor spuštěného procesu do souboru, aby bylo možné tento proces ukončit.
+
+Zastavení aplikace znamená ukončení procesu webového serveru, jehož identifikátor máme uložený v souboru. Pro ukončení procesu je zavolán příkaz \verb|kill| a následně je smazán soubor s identifikátorem.
+
+Restart aplikace je kombinací zastavení a následného spuštění webového serveru.
 \subsection{Manifest}
+Manifest můžeme vytvořit například pomocí příkazu \verb|svcbundle|. Tento příkaz vygeneruje XML dokument, který bude naši službu popisovat. Jeho obsahem jsou především metody, které se budou provádět při zapínání a vypínání služby. Pro tento účel jsme vytvářeli výše zmíněný start skript, který použijeme jako metodu pro ovládání služby. Další součástí manifestu je tzv. kontext metody, který nám umožní specifikovat uživatele, pod kterým se bude celá služba spouštět. Zde uvedeme námi vytvořenou roli \emph{wzfsadm}. Posledním součástí je jméno služby, pod kterým budeme moci aplikaci spravovat. Součástí jména jsou i nadřazené kategorie, kterých se služba týká. V našem případě bude jméno služby \emph{system/filesystem/wzfsadm}. V manifestu se dá specifikovat mnoho další vlastností, které ale nebudeme potřebovat. 
 
+Následně zaregistrujeme službu pomocí příkazu \verb|svccfg import|, který přesune vytvořený manifest do adresáře \emph{/lib/svc/manifest} a restartuje službu \emph{manifest-import}, která se stará o načítání jednotlivých manifestů.
 
-
-\section{Instalace}
-\section{Konfigurace}
+Výhoda zaregistrování služby v systému spočívá v jednoduchém ovládání služby pomocí příkazu \verb|svcadm|. Tímto příkazem službu jednoduše dokážeme zapnout, vypnout nebo restartovat.
+SMF se také stará o zaznamenávání chyb při manipulaci se službou. Administrátor se tedy může kdykoli podívat k jaké chybě došlo.
+\section{Balíčkovací systém}
+Zdrojové kódy aplikace zabalíme pomocí nástroje \verb|pkgmk| do balíčku \emph{wzfsadm-i386.pkg}, který uživateli značně usnadní instalaci celé aplikace. Součástí balíčku budou i instalační skripty, které zajistí vytvoření role \emph{wzfsadm} s potřebnými právy a také registrují službu \emph{wzfsadm} v systému. Při odstranění balíčku dojde k odstranění vytvořené role a služby spolu se všemi zdrojovými kódy aplikace. Instalaci a spuštění aplikace se věnuje příloha TODO.
 \section{Testy}
+
 
