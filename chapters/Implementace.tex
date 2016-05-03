@@ -1,4 +1,4 @@
-Obsahem následující kapitoly popis vlastní implementace nástroje pro správu ZFS. Dále tato kapitola obsahuje návod, jak vytvořený nástroj nainstalovat do operačního systému Solaris a následně nakonfigurovat.
+Obsahem následující kapitoly popis vlastní implementace nástroje pro správu ZFS. Dále tato kapitola obsahuje postup, jak vytvořený nástroj integrovat do operačního systému Solaris.
 \section{Python}
 Než začneme s implementací, je nutné si ujasnit v jakém jazyce budeme aplikaci psát.
 
@@ -196,10 +196,11 @@ Manifest můžeme vytvořit například pomocí příkazu \verb|svcbundle|. Tent
 
 Následně zaregistrujeme službu pomocí příkazu \verb|svccfg import|, který přesune vytvořený manifest do adresáře \emph{/lib/svc/manifest} a restartuje službu \emph{manifest-import}, která se stará o načítání jednotlivých manifestů.
 
-Výhoda zaregistrování služby v systému spočívá v jednoduchém ovládání služby pomocí příkazu \verb|svcadm|. Tímto příkazem službu jednoduše dokážeme zapnout, vypnout nebo restartovat.
+Výhoda registrace služby v systému spočívá v jednoduchém ovládání pomocí příkazu \verb|svcadm|. Tímto příkazem službu jednoduše dokážeme zapnout, vypnout nebo restartovat.
 SMF se také stará o zaznamenávání chyb při manipulaci se službou. Administrátor se tedy může kdykoli podívat k jaké chybě došlo.
 \section{Balíčkovací systém}
 Zdrojové kódy aplikace zabalíme pomocí nástroje \verb|pkgmk| do balíčku \emph{wzfsadm-i386.pkg}, který uživateli značně usnadní instalaci celé aplikace. Součástí balíčku budou i instalační skripty, které zajistí vytvoření role \emph{wzfsadm} s potřebnými právy a také registrují službu \emph{wzfsadm} v systému. Při odstranění balíčku dojde k odstranění vytvořené role a služby spolu se všemi zdrojovými kódy aplikace. Instalaci a spuštění aplikace se věnuje příloha TODO.
 \section{Testy}
+Veškerý vývoj a testování probíhalo na operačním systému Solaris 11 verze 5.11, který byl spouštěn pomocí aplikace \emph{Virtualbox}<CITATE Virtual>. Odkaz na tento operační systém je k dispozici ve zdrojích<CITATE Image>. 
 
 
