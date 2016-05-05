@@ -35,8 +35,8 @@
 % ODTUD DAL VSE ZMENTE
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-\department{Katedra \ldots (DOPLŇTE)}
-\title{Doplňte název práce}
+\department{Katedra počítačových systémů}
+\title{Nástroj pro správu a monitorování systému souborů ZettaByte}
 \authorGN{Tomáš} %(křestní) jméno (jména) autora
 \authorFN{Šimáček} %příjmení autora
 \authorWithDegrees{Tomáš Šimáček} %jméno autora včetně současných akademických titulů
@@ -55,31 +55,31 @@
 % \newacronym{FIT}{FIT}{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}
 
 \begin{introduction}
-    \input{chapters/Úvod.tex}
+    \input{chapters/introduction.tex}
 \end{introduction}
 
 \chapter{Cíle práce}
-    \input{chapters/Cíle.tex}
+    \input{chapters/goals.tex}
 
 \chapter{Souborové systémy}
     \input{chapters/Souborove_systemy.tex}
 
 \chapter{ZFS}
-    \input{chapters/ZFS.tex}
-    
+    \input{chapters/zfs.tex}
+
 \chapter{Analýza implementovaných řešení}
-    \input{chapters/Analyza_reseni.tex}
+    \input{chapters/analysis.tex}
 
 \chapter{Návrh řešení}
     \input{chapters/Návrh.tex}
 \chapter{Implementace}
     \input{chapters/Implementace.tex}
 \begin{conclusion}
-	%Závěr
+	\input{chapters/conclusion.tex}
 \end{conclusion}
 
 \bibliographystyle{csn690}
-\bibliography{mybibliographyfile}
+\bibliography{references}
 
 \appendix
 
@@ -87,11 +87,16 @@
 % \printglossaries
 \begin{description}
 	\item[HTML] Hypertext markup language
-    \item[HTTP] Hypertext markup language
-    \item[HTTPS] Hypertext markup language
+    \item[HTTP] Hypertext transfer protocol
+    \item[HTTPS] Hypertext transfer protocol secure
 	\item[RBAC] Role-Based Access Control
+    \item[RAID] Redundant array of independent disks
 	\item[XML] Extensible markup language
+    \item[ZFS] Zettabyte file system
 \end{description}
+
+\chapter{Uživatelská příručka}
+    \input{chapters/guide.tex}
 
 \chapter{Obsah přiloženého CD}
 
