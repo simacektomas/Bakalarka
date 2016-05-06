@@ -41,20 +41,20 @@ Pro návrh uživatelského rozhraní aplikace přicházejí v úvahu následují
 
     Grafické rozhraní nám pomůže vyřešit problém s uživatelským komfortem. Dále nám podle požadavků zbývá zvážit možnost vzdáleného přístupu. Ano i v tomto případě bychom byli schopni tento požadavek splnit. Jde o to, jak by to pro nás bylo pohodlné. Vždy, kdybychom chtěli ZFS administrovat, bychom museli mít dotyčnou aplikaci nainstalovanou. Tento problém není nepřekonatelný, ale existuje ještě jedno komfortnější a dnes stále populárnější řešení.
     \subsection{Webové rozhraní}
-    Poslední možností je použití webového rozhraní. Hlavní výhodou toho řešení je fakt, že pro přístup k aplikaci potřebujeme jen webový prohlížeč. Ten je dnes přítomný v drtivé většině operačních systémů. Tato skutečnost nám přináší možnost přistupovat k aplikaci z webového prohlížeče v libovolném operačním systému k aplikaci, přestože aplikace poběží na operačním systému Solaris.
+    Poslední možností je použití webového rozhraní. Hlavní výhodou toho řešení je fakt, že pro přístup k aplikaci potřebujeme jen webový prohlížeč. Ten je dnes přítomný v drtivé většině operačních systémů. Tato skutečnost nám přináší možnost přistupovat k aplikaci z webového prohlížeče v libovolném operačním systému, přestože aplikace poběží na operačním systému Solaris.
 
-    Webové stránky jsou navíc známé většině uživatelů a tak by při správném návrhu stránek neměl být sebemenší problém s jednoduchostí a přehledností tohoto nástroje.
+    Webové stránky jsou navíc známé pro většinu uživatelů a tak by při správném návrhu stránek neměl být sebemenší problém s jednoduchostí a přehledností tohoto nástroje.
 
     Zbytek požadavků jako je bezpečnost jednoduše splníme pomocí správné implementace tohoto řešení.
 \section{Architektura aplikace}
 V předchozí kapitole jsme pro náš nástroj zvolili možnost zobrazování dat pomocí webového rozhraní. Toto rozhraní se bude skládat z webových stránek, které budeme chtít uživateli zobrazovat. Pro tento účel si budeme muset zvolit nebo implementovat nějaký webový server, který bude zprostředkovávát komunikaci mezi naší aplikací a klientským prohlížečem. Jakmile uživatel požádá pomocí svého prohlížeče o nějakou stránku, server obdrží tento požadavek a předá ho naší aplikaci. Aplikace tento požadavek vyhodnotí a prostřednictvím webového serveru pošle uživateli odpovídající odpověď.
 
-Náš nástroj má sloužit pro správu souborového systému ZFS a tak bude nutné vymyslet, jak bude naše aplikace s tímto systémem komunikovat. Administrátor může ZFS spravovat pomocí příkazů, které jednoduše zadá do příkazové řádky. Tyto příkazy dokáží změnit vnitřní stav souborového systému nebo vyvolat nějakou akci. Jelikož jsme stanovili, že náš nástroj bude umět využívat základních funkcí ZFS, bude nutné vymyslet vrstvu aplikace, která bude tyto příkazy sestavovat a následně provádět. Na obrázku \ref{architecture} můžeme vidět graficky znázorněnou komunikaci mezi hlavními komponenty aplikace.
+Náš nástroj má sloužit pro správu souborového systému ZFS a tak bude nutné vymyslet, jak bude naše aplikace s tímto systémem komunikovat. Administrátor může ZFS spravovat pomocí příkazů, které jednoduše zadá do příkazové řádky. Tyto příkazy dokáží změnit vnitřní stav souborového systému nebo vyvolat nějakou akci. Bude tedy nutné vymyslet vrstvu aplikace, která bude tyto příkazy sestavovat a následně provádět. Na obrázku \ref{architecture} můžeme vidět graficky znázorněnou komunikaci mezi hlavními komponenty aplikace.
 \begin{figure}[h]
         \caption{Struktura aplikace}
         \label{architecture}
         \centering
-        \includegraphics[scale=0.8]{architecture.pdf}
+        \includegraphics[scale=0.8]{appstructure.pdf}
 \end{figure}
     \subsection{Architektura MVC}
     Komponenty aplikace a jejich komunikaci jsme již rozebrali. Nyní je na čase navrhnout řešení, jak bude aplikace fungovat uvnitř. Jak již bylo zmíněno, náš nástroj bude umožňovat správu souborového systému ZFS pomocí jeho základních funkcí. Tudíž ne všechny funkce budou ve výsledné implementaci zahrnuty. Z tohoto důvodu je aplikaci nutno navrhnout tak, aby se dala jednoduše rozšiřovat o potřebnou funkcionalitu.
@@ -66,184 +66,35 @@ Náš nástroj má sloužit pro správu souborového systému ZFS a tak bude nut
         \subsubsection{Datová vrstva}
         \verb|Model| je označení pro třídu, která je součástí datové vrstvy aplikace. Úkol této třídy, potažmo i celé datové vrstvy, je manipulace a práce s daty. Jako příklad si můžeme vzít třídu, která má na starost práci s databází. Tato třída obdrží od vyšší vrstvy data a je požádána aby s nimi provedla určitou akci. V databázi může například vytvořit nový záznam popřípadě nějaký modifikovat. V našem případě žádnou databázi potřebovat nebudeme. Všechny datové struktury si ZFS spravuje samo a my k nim nemáme přímý přístup. Naše datová vrstva a její třídy nám tedy budou zajišťovat vykonávání ZFS příkazů, které budou sestaveny na základě dat předaných z logické vrstvy.
         \subsubsection{Prezentační vrstva}
-        Další vrstvou aplikace je tzv. prezentační vrstva. Tato vrstva se skládá z tříd nesoucí obecný název \verb|View|. Hlavním úkolem této vrstvy je vykreslování dat uživateli. V grafických aplikacích jsou jednotlivé třídy přímo zodpovědné za vykreslování určitých částí výsledného uživatelského rozhraní. V našem případě aplikace poběží na počítači se souborovým systémem ZFS a uživatel se k ní bude připojovat pomocí webového prohlížeče. Naše prezentační vrstva nebude přímo vykreslovat uživatelské rozhraní protože neví kam. Pro zachování nezávislosti jednotlivých vrstev, bude prezentační vrstva pouze generovat HTML kód stránky z dat, které jí budou předány. Následně takto vygenerovanou stránku předá zpět do logické vrstvy, která zařídí odeslání stránky uživateli.
+        Další vrstvou aplikace je tzv. prezentační vrstva. Tato vrstva se skládá z tříd nesoucí obecný název \verb|View|. Hlavním úkolem této vrstvy je vykreslování dat uživateli. V grafických aplikacích jsou jednotlivé třídy přímo zodpovědné za vykreslování určitých částí výsledného uživatelského rozhraní. V našem případě aplikace poběží na počítači se souborovým systémem ZFS a uživatel se k ní bude připojovat pomocí webového prohlížeče. Naše prezentační vrstva nebude přímo vykreslovat uživatelské rozhraní, protože neví kam. Pro zachování nezávislosti jednotlivých vrstev, bude prezentační vrstva pouze generovat HTML kód stránky z dat, které jí budou předány. Následně takto vygenerovanou stránku předá zpět do logické vrstvy, která zařídí odeslání stránky uživateli.
         \subsubsection{Logická vrstva}
-        Poslední vrstvou aplikace je logická vrstva, někdy také nazývaná bussines vrstva. Hlavním úkolem této vrstvy, je řízení toku dat mezi datovou a prezentační vrstvou. V okamžiku, kdy webový server obdrží nějaký požadavek od uživatele, aplikace vybere z logické vrstvy třídu, která dokáže tento požadavek vyřídit. Tato třída, kterou obecně nazýváme \verb|Controller|, může požádat datovou vrstvu, aby provedla potřebné operace se souborovým systémem nebo od souborového systému získala potřebná data. Následně data převede do potřebného formátu a požádá prezentační vrstvu o jejich vykreslení. V našem případě vykreslená data opět převezme a předá aplikaci, aby je mohla odeslat klientovi.
+        Poslední vrstvou aplikace je logická vrstva. Hlavním úkolem této vrstvy je řízení toku dat mezi datovou a prezentační vrstvou. V okamžiku, kdy webový server obdrží nějaký požadavek od uživatele, aplikace vybere z logické vrstvy třídu, která dokáže tento požadavek vyřídit. Tato třída, kterou obecně nazýváme \verb|Controller|, může požádat datovou vrstvu, aby provedla potřebné operace se souborovým systémem nebo od souborového systému získala potřebná data. Následně data převede do potřebného formátu a požádá prezentační vrstvu o jejich vykreslení. V našem případě vykreslená data opět převezme a předá aplikaci, aby je mohla odeslat klientovi.
 
         Komunikace mezi jednotlivými vrstvami aplikace je znázorněna na obrázku \ref{mvc}. Na obrázku je také vidět způsob předávání dat mezi webovým serverem a aplikací.
 
     \begin{figure}[h]
-        \caption{Princip MVC architektury}
+        \caption{Architektura aplikace}
         \label{mvc}
         \centering
         \includegraphics[scale=0.8]{mvc.pdf}
     \end{figure}
 \section{Interakce s aplikací}
-K aplikaci bude administrátor moci přistupovat pomocí jakéhokoli webového prohlížeče. Tato výhoda pramení ze způsobu přenosu webových stránek pomocí protokolu HTTP, který je pro tento účel určený. Jeho definici můžeme najít v RFC dokumentu \cite{RFC2616}. V dnešní době je to jeden z nejpoužívanější protokolů a to zejména proto, že se používá i v internetu. Tento protokol je postavený na architektuře klient-server, kdy klient posílá požadavky na webový server a ten klientovi odpovídá v podobě HTML dokumentu. Jak jsem již zmiňoval, výhodou tohoto způsobu je oddělenost serveru a klienta. Webový prohlížeč uživatel může klidně spouštět na operačním systému Windows nebo Linux, zatímco celá aplikace s webovým serverem bude spouštěna pod operačním systémem Solaris.
+K aplikaci bude administrátor moci přistupovat pomocí jakéhokoli webového prohlížeče. Tato výhoda pramení ze způsobu přenosu webových stránek pomocí protokolu HTTP, který je pro tento účel určený. Jeho definici můžeme najít v RFC dokumentu \cite{RFC2616}. V dnešní době je to jeden z nejpoužívanější protokolů a to zejména proto, že se používá i v internetu. Tento protokol je postavený na architektuře klient-server, kdy klient posílá požadavky na webový server a ten klientovi odpovídá v podobě HTML dokumentu. Jak již bylo zmíněno, výhodou tohoto způsobu je oddělenost serveru a klienta. Webový prohlížeč uživatel může klidně spouštět na operačním systému Windows nebo Linux, zatímco celá aplikace s webovým serverem bude spouštěna pod operačním systémem Solaris.
 
-Uživatel tedy bude pomocí webového prohlížeče vznášet požadavky na webový server v podobě URL. Uniform resource locator (URL) se používá pro lokalizování zdrojů na internetu poskytnutím jedinečného řetězce znaků \cite{RFC3986}. HTTP požadavek, který uživatel bude pomocí webového prohlížeče odesílat, obsahuje právě tento URL retězec. Tím administrátor specifikuje jakou stránku chce zobrazit popřípadě jakou akci chce povést.
+Uživatel bude pomocí webového prohlížeče vznášet požadavky na webový server v podobě URL. Uniform resource locator (URL) se používá pro lokalizování zdrojů na internetu poskytnutím jedinečného řetězce znaků \cite{RFC3986}. HTTP požadavek, který uživatel bude pomocí webového prohlížeče odesílat, obsahuje právě tento URL řetězec. Tím administrátor specifikuje jakou stránku chce zobrazit popřípadě jakou akci chce povést.
 
 Naši aplikaci tedy postavíme tak, aby byla schopná přijmout URL řetězec a na základě jeho struktury provedla určitou akci.
+
 \section{Bezpečnost}
 Další důležitou kapitolou v procesu návrhu administrátorského nástroje je bezpečnost.
 
-Některé příkazy poskytované souborovým systém ZFS jsou dostupné každému uživateli v systému. Jedná se hlavně o příkazy, které vypisují nejrůznější informace o stavu souborových systémů a poolů. Prováděním těchto příkazů se v nastavení ZFS nic nemění, tudíž nemůže dojít k žádné ztrátě nebo poškození dat. Na druhou stranu ZFS nabízí příkazy, které běžní uživatelé nemohou využívat. K provádění těchto příkazů je potřeba oprávnění \emph{root} uživatele.Jedná zejména o příkazy, které vytvářejí, mění nebo ničí souborové systémy či pooly. Toto chování je naprosto pochopitelné, protože nesprávným nebo neuváženým použitím těchto příkazů může dojít ke zničení cenných dat nebo celého operačního sytému.
-
-Našim cílem je vytvořit nástroj pro správu souborového systému ZFS. Je tedy zřejmé, že budeme potřebovat aby naše aplikace dokázala využívat i příkazy, které nejsou běžným uživatelům dostupné. V operačním systému Solaris, kde naše aplikace poběží, dostává když spuštěný proces takzvanou identitu. Tato identita spojuje běžící proces spolu s uživatelem, pod kterým byl proces spuštěn. Díky tomu je operační systém schopen určit, jaká práva proces má a co vše může v systému využívat. Tyto práva přesně odpovídají právům, které má daný uživatel k dispozici. Pokud bychom tedy spustili naší aplikaci pod uživatelem, který nemá právo využívat některé příkazy souborového systému ZFS, pak by ani náš nástroj nemohl tyto příkazy využívat. Tento fakt nás tedy vede k tomu, abychom naší aplikaci pouštěli pod oprávněným uživatelem, který má právo vykonávat všechny ZFS příkazy. a
-
-Právě jsme vyřešili problém jak zajistit naší aplikaci potřebná práva pro vykonávání ZFS příkazů. Máme tedy aplikaci, která může v systému provádět potřebné příkazy a je dostupná na nějaké URL adrese. Problém přístupu neoprávněných uživatelů k nebezpečným příkazům byl vyřešen na úrovni systému. Neoprávnění uživatelé jednoduše nemohli nebezpečné příkazy spouštět. Nyní jsme ale aplikaci pustili pod uživatelem, který tato práva vlastní a navíc má tato aplikace veřejné webové rozhraní, které je dostupné na stanové URL. Každý kdo tuto URL zná, může v tuto chvíli pomocí webového prohlížeče k aplikaci přistoupit a provádět jejím prostřednictvím nebezpečné příkazy. To není úplně ideální případ. My bychom chtěli, aby k aplikaci mohli přistupovat jenom oprávnění uživatelé pomocí přihlašovacího jména a hesla. K tomuto použijeme vlastnost HTTP protokolu Basic Authentication \ref{httpauth}, která nám zajistí přístup jen pro autentizované uživatele.
-
-Aplikace je nyní přístupná jen pro oprávněné uživatele, kteří se autentizují pomoci HTTP Basci Authetication. To s sebou přináší další starosti, protože uživatelské jméno a heslo musíme ověřit. Tyto citlivé informace pomocí HTTP protokolu putují přes počítačovou síť až ke koncovému webovému serveru. Podle specifikace <CITATE RFC HTTP>HTTP protokol neumožňuje šifrování. To znamená, že potencionální útočník může na síti odposlechnout požadavek, který obsahuje uživatelské jméno a heslo. Na základě znalosti autentifikační mehody \emph{Basic}, která je také specifikovaná v normě HTTP protokolu <CITATE RFC HTTP>, pak už útočník jednoduše získá uživatelské jméno a heslo, které bylo použito pro vstup do naší aplikace. Z tohoto důvodu budeme přenos dat šifrovat pomocí HTTPS protokolu \ref{https}.
-    \subsection{Systémový uživatel}
-    \label{sysuser}
-    Z důvodů uvedených výše budeme potřebovat vhodného uživatele, pod kterým budeme tuto aplikaci spouštět. V úvahu přicházejí následující možnosti.
-    \begin{itemize}
-      \item uživatel \emph{root}
-      \item role (RBAC)
-    \end{itemize}
-
-    První možností je zvolit uživatele \emph{root}. Tento uživatel má právo na všechny operace v systému. Může tedy uživatelům měnit hesla, přidávat a odebírat uživatele a tak dále. Volba tohoto uživatele by sice náš problém vyřešila, ale přinesla by další bezpečnostní rizika. Pokud bychom spustili aplikaci s identitou uživatele \emph{root}, pak by tato aplikace mohla v systému provádět úplně všechno. To by bylo pro naši aplikaci zbytečné. Nám bude stačit, pokud aplikace bude moci využívat přesně ty nástroje, které ke své správné funkčnosti potřebuje. Dalším rizikem je fakt, že by potenciální útočník mohl tyto práva nějakým způsobem zneužít.
-
-    Druhá možnost, která přichází v úvahu, je použití tzv. RBAC. Jedná se o rozšíření bezpečnostního modelu, které nám umožňuje kontrolovat přístup uživatelů k úkonům, které jsou normálně povoleny pouze pro superuživatele \emph{root}. V nerozšířeném bezpečnostním modelu jste buď uživatelem s omezenými možnosti a nebo jste superuživatel a můžete všechno.<CITATE RBAC> Ve zkratce RBAC umožňuje vytváření tzv. rolí, které se chovají téměř jako normální uživatel. Rozdíl je v tom, že na roli se nedá přihlásit přímo. Do systému se nejprve musí přihlásit klasický uživatel, který si poté smí přiřadit určitě role. Rolím jsou pak přiřazovány bezpečnostní profily, které obsahují jednotlivá privilegia.
-
-    Pro bezpečnost našeho nástroje si tedy vytvoříme roli, které přiřadíme potřebná oprávnění pro vykonávání následujících příkazů.
-    \begin{itemize}
-      \item zfs
-      \item zpool
-      \item format
-      \item fdisk
-      \item TODO
-    \end{itemize}
-
-    Aplikaci pak budeme spouštět pod touto rolí. Ve výsledku aplikace bude mít veškerá oprávnění pro svoji správnou činnost a bezpečnostní rizika budou minimální.
-    \subsection{HTTP Basic Authentication}
-    \label{httpauth}
-    Basic Authetication je způsob autentikace uživatelů pomocí portokolu HTTP. Pokud webový server vyžaduje tuto metodu ověření, uživatel je před přístupem k obsahu vyžádán o autentizaci pomocí jména a hesla. Jméno a heslo je pak spolu s požadavek odesláno webovému server k ověření.<CITATE AUTH RFC>
-
-    Pro naší aplikaci to znamená, že webový server bude muset umět ověřit uživatele oproti lokální databázi. Pokud se uživatelské jméno a heslo odeslané webovým prohlížečem bude shodovat s uživatelskými údaji v lokální databázi, bude uživateli umožněn vstup do nástroje.
-
-    Pro názornost si můžeme ukázat, jak taková komunikace serveru a prohlížeče vypadá. V první řadě prohlížeč odešle normální požadavek bez uživatelských údajů. Jakmile server zjistí, že se v požadavku nevyskytuje hlavička \emph{Authorization}, odešle webovému prohlížeči HTTP odpověď s kódem 401 (Unauthorized). Do hlaviček odpovědi server přidá hlavičku \emph{WWW-Authenticate}, kde specifikuje jakou metodu autentikace očekává. V našem případě se bude jednat o metodu \emph{Basic}. Prohlížeč nyní již ví, že server vyžaduje autentizaci a požádá uživatele o zadání jména a hesla. Uživatelské údaje se pak poskládají do správného formátu ( jméno:heslo ) a zakódují pomocí base64\footnote{Kódování není šifrování. Kódování je způsob jak data upravit pro přenos. Pokud třetí osoba tyto data získá je z nich schopná rekonstruovat původní data.} kódování. Požadavek je odeslán znovu, ale tentokrát už prohlížeč přidá hlavičku \emph{Authorize}. Obsahem této hlavičky je jméno metody, kterou prohlížeč použil pro autentikaci a samotné zakódované údaje. Server následně požadavek znovu projde a pokusí se ověřit uživatele oproti lokální databázi. Pokud se údaje shodují, uživatel je připuštěn k chráněnému obsahu. Jestli se údaje neshodují je opět odeslána HTTP odpověď s kódem 401 (Unatuhorized).<CITATE AUTH RFC>
-
-    Náš administrační nástroj bude tuto metodu využívat pro účely autentizace uživatelů. Do všech částí aplikace bude umožněn vstup pouze autentizovaným uživatelů.
-
-    \subsection{HTTPS}
-    \label{https}
-    Jak jsem již dříve zmiňoval HTTP protokol neumožňuje nijak šifrovat data, která jsou přenášena. Jelikož jsou po síti přenášena citlivá data jako je uživatelské jméno a heslo, musíme zajistit šifrování tohoto přenosu. HTTPS je protokol, který nám přesně tohle nabízí. Tento protokol ve svém základu využívá ke komunikaci HTTP protokol, ale rozdíl oproti klasickému HTTP je v tom, že přenášená data jsou šifrována pomocí SSL nebo TSL.<CITATE TSL>
-
-    V první fázi spojení probíhá mezi webovým serverem a klientem takzvaný handshake. Na začátku tohoto procesu dochází k výměně zpráv a dohodnutí se na šifrovacím algoritmu. Dále proběhne výměna nezbytných kryptografických parametrů. Následně si účinkující vymění své certifikáty, aby se vzájemně mohli identifikovat.<CITATE TSL Handshake> Pokud handshake proběhne v pořádku, klient může začít posílat první požadavek stejně jako pomocí HTTP protokolu.
-
-    Použití protokolu HTTPS zajistí naší aplikaci, že bude pro útočníka téměř nemožné získat uživatelské údaje, které byli použity pro vstup do aplikace.
-    \subsection{Shrnutí}
-    Pro shrnutí ještě jednou zopakuji, jaké bezpečnostní opatření budou provedena pro zajištění aplikace. Vytvoříme systémovou roli pomocí RBAC, která bude mít privilegia k vykonávání potřebných operací. Výsledná aplikace bude spouštěna pod touto rolí. K autentizaci uživatelů, kteří budou přistupovat k aplikaci, použijeme metodu \emph{Basic} protokolu HTTP. Uživatele budeme ověřovat proti lokální databázi uživatelů. A konečně celý přenos dat mezi webovým serverem a klientem zašifrujeme pomocí protokolu HTTPS.
-
-\section{Integrace do systému}
-Pro ulehčení správy celé aplikace ji zaregistrujeme v operačním systému jako službu. Docílíme tím toho, že se operační systém bude sám starat o zapínání, vypínání a restartování celé aplikace. Samozřejmě, že budeme stále schopni explicitně říci, jestli má daná aplikace běžet nebo ne.
-
-Service Management Facility (SMF) je v operačním systému Solaris nástroj pro spravování služeb. Nahrazuje tím tradiční způsob spravování služeb pomocí \emph{init} skriptů, který byl běžný v dřívějších verzí operačního systému Solaris a ostatních unixových operačních systémech. Velkou výhodou SMF je možnost definování závislostí dané služby na ostatní službách. Tím dokážeme stanovit, že se daná služba nespustí, dokud nebudou spuštěny všechny služby stanovené v závislostech. SMF uchovává veškeré informace o startu, běhu i ukončování služby v logu. Administrátor má tedy kdykoli možnost tyto logy prozkoumat a získat požadované informace. V pozadí každé služby zaregistrované v SMF je takzvaný manifest. <CITATE SMF>
-    \subsection{Manifest}
-    Manifest je XML dokument, který danou službu popisuje. Právě zde administrátor stanovuje, na kterých službách bude tato služba závislá nebo jak se danná služba jmenuje. V našem případě to znamená, že si budeme muset tento manifest vytvořit a zaregistrovat službu v SMF. Administrátor pak bude schopen službu spravovat pomocí jednoduchých příkazů.
-    \subsection{Metody}
-    Důležitou součástí manifestu jsou metody, které SMF říkají, jak má danou službu zapnout nebo vypnout. V těchto metodách se může spouštět více procesů, které jsou svázány dohromady jako součást dané služby. Administrátor se pak stará jenom o službu jako takovou a nemusí vůbec vědět jaké procesy byli v rámci služby spuštěny.<CITATE SMF> Mimo jiné můžeme v manifestu určit takzvaný kontext metod. Tato vlastnost nám dovoluje určit pod jakým uživatelem mají být jednotlivé metody vykonávány. V kontextu naší aplikace to znamená, že metody služby budou spouštěny pod námi vytvořenou rolí, která bude mít dostatečná práva.
-    \subsection{Shrnutí}
-    Zaregistrování aplikace jako služby v operačním systému Solaris nám přinese následující výhody ve správě této aplikace. Administrátor bude mít jasný přehled na tím zda danná služba běží nebo neběží. Dále bude moci jednoduše danou službu spustit popřípadě zastavit. Pokud dojde k nějakému problému při spuštění dané služby, SMF administrátorovi poskytne informace o zdroji tohoto problému. V poslední řadě SMF také umožní automatické spuštění služby při startu systému.
-
-
-Následující kapitola popisuje návrh nástroje pro administraci souborového systému ZFS. Zmiňuje především architekturu a bezpečnostní opatření navrhované aplikace.
-\section{Požadavky}
-Na začátku bychom si měli stanovit funkcionalitu, kterou budeme po aplikaci vyžadovat. Ještě jednou připomenu, že hlavním cílem je vytvořit graficky orientovaný administrační nástroj pro správu souborového systému ZFS.
-
-Souborový systém ZFS byl původně integrován v operačním systému Solaris. I přes to, že dnes již existují operační systémy, na které bylo ZFS přeneseno, hlavní platformou aplikace bude právě operační systém Solaris.
-
-Jelikož má nástroj být grafického charakteru, můžeme brát jako první požadavek na aplikaci přítomnost uživatelského rozhraní. O tom jaké druhy uživatelského rozhraní připadají v úvahu si povíme hned v následující kapitole.
-
-Jak jsem se již zmínil v úvodu, účelem toho nástroje má být ulehčení a zpřehlednění správy souborového systému ZFS a to i pro začínajícího administrátora.  Bylo by tedy vhodné, aby zvolené uživatelské rozhraní bylo přehledné a jednoduché na používání.
-
-ZFS je souborový systém určený především pro servery. Tyto počítače můžou být v mnohých situací pro administrátora fyzicky nedostupné. Výhodou našeho nástroje by tedy mohl být vzdálený přístu ke správě ZFS.
-
-Na konci předchozí kapitoly jsme se dozvěděli, že většina nástrojů využívá takový způsob sběru dat, který uživateli v některých situací znemožňuje vidět přímo aktuílní data. Tohoto problému bychom se při návrhu měli vyvarovat a zvolit takový způsob, který by uživateli zobrazil aktuální data při každém jeho požadavku.
-
-Další nedostatek objevený při analýze již vytvořených nástrojů pro správu ZFS, je ten, že většina těchto nástrojů vůbec neposkytuje funkce pro administraci. Dovolují nám tedy daný souborový systém sledovat, ale ne ho ovlivňovat nebo nastavovat jeho vlastnosti. Jelikož je ZFS rozsáhlý souborový systém, obsahuje i velké množství funkcí a příkazů pro jeho správu. Bylo by tedy dobrém, některé základní funkce a příkazy pro administraci ZFS do tohoto nástroje zahrnout.
-
-Posledním bodem požadavků by měla být bezpečnost. Hlavním důvodem proč se starat o bezpečnost apliakace je fakt, že pomocí ZFS lze jednoduchým příkazem zničit vše co se na disku nachází. Jelikož se z disku načítá při startu i operační systém, mohli by následky být fatální. Příklad, jak se před tímto problémem chránit, si můžeme vzít z Unixových operačních systémů. Na těchto systémech existuje uživatel \emph{root}, který v systému může dělat všechny operace. Druhou skupinou jsou obyčejní uživatelé, kteří nebezpečné příkazy vykonávat nemohou. To nás může přivést na myšlenku, že aplikace bude přístupná pouze specifikovaným uživatelům.
-
-Pro shrnutí můžeme požadavky na administrační nástroj shrnout do následujících bodu.
-\begin{itemize}
-    \item Solaris
-    \item Uživatelské rozhraní
-    \item Jednoduchost a přehlednost
-    \item Vzdálený přístup
-    \item Aktualita dat
-    \item Základní funkce pro administraci
-    \item Bezpečnost
-
-Pokud splníme všechny stanovené požadavky, můžeme uživateli zajisti bezpečnou správu souborového systému ZFS, která mu bude poskytovat aktuální informace.
-\end{itemize}
-\section{Možnosti uživatelských rozhraní}
-Při návrhu se ukázaly následující možnosti pro volbu uživatelského rozhraní.
-    \subsection{Příkazová řádka}
-    Každý uživatel, který se někdy nějakým způsobem setkal s administrací unixových operačních systémů, by měl mít alespoň nějaké povědomí o tom, co je to příkazová řádka. Příkazová řádka je v unixu nástroj, který umožňuje využívat různé příkazy. Je rychlý, nenáročný a jediné co potřebujete vědět je, jaký příkaz napsat a co daný příkaz udělá. Vše se obejde bez myši a klikání.
-
-    Na druhou stranu pro začínajícího uživatele může být složité si všechny příkazy pamatovat a nějakou dobu trvá, než uživatel získá potřebné zkušenosti s tímto nástrojem. Pokud uživatel příkazy příliš neovládá, je to pro něj spíše zpomalení práce než zrychlení.
-
-    Protože jsme si v požadavcích stanovali, že náš nástroj má být jednoduchý, přehledný, uživatelsky příjemný na používání i pro začínající uživatele, je tato volba nevhodná.
-    \subsection{Grafické rozhraní}
-    Jelikož jsme zavrhli příkazovou řádku, je třeba přijít s něčím co bude pro uživatele přívětivé. Každý z vás se již jistě setkal s pojmem grafické rozhraní. Pokud ne, pod pojmem grafické rozhraní si můžete představit například kalkulačku z operačního systému Windows. Prakticky všechno v operačním systému Windows má svoje grafické rozhraní, aby měl uživatel přehled o tom co může v daný okamžik využívat za funkce.
-
-    Grafické rozhraní nám pomůže vyřešit problém s uživatelským komfortem. Dále nám podle požadavků zbývá zvážit možnost vzdáleného přístupu. Ano i v tomto případě bychom byli schopni tento požadavek splnit. Jde o to, jak by to pro nás bylo pohodlné. Pokaždé kdybychom chtěli ZFS administrovat, museli bychom mít dotyčnou aplikaci nainstalovanou. Netvrdím, že je to nepřekonatelný problém, ale existuje ještě jedno komfortnější a dnes stále populárnější řešení.
-    \subsection{Webové rozhraní}
-    Poslední možností je použití webového rozhraní. Hlavní výhodou toho řešení je fakt, že pro přístup k aplikaci potřebujete jen webový prohlížeč. Ten je dnes přítomný v drtivé většině operační systémů. Tato skutečnost nám přináší možnost přistupovat k aplikaci z webového prohlížeče v libovolném operačním systému k aplikaci, přestože aplikace poběží na operačním systému Solaris.
-
-    Webové stránky jsou navíc známé většině uživatelům a tak by při správném návrhu stránek neměl být sebemenší problém s jednoduchostí a přehledností tohoto nástroje.
-
-    Zbytek požadavků jako je bezpečnost jednoduše splníme pomocí správné implementace tohoto řešení.
-\section{Architektura aplikace}
-V předchozí kapitole jsme pro náš nástroj zvolili možnost zobrazování dat pomocí webového rozhraní. Toto rozhraní se bude skládat z webových stránek, které budeme chtít uživateli zobrazovat. Pro tento účel si budeme muset zvolit nebo implementovat nějaký webový server, který bude zprostředkovávát komunikaci mezi naší aplikací a klientským prohlížečem. Jakmile uživatel požádá pomocí svého prohlížeče o nějakou stránku, server obdrží tento požadavek a předá ho naší aplikaci. Aplikace tento požadavek vyhodnotí a prostřednictvím webového serveru pošle uživateli odpovídající odpověď.
-
-Náš nástroj má sloužit pro správu souborového systému ZFS a tak bude nutné vymyslet, jak bude naše aplikace s tímto systémem komunikovat. Aministrátor může ZFS spravovat pomocí příkazů, které jednoduše zadá do příkazové řádky. Tyto příkazy dokáží změnit vnitřní stav souborového systému, nastavit nějakou hodnotu popřípadě vyvolat nějakou akci. Jelikož jsme stanovili, že náš nástroj bude umět využívat základních funkcí ZFS, bude nutné vymyslet vrstvu aplikace, která bude tyto příkazy sestavovat a následně provádět. Na obrázku \ref{architecture} můžeme vidět graficky znázorněnou komunikaci mezi jednotlivými komponenty aplikace.
-\begin{figure}[h]
-        \caption{Struktura aplikace}
-        \label{architecture}
-        \centering
-        \includegraphics[scale=0.8]{architecture.pdf}
-\end{figure}
-    \subsection{Architektura MVC}
-    Komponenty aplikace a jejich komunikaci jsme již rozebrali. Nyní je na čase navrhnout řešení, jak bude aplikace fungovat uvnitř. Jak již bylo zmíněno, náš nástroj bude umožňovat správu souborového systému ZFS pomocí jeho základních funkcí. Tudíž ne všechny funkce budou ve výsledné implementaci zahrnuty. Z tohoto důvodu je aplikaci nutno navrhnout tak, aby se dala jednoduše rozšiřovat o potřebnou funkcionalitu.
-
-    K tomuto účelu jsem se rozhodl použít objektový návrh společně s architekturou MVC. Model-view-controller (MVC) je softwarová architektura, která rozděluje datový model aplikace, uživatelské rozhraní a řídící logiku do tří nezávislých komponent tak, že modifikace některé z nich má jen minimální vliv na ostatní.<CITATE Wiki-mvc> Pokud bychom chtěli naši aplikaci rozšířit a novou fukncionalitu, jednoduše stačí rozšířit vrstvu, která zajišťuje komunikaci se souborovým systémem. Nově přidané funkce pak můžeme ihned využít ve vyšších vrstvách aplikace.
-
-    Komponenty jednotlivých vrstev aplikace rozdělujeme na \emph{model}, \emph{view} a \emph{controller}.
-
-        \subsubsection{Datová vrstva}
-        \verb|Model| je označení pro třídu, která je součástí datové vrstvy aplikace. Úkol této třídy, potažmo i celé datové vrstvy, je manipulace a práce s daty. Jako příklad si můžeme vzít třídu, která má na starost práci s databází. Tato třída obdrží od vyšší vrstvy data a je požádána aby s nimi provedla určitou akci. V databázi může například vytvořit nový záznam popřípadě nějaký modifikovat. V našem případě žádnou databázi potřebovat nebudeme. Všechny datové struktury si totiž ZFS spravuje samo a my k nim nemáme přímý přístup. Naše datová vrstva a její třídy nám tedy budou zajišťovat vykonávání ZFS příkazů, které budou sestaveny na základě dat předaných z logické vrstvy.
-        \subsubsection{Prezentační vrstva}
-        Další vrstvou aplikace je tzv. prezentační vrstva. Tato vrstva se skládá z tříd nesoucí obecný název \verb|View|. Hlavním úkolem této vrstvy je vykreslování dat uživateli. V grafických aplikacích jsou jednotlivé třídy přímo zodpovědné za vykreslování určitých částí výsledného uživatelského rozhraní. V našem případě aplikace poběží na počítači se souborovým systémem ZFS a uživatel se k ní bude připojovat pomocí webového prohlížeče. Nicméně prezentační vrstva nebude přímo vykreslovat uživatelské rozhraní protože neví kam. Pro zachování nezávislosti jednotlivých vrstev, bude prezentační vrstva pouze generovat HTML kód stránky z dat, které jí budou předány. Následně takto vygenerovanou stránku předá zpět do logické vrstvy, která zařídí odeslání stránky uživateli.
-        \subsubsection{Logická vrstva}
-        Poslední vrstvou aplikace je logická vrstva, někdy také nazývaná bussines vrstva. Hlavním úkolem této vrstvy, je řízení toku dat mezi datovou a prezentační vrstvou. V okamžiku, kdy webový server obdrží nějaký požadavek od uživatele, aplikace vybere z logické vrstvy třídu, která dokáže tento požadavek vyřídit. Tato třída, kterou obecně nazýváme \verb|Controller|, může požádat datovou vrstvu, aby provedla potřebné operace se souborovým systémem nebo od souborového systému získala potřebná data. Následně data převede do potřebného formátu a požádá prezentační vrstvu o jejich vykreslení. V našem případě vykreslená data opět převezme a předá aplikaci, aby je mohla odeslat klientovi.
-
-        Komunikace mezi jednotlivými vrstvami aplikace je znázorněna na obrázku \ref{mvc}. Na obrázku je také vidět způsob předávání dat mezi webovým serverem a aplikací.
-
-    \begin{figure}[h]
-        \caption{Princip MVC architektury}
-        \label{mvc}
-        \centering
-        \includegraphics[scale=0.8]{mvc.pdf}
-    \end{figure}
-\section{Interakce s aplikací}
-K aplikaci bude administrátor moci přistupovat pomocí jakéhokoli webového prohlížeče. Tato výhoda pramení ze způsobu přenosu webových stránek pomocí protokolu HTTP, který je pro tento účel určený. Jeho definici můžeme najít v RFC dokumentu \cite{RFC2616}. V dnešní době je to jeden z nejpoužívanější protokolů a to zejména proto, že se používá i v internetu. Tento protokol je postavený na architektuře klient-server, kdy klient posílá požadavky na webový server a ten klientovi odpovídá v podobě HTML dokumentu. Jak jsem již zmiňoval, výhodou tohoto způsobu je oddělenost serveru a klienta. Webový prohlížeč tak klidně může uživatel spouštět na operačním systému Windows nebo Linux, zatímco celá aplikace s webovým serverem poběží pod operačním systémem Solaris.
-
-Uživatel tedy bude pomocí webového prohlížeče vznášet požadavky na webový server v podobě URL. Uniform resource locator (URL) se používá pro lokalizování zdrojů na internetu poskytnutím jedinečného řetězce znaků \cite{RFC3986}. HTTP požadavek, který administrátor bude pomocí webového prohlížeče odesílat, obsahuje právě tento URL retězec. Tím administrátor specifikuje jakou stránku chce zobrazit popřípadě jakou akci chce povést.
-
-Naši aplikaci tedy postavíme tak, aby byla schopná přijmout URL řetězec a na základě jeho struktury provedla určitou akci.
-\section{Bezpečnost}
-Další důležitou kapitolou v procesu návrhu administrátorského nástroje je bezpečnost.
-
-Některé příkazy poskytované souborovým systém ZFS jsou dostupné každému uživateli v systému. Jedná se hlavně o příkazy, které vypisují nejrůznější informace o stavu souborových systémů a poolů. Prováděním těchto příkazů se v nastavení ZFS nic nemění, tudíž nemůže dojít k žádné ztrátě nebo poškození dat. Na druhou stranu ZFS nabízí příkazy, které běžní uživatelé nemohou využívat. K provádění těchto příkazů je potřeba oprávnění \emph{root} uživatele. Jedná se zejména o příkazy, které vytvářejí, mění nebo ničí souborové systémy či pooly. Toto chování je naprosto pochopitelné, protože nesprávným nebo neuváženým použitím těchto příkazů může dojít ke zničení cenných dat nebo celého operačního sytému.
+Některé příkazy poskytované souborovým systém ZFS jsou dostupné každému uživateli v systému. Jedná se hlavně o příkazy, které vypisují nejrůznější informace o stavu souborových systémů a poolů. Prováděním těchto příkazů se v nastavení ZFS nic nemění a proto nemůže dojít k žádné ztrátě nebo poškození dat. Na druhou stranu ZFS nabízí příkazy, které běžní uživatelé nemohou využívat. K provádění těchto příkazů je potřeba oprávnění \emph{root} uživatele. Jedná se zejména o příkazy, které vytvářejí, mění nebo ničí souborové systémy či pooly. Toto chování je naprosto pochopitelné, protože nesprávným nebo neuváženým použitím těchto příkazů může dojít ke zničení cenných dat nebo celého operačního sytému.
 
 Našim cílem je vytvořit nástroj pro správu souborového systému ZFS. Je tedy zřejmé, že budeme potřebovat, aby naše aplikace dokázala využívat i příkazy, které nejsou běžným uživatelům dostupné. V operačním systému Solaris, kde naše aplikace poběží, dostává každý spuštěný proces tzv. identitu. Tato identita spojuje běžící proces spolu s uživatelem, pod kterým byl proces spuštěn. Díky tomu je operační systém schopen určit, jaká práva proces má a co vše může v systému využívat. Pokud bychom spustili naší aplikaci pod uživatelem, který nemá právo využívat některé příkazy souborového systému ZFS, pak by ani náš nástroj nemohl tyto příkazy využívat. Tento fakt nás tedy vede k tomu, abychom naší aplikaci spouštěli pod uživatelem, který má právo vykonávat všechny ZFS příkazy.
 
 Právě jsme vyřešili problém, jak zajistit naší aplikaci potřebná práva pro vykonávání ZFS příkazů. Máme tedy aplikaci, která může v systému provádět potřebné příkazy a je dostupná na nějaké URL adrese. Problém přístupu neoprávněných uživatelů k nebezpečným příkazům byl vyřešen na úrovni systému a jednoduše nemohli nebezpečné příkazy spouštět. Nyní jsme aplikaci pustili pod uživatelem, který tato práva vlastní a navíc má tato aplikace veřejné webové rozhraní, které je dostupné na stanové URL adrese. Každý kdo tuto adresu zná, může v tuto chvíli pomocí webového prohlížeče k aplikaci přistoupit a provádět jejím prostřednictvím nebezpečné příkazy. To není úplně ideální případ. My bychom chtěli, aby k aplikaci mohli přistupovat jenom oprávnění uživatelé pomocí přihlašovacího jména a hesla. K tomuto použijeme vlastnost HTTP protokolu Basic Authentication, která nám zajistí přístup jen pro autentizované uživatele.
 
-Aplikace je nyní přístupná jen pro oprávněné uživatele, kteří se autentizují pomocí metody Basic Authetication. To s sebou přináší další starosti, protože uživatelské jméno a heslo musíme ověřit. Tyto citlivé informace pomocí HTTP protokolu putují přes počítačovou síť až ke koncovému webovému serveru. Podle specifikace \cite{RFC2616} HTTP protokol neumožňuje šifrování. To znamená, že potencionální útočník může na síti odposlechnout požadavek, který obsahuje uživatelské jméno a heslo a použít tyto údaje pro vstup do aplikace. Z tohoto důvodu budeme přenos dat šifrovat pomocí HTTPS protokolu.
+Aplikace bdue přístupná jen pro oprávněné uživatele, kteří se autentizují pomocí metody Basic Authetication. To s sebou přináší další starosti, protože uživatelské jméno a heslo musíme ověřit. Tyto citlivé informace pomocí HTTP protokolu putují přes počítačovou síť až ke koncovému webovému serveru. Podle specifikace \cite{RFC2616} HTTP protokol neumožňuje šifrování. To znamená, že potencionální útočník může na síti odposlechnout požadavek, který obsahuje uživatelské jméno a heslo a použít tyto údaje pro vstup do aplikace. Z tohoto důvodu budeme přenos dat šifrovat pomocí HTTPS protokolu.
     \subsection{Systémový uživatel}
     \label{sysuser}
     Z důvodů uvedených výše budeme potřebovat vhodného uživatele, pod kterým budeme tuto aplikaci spouštět. V úvahu přicházejí následující možnosti.
@@ -261,7 +112,7 @@ Aplikace je nyní přístupná jen pro oprávněné uživatele, kteří se auten
       \item \emph{zfs}
       \item \emph{zpool}
       \item \emph{format}
-      \item \emph{fdisk}      
+      \item \emph{fdisk}
     \end{itemize}
 
     Aplikaci budeme spouštět pod touto rolí. Ve výsledku aplikace bude mít veškerá oprávnění pro svoji správnou činnost a bezpečnostní rizika budou minimální.
@@ -269,31 +120,25 @@ Aplikace je nyní přístupná jen pro oprávněné uživatele, kteří se auten
     \label{httpauth}
     Basic Authetication je způsob autentizace uživatelů pomocí portokolu HTTP. Pokud webový server vyžaduje tuto metodu ověření, uživatel je před přístupem k obsahu vyžádán o autentizaci pomocí jména a hesla. Jméno a heslo je pak spolu s požadavek odesláno webovému server k ověření \cite{RFC2617}.
 
-    Pro naší aplikaci to znamená, že webový server bude muset umět ověřit uživatele oproti lokální databázi. Pokud se uživatelské jméno a heslo odeslané webovým prohlížečem bude shodovat s uživatelskými údaji v lokální databázi, bude uživateli umožněn vstup do aplikace.
-
-    Pro názornost si můžeme ukázat, jak taková komunikace serveru a prohlížeče vypadá. V první řadě prohlížeč odešle normální požadavek bez uživatelských údajů. Jakmile server zjistí, že se v požadavku nevyskytuje hlavička \emph{Authorization}, odešle webovému prohlížeči HTTP odpověď s kódem 401 (Unauthorized). Do hlaviček odpovědi server přidá hlavičku \emph{WWW-Authenticate}, kde specifikuje jakou metodu autentizace očekává. V našem případě se bude jednat o metodu \emph{Basic}. Prohlížeč se tímto dozví, že server vyžaduje autentizaci a požádá uživatele o zadání jména a hesla. Uživatelské údaje se následně zakódují pomocí base64\footnote{Kódování není šifrování. Kódování je způsob jak data upravit pro přenos. Pokud třetí osoba tyto data získá je z nich schopná rekonstruovat původní data.} kódování a odešlou serveru v hlavičce \emph{Authorize}. Server následně požadavek znovu projde a pokusí se ověřit uživatele oproti lokální databázi. Pokud se údaje shodují, uživatel je připuštěn k chráněnému obsahu. V opačném případě je opět odeslána HTTP odpověď s kódem 401 (Unatuhorized) \cite{RFC2617}.
-
-    Náš administrační nástroj bude tuto metodu využívat pro účely autentizace uživatelů. Do všech částí aplikace bude umožněn vstup pouze autentizovaným uživatelů.
+    Pro naší aplikaci to znamená, že webový server bude muset umět ověřit uživatele oproti lokální databázi. Pokud se uživatelské jméno a heslo odeslané webovým prohlížečem bude shodovat s uživatelskými údaji v lokální databázi, bude uživateli umožněn vstup do aplikace. Do všech částí aplikace bude umožněn vstup pouze autentizovaným uživatelů.
 
     \subsection{HTTPS}
     \label{https}
     HTTP protokol nám neumožňuje nijak šifrovat data, která jsou přenášena. Jelikož jsou po síti přenášena citlivá data jako je uživatelské jméno a heslo, musíme zajistit šifrování tohoto přenosu. HTTPS je protokol, který nám přesně tohle nabízí. Tento protokol ve svém základu využívá ke komunikaci HTTP protokol, ale rozdíl oproti klasickému HTTP je v tom, že přenášená data jsou šifrována pomocí SSL nebo TSL \cite{RFC2818}.
 
-    V první fázi spojení probíhá mezi webovým serverem a klientem takzvaný handshake. V tomto procesu dojde k výměně nezbytných kryptografických informací a certifikátů \cite{RFC5246}. Pokud handshake proběhne v pořádku, klient může začít posílat první požadavek stejně jako pomocí HTTP protokolu.
-
     Použití protokolu HTTPS zajistí naší aplikaci, že bude pro útočníka téměř nemožné získat uživatelské údaje, které byli použity pro vstup do aplikace.
     \subsection{Shrnutí}
-    Pro shrnutí zopakujeme, jaké bezpečnostní opatření budou provedena pro zajištění aplikace. Vytvoříme systémovou roli pomocí RBAC, která bude mít privilegia k vykonávání potřebných operací. Výsledná aplikace bude spouštěna pod touto rolí. K autentizaci uživatelů, kteří budou přistupovat k aplikaci, použijeme metodu \emph{Basic} protokolu HTTP. Uživatele budeme ověřovat proti lokální databázi uživatelů. A konečně celý přenos dat mezi webovým serverem a klientem zašifrujeme pomocí protokolu HTTPS.
+    Pro shrnutí zopakujeme, jaké bezpečnostní opatření budou provedena pro zajištění aplikace. Vytvoříme systémovou roli pomocí RBAC, která bude mít privilegia k vykonávání potřebných operací. Výsledná aplikace bude spouštěna pod touto rolí. K autentizaci uživatelů, kteří budou přistupovat k aplikaci, použijeme metodu Basic protokolu HTTP. Uživatele budeme ověřovat proti lokální databázi uživatelů. A konečně celý přenos dat mezi webovým serverem a klientem zašifrujeme pomocí protokolu HTTPS.
 
 \section{Integrace do systému}
 Pro ulehčení správy celé aplikace ji zaregistrujeme v operačním systému jako službu. Docílíme tím toho, že se operační systém bude sám starat o zapínání, vypínání a restartování celé aplikace. Samozřejmě, že budeme stále schopni explicitně říci, jestli se má daná aplikace spouštět.
 
 Service Management Facility je v operačním systému Solaris nástroj pro spravování služeb. Nahrazuje tím tradiční způsob spravování služeb pomocí \emph{init} skriptů, který byl běžný v dřívějších verzí operačního systému Solaris a ostatních unixových operačních systémech. Velkou výhodou SMF je možnost definování závislostí dané služby na ostatní službách. Tím dokážeme stanovit, že se daná služba nespustí, dokud nebudou spuštěny všechny služby stanovené v závislostech. SMF také uchovává veškeré informace o startu, běhu i ukončování služby v logu. Administrátor má tedy kdykoli možnost tyto logy prozkoumat a získat požadované informace. V pozadí každé služby zaregistrované v SMF je tzv. manifest \cite{SMF}.
     \subsection{Manifest}
-    Manifest je XML dokument, který danou službu popisuje. Právě zde administrátor stanovuje, na kterých službách bude tato služba závislá nebo jak se daná služba jmenuje. V našem případě to znamená, že si budeme muset tento manifest vytvořit a zaregistrovat službu v SMF. Administrátor pak bude schopen službu spravovat pomocí jednoduchých příkazů.
+    Manifest je XML dokument, který danou službu popisuje. Právě zde administrátor stanovuje, na kterých službách bude tato služba závislá nebo jak se daná služba jmenuje. V našem případě to znamená, že si budeme muset tento manifest vytvořit a zaregistrovat službu v SMF.
     \subsection{Metody}
-    Důležitou součástí manifestu jsou metody, které SMF říkají, jak má danou službu zapnout nebo vypnout. V těchto metodách se může spouštět více procesů, které jsou svázány dohromady jako součást dané služby. Administrátor se pak stará jenom o službu jako takovou a nemusí vůbec vědět jaké procesy byli v rámci služby spuštěny \cite{SMF}. Mimo jiné můžeme v manifestu určit takzvaný kontext metod. Tato vlastnost nám dovoluje určit pod jakým uživatelem mají být jednotlivé metody vykonávány. V kontextu naší aplikace to znamená, že metody služby budou spouštěny pod námi vytvořenou rolí, která bude mít dostatečná práva.
+    Důležitou součástí manifestu jsou metody, které SMF říkají, jak má danou službu zapnout nebo vypnout. V těchto metodách se může spouštět více procesů, které jsou svázány dohromady jako součást dané služby. Administrátor se pak stará jenom o službu jako takovou a nemusí vůbec vědět, jaké procesy byli v rámci služby spuštěny \cite{SMF}. Mimo jiné můžeme v manifestu určit takzvaný kontext metod. Tato vlastnost nám dovoluje určit pod jakým uživatelem mají být jednotlivé metody vykonávány. V kontextu naší aplikace to znamená, že metody služby budou spouštěny pod námi vytvořenou rolí, která bude mít dostatečná práva.
     \subsection{Shrnutí}
-    Zaregistrování aplikace jako služby v operačním systému Solaris nám přinese následující výhody ve správě této aplikace. Administrátor bude mít jasný přehled nad tím, zda je daná služba spuštěna. Dále bude moci jednoduše danou službu spustit popřípadě zastavit. Pokud dojde k nějakému problému při spuštění dané služby, SMF administrátorovi poskytne informace o zdroji tohoto problému. V poslední řadě SMF také umožní automatické spuštění služby při startu systému.
+    Zaregistrování aplikace jako služby v operačním systému Solaris nám přinese následující výhody pro správu této aplikace. Administrátor bude mít jasný přehled nad tím, zda je daná služba spuštěna. Dále bude moci jednoduše danou službu spustit popřípadě zastavit. Pokud dojde k nějakému problému při spuštění dané služby, SMF administrátorovi poskytne informace o zdroji tohoto problému. V poslední řadě SMF také umožní automatické spuštění služby při startu systému. Jako pracovní název aplikace zvolíme \emph{wzfsadm}, který vznikl spojením slov web, ZFS a administrace. Z názvu je jasně patrné že nástroj bude sloužit pro webovou administraci souborového systému ZFS.
 
 
