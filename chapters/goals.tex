@@ -1,0 +1,11 @@
+V této kapitole je přiblížena problematika, kterou se tato bakalářská práce zabývá. V závěru jsou zmíněny výhody, které by případné vyřešení problematiky mohlo přinést.
+
+\section{Problematika}
+Následující problém si můžeme zobecnint na většinu nástrojů či aplikací, které slouží k administraci nějakého systému.
+Aby administrátor mohl rychle a efektivně spravovat tento systém, musí důkladně znát všechny jeho funkce a možnosti. U rozsáhlých systémů platí, že s rostoucím počtem funkcí, které systém nabízí, roste i složitost jeho administrace. V případě ZFS se jedná o desítky příkazů, které slouží pro ovládání souborového systému. I přes to, že je veškerá funkcionalita ZFS popsána v manuálnových stránkách, je nutné tyto příkazy znát.
+Další zdrojem informací o ZFS mohou být webové stránky společnosti Oracle, kde se nachází mnoho
+podrobných online návodů jak ZFS administrovat.
+
+Pro zkušené administrátory, kteří se v prostředí tohoto souborového systému pohybují jíž delší dobu, je příkazová řádka pravděpodobně nejrychlejší a nejefektivnější volbou. Potřebný příkaz stačí napsat do příkazové řádky a sytém ho provede. Administrátor může tyto příkazy použít ve skriptech, které může využít pro automatizaci některých činností. Na druhou stranu existují uživatelé, kteří se teprve seznamují se souborovým systémem ZFS a nemají potřebné znalosti. Jelikož v ZFS neexistuje grafické rozhraní, kde by byla funkcionalita sdružena na jednom místě, musí začínající uživatelé využívat stále manuálových stránek, aby se dozvěděli k čemu daný příkaz slouží. K tomuto účelu společnost Oracle, která je nyní vlastníkem souborového systému ZFS, vydává mnoho online návodů, jak tento systém administrovat.
+\section{Řešení}
+Z výše uvedených důvodů jsem se rozhodl navrhnout a implementovat graficky orientovaný administrátorský nástroj pro ZFS,který by sdružoval funkcionalitu ZFS do jednoho místa, odkud by administrátor mohl pohodlně ovládat funkce systému. Tento nástroj by měl být určený především seznámení se uživatelů se souborovým systémem ZFS a jeho základními funkcemi.

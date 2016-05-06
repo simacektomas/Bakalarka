@@ -1,0 +1,38 @@
+V úvodu této kapitoly je uvedena definice souborového systému, která je následována výčtem nejznámějších zástupců souborových systémů. V závěru této kapitoly porovnáme několik vlastností vybraných souborových systémů.
+\section{Souborový systém}
+    \label{fs}
+    Souborový systém označuje způsob, kterým se organizují data v datových úložištích. Jak už název napovídá, data jsou v úložišti organizována do souborů \cite{fs}.
+    Tento systém si o každém souboru udržuje informace, aby bylo později možné zjistit, kde se soubor nachází nebo jak je velký. Dále tento systém umožňuje tyto data číst, měnit nebo vytvářet.
+
+    V dnešní době existuje mnoho způsobů organizace dat, a proto máme k dispozici i mnoho různých souborových systémů. Ty se liší nejenom ve způsobu jak data organizují,
+    ale také v možnostech jak velké datové úložiště dokáží adresovat nebo jak velké soubory dokáží spravovat. Další rozlišovacím prvkem může být závislost na operačním systémů.
+    Jelikož nejrozšířenější operační systémy jsou systémy typu Unix a Windows, uvedeme několik typických zástupců souborových systémů pro tyto platformy.
+
+    Mezi nejznámější zástupce unixových souborových systémů patří následující systémy.
+    \begin{itemize}
+      \item UFS
+      \item ext2, ext3, ext4
+    \end{itemize}
+
+    Naopak mezi nejznámější zástupce souborových systémů pro platformu Windows se řadí následující.
+    \begin{itemize}
+      \item FAT12, FAT16, FAT32
+      \item NTFS
+    \end{itemize}
+
+\section{Porovnání}
+    V tabulce \ref{fscompare} můžeme vidět porovnání vybraných souborových systémů z hlediska maximální délky názvu souboru, maximální velikosti souboru a maximální velikosti svazku, který dokáží spravovat \cite{data}.
+    \begin{table}[]
+    \centering
+    \caption{Porovnání systémů souborů}
+    \label{fscompare}
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    Název & Max. délka názvu & Max. velikost souboru & Max. velikost svazku \\ \hline
+    UFS & 255b & 4 GiB až 256 TiB & 256 TiB \\ \hline
+    ext2 & 255b & 16GB až 2TB & 2TB až 32TB \\ \hline
+    ext4 & 255b & 16TB & 1EB \\ \hline
+    NTFS & 255b & 16TB & 16EB \\ \hline
+    ZFS & 255b & 16EB & 16EB \\ \hline
+    \end{tabular}
+    \end{table} 
