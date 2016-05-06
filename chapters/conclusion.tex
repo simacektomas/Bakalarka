@@ -8,9 +8,11 @@ Celá aplikace byla integrována do operačního systému Solaris, pro který by
 
 Výsledná implementace administrátorkého nástroje neobsahuje všechny funkce správy souborového systému ZFS, a proto bylo nutné navrhnout jeho strukturu tak, aby se dala v budoucnu jednoduše rozšířit o nové funkce. K tomuto účelu bylo využito objektové architektury MVC, která odděluje jednotlivé vrstvy aplikace tak, že jsou na sobě minimálně závislé. Pro rozšíření funkcionality aplikace stačí rozšířit nebo modifikovat jen některé z těchto vrstev. Jednotlivé třídy vrstev jsou do aplikace dynamicky načteny až v okamžiku, kdy jsou potřeba.
 
-V budoucnu bylo možné aplikaci rozšířit o zbytek funkcí, které ZFS nabízí. Vzhledem ke struktuře aplikace by to neměl být větší problém. Ve výsledné implementaci aplikace umožňuje správu jednoho souborového serveru. Vylepšení aplikace by mohlo spočívat ve správě více těchto serverů. Bylo by nutné centralizovat sběr dat a na jednotlivé souborové servery umístit sondy, které by zajišťovaly sběr dat.  
+V budoucnu bylo možné aplikaci rozšířit o zbytek funkcí, které ZFS nabízí. Vzhledem ke struktuře aplikace by to neměl být větší problém. Ve výsledné implementaci aplikace umožňuje správu jednoho souborového serveru. Vylepšení aplikace by mohlo spočívat ve správě více těchto serverů. Bylo by nutné centralizovat sběr dat a na jednotlivé souborové servery umístit sondy, které by zajišťovaly sběr dat. 
 
+Pro usnadnění byl vytvořen balíček \emph{wzfsadm-i386.pkg}, který obsahuje všechny zdrojové kódy aplikace a zajišťuje celkovou instalaci nástroje se všemi potřebnými komponenty.
 
+Všechny všechny cíle bakalářské práce a požadavky stanovené na aplikaci se podařilo splnit. Výsledná implementace administrátorského nástroje sloužícího pro správu souborového systému ZFS je dostupná na přiloženém médiu
 
 
 
