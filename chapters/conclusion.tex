@@ -1,7 +1,17 @@
 Cílem této bakalářské práce bylo vytvořit graficky orientovaný administrátorský nástroj sloužící pro správu souborového systému Zettabyte. Tento cíl byl úspěšně naplněn.
 
+Nástroj je implementován pomocí webového rozhraní, které se uživateli prezentuje pomocí jednotlivých HTML stránek. Uživatel se může po těchto stránkách libovolně pohybovat bez nutnosti hlubší znalostí architektury aplikace. Stránky jsou přenášeny prostřednictvím počítačové sítě mezi webovým serverm a klientským prohlížečem, a proto je aplikace dostupná i ze vzdáleného počítače.
+
 Při vývoji aplikace byl kladen důraz především na bezpečnost, jednoduchost používání a budoucí rozšiřitelnost. Bezpečnost přenosu dat mezi klientem a webovým serverem je zajišťována pomocí HTTPS protokolu, který data šifruje. Do aplikace je umožněn vstup pouze autentizovaným uživatelům, jelikož nástroj umožňuje provádět nebezpečné příkazy. Autentizace uživatelů se provádí oproti lokální databázi uložené v souboru.
 
-Celá aplikace byla integrována do operačního systému Solaris, který využívá souborový systém ZFS v základu. Integrace do systému umožňuje administrátorovi aplikaci jednoduše ovládat a v případě nějaké chyby mu poskytne informace potřebné k jejímu odstranění. Některé funkce a vlastnosti aplikace se dají nastavovat pomocí konfiguračních souborů. Tato možnost administrátorovi umožňuje aplikace přizpůsobit jeho požadavkům. 
+Celá aplikace byla integrována do operačního systému Solaris, pro který byl souborový systém ZFS původně vyvíjen. Integrace do systému umožňuje administrátorovi aplikaci jednoduše ovládat a v případě nějaké chyby mu poskytne informace potřebné k jejímu odstranění. Některé funkce a vlastnosti aplikace se dají nastavovat pomocí konfiguračních souborů. Tato možnost administrátorovi umožňuje aplikace přizpůsobit jeho požadavkům. Dále byl v operačním systému Solaris vytvořen speciální uživatel, pod kterým se výsledný nástroj spouští. Tento krok aplikaci zajišťuje práva k vykonávání potřebných příkazů a minimalizuje bezpečnostní rizika.
 
-Výsledná implementace administrátorkého nástroje neobsahuje všechny funkce správy souborového systému ZFS, a proto bylo nutné navrhnout jeho strukturu tak, aby se dala v budoucnu jednoduše rozšířit o nové funkce. K tomuto účelu bylo využito objektové architektury MVC, která odděluje jednotlivé vrstvy aplikace tak, že jsou na sobě minimálně závislé. Pro rozšíření funkcionality aplikace stačí rozšířit nebo modifikovat jen některé z těchto vrstev. Část aplikace, která zajišťuje komunikaci se souborovým systémem ZFS, byla rozdělena do modulů. Jednotlivé moduly zajišťují 
+Výsledná implementace administrátorkého nástroje neobsahuje všechny funkce správy souborového systému ZFS, a proto bylo nutné navrhnout jeho strukturu tak, aby se dala v budoucnu jednoduše rozšířit o nové funkce. K tomuto účelu bylo využito objektové architektury MVC, která odděluje jednotlivé vrstvy aplikace tak, že jsou na sobě minimálně závislé. Pro rozšíření funkcionality aplikace stačí rozšířit nebo modifikovat jen některé z těchto vrstev. Jednotlivé třídy vrstev jsou do aplikace dynamicky načteny až v okamžiku, kdy jsou potřeba.
+
+V budoucnu bylo možné aplikaci rozšířit o zbytek funkcí, které ZFS nabízí. Vzhledem ke struktuře aplikace by to neměl být větší problém. Ve výsledné implementaci aplikace umožňuje správu jednoho souborového serveru. Vylepšení aplikace by mohlo spočívat ve správě více těchto serverů. Bylo by nutné centralizovat sběr dat a na jednotlivé souborové servery umístit sondy, které by zajišťovaly sběr dat.  
+
+
+
+
+
+
