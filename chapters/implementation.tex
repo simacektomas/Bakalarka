@@ -21,7 +21,7 @@ Při návrhu aplikace jsme zvolili webové rozhraní. Pro implementaci tohoto ř
     \subsubsection{Třída WzfsadmServer}
     HTTP protokol se přenáší v textové formě, a proto použijeme jako základ celého serveru třídu \verb|TCPServer|. Tato třída bude zajišťovat hlavní síťovou komunikaci a bude odpovědná za přijímání spojení. \verb|ThreadingMixIn| je třída, která rozšiřuje funkcionalitu předchozí třídy. Zajistí nám zpracovávání jednotlivých požadavků v oddělených vláknech, tudíž bude moci server zpracovávat více požadavků v jednom okamžiku. Obě tyto třídy jsou součástí knihovny \verb|SocketServer| \cite{socketserver}, která je standardní součástí jazyka \emph{python}.
 
-    Třída \verb|WzfsadmServer| reprezentující vlastní webový server, bude potomkem tříd \verb|TCPServer| a \verb|ThreadingMixIn|. To znamená, že zdědí metody obou rodičovských tříd a bude tyto metody moci využívat. Dále tato třída bude implementovat šifrování komunikačního kanálu pomocí knihovny \verb|ssl|. 
+    Třída \verb|WzfsadmServer| reprezentující vlastní webový server, bude potomkem tříd \verb|TCPServer| a \verb|ThreadingMixIn|. To znamená, že zdědí metody obou rodičovských tříd a bude tyto metody moci využívat. Dále tato třída bude implementovat šifrování komunikačního kanálu pomocí knihovny \verb|ssl|.
 
     Hlavním úkolem této třídy bude poslouchat příchozí spojení na předem stanoveném síťovém rozhraní a portu. V okamžiku připojení klienta k serveru dojde k vytvoření instance třídy \verb|WzfsadmRequestHandler|, která bude implementovat komunikaci pomocí HTTP protokulu. Na této úrovni jsme schopni filtrovat IP adresy, které se k serveru budou moci připojovat. V hlavním konfiguračním souboru serveru budeme schopni stanovit seznam IP adres, které se serverem budou moci komunikovat.
 
@@ -32,14 +32,14 @@ Při návrhu aplikace jsme zvolili webové rozhraní. Pro implementaci tohoto ř
     Hlavní součástí webového serveru je již zmíněná třída \verb|WzfsadmRequestHandler|. Tato třída je potomkem třídy \verb|BaseHTTPRequestHandler|, která je součástí standardní knihovny \verb|BaseHTTPServer| a zajišťuje komunikaci pomocí HTTP protokolu. Šifrování komunikačního kanálu je zajištěno na úrovni třídy \verb|WzfsadmServer|, a proto se tato o ní nemusí starat. Součástí této třídy bude i implementace autentizační metody Basic protokolu HTTP.
 
     Při ověřování požadavku ověříme, jestli klient poslal autentizační údaje. Na všechny požadavky, které nebudou obsahovat hlavičku \emph{Authorization} se správnými uživatelskými údaji, odpovíme HTTP kódem 401(Unauthorize).
-    K ověření validity uživatelského jména a hesla budeme využívat třídu \verb|Authenticator| a její metodu \verb|authenticate()|.    
+    K ověření validity uživatelského jména a hesla budeme využívat třídu \verb|Authenticator| a její metodu \verb|authenticate()|.
 
     V případě, že požadavek úspěšně projde procesem autentizace, dojde ke zpracování požadované HTTP metody. Jelikož pro naše účely naší aplikace budou stačit prostředky, které nabízí metoda GET, ostatní metody nebude náš webový server podporovat. V případě, že klient pošle požadavek na jinou HTTP metodu, server odpoví kódem 501 (Not Implemented).
-     
+
     Uvnitř metody, která reprezentuje HTTP metodu GET, server ověří, zda požadovaná URL odpovídá souboru. Server bude tento soubor hledat v kořenovém adresáři, který mu nastavíme pomocí konfiguračního souboru. Pokud URL odpovídá nějakému souboru, je jeho obsah odeslán klientovi a volání metody ukončeno. V opačném případě server vytvoří instanci třídy \verb|App| reprezentující naší aplikaci. Následně na této instanci zavolá metodu \verb|route|, které předá URL požadovanou klientem. Aplikace požadavek zpracuje a server v konečné fázi odešle výsledek zpět uživateli.
     \subsubsection{Třída Authenticator}
     Poslední třídou, která přímo souvisí s funkcionalitou webového serveru, je třída \verb|Authenticator|. Metoda \verb|authenticate()| této třídy má za úkol zkontrolovat validitu uživatelského jména a hesla, které přišli spolu s požadavkem. Tyto uživatelské údaje ověří oproti lokální databázi uložené v předem určeném souboru s předepsanou strukturou.
-     
+
     Každá řádka tohoto souboru bude reprezentovat uživatele, který se k aplikaci bude moci připojit. Formát dat uložených v souboru bude následující. Řádka se bude skládat ze tří sloupců oddělených dvojtečkou. V prvním sloupci bude uloženo uživatelské jméno. Ve druhém sloupci bude následovat jméno hešovací funkce použité při tvorbě heše uživatelského hesla a konečně v posledním sloupci pak bude hexadecimální reprezentace tohoto heše. Soubor bude postupně procházen a uživatelské údaje porovnány. Pokud nebude nalezena shoda, autentizace uživatele bude vyhodnocena jako chybná.
 \section{Směrování}
 \label{route}
@@ -141,7 +141,7 @@ Třídy logické vrstvy se obecně nazývají kontroléry. Kontroléry budou obs
     Třída \verb|DashboardConroller| bude zajišťovat zobrazování úvodní stránky aplikace. Obsahem této stránky bude přehled základních informací týkajících se souborového systému obecně, vytvořených poolů nebo například všech dostupných souborových systémů.
 
     Stránky, které se týkají administrace souborových systémů v ZFS, bude řídit třída \verb|DatasetConroller|. Tento kontorlér bude umožňovat zobrazit detailní informace o jednotlivých souborových systémech a bude také nabízet funkce pro jejich administraci. Nebude tedy chybět možnost souborové systémy ničit, vytvářet, nastavovat nebo vytvářet jejich snapshoty.
-    
+
     V případě kontrolerů \verb|DeviceConroller| a \verb|ZpoolConroller| se bude jednat o podobné funkce týkající se správy zařízení a ZFS poolů.
 
     Výsledná aplikace bude generovat HTML stránky, které v sobě ponesou odkazy na metody výše zmíněných kontrolerů. Uživatel tedy vůbec nemusí znát strukturu aplikace a jednotlivé metody kontolerů, protože mu budou nabídnuty prostřednictvím těchto stránek. Stránky mezi sebou budou logicky provázané tak, aby se uživatel mohl po aplikaci libovolně a pohodlně pohybovat.
@@ -153,6 +153,7 @@ Poslední vrstvou aplikace je tzv. prezentační vrstva. Jediným úkolem této 
     \subsection{Jinja2}
     Pro generování šablon třída \verb|BaseView| využívá modulu \emph{Jinja2}. Při vytváření instance této třídy dojde k inicializaci potřebných proměnných a stanovení adresáře, ze kterého se budou šablony načítat. Tento adresář se v našem případě bude jmenovat \emph{template} a bude se v kořenovém adresáři aplikace. Modul při každém požadavku na vykreslení šablony z tohoto adresáře dynamicky načte potřebnou šablonu. Ta je následně vyplněna daty a vrácena jako textový řetězec.
     \subsection{Google charts}
+    Pro demonstraci dynamického zobrazování dat v HTML dokumentu využijeme jazyka JavaScript a technologie AJAX. Tato technologie nám umožní posílat HTTP požadavky z již načtené stránky v klientském webovém prohlížeči. V požadavku klasicky specifikujeme požadovanou URL adresu a odešleme ho webovému serveru, který nám pošle odpověď. V klientském prohlížeči data zpracujeme a dynamicky změníme část načtené stránky. Pro lepší práci s JavaScriptem budeme využívat knihovnu jQuery \cite{jquery} a data dynamická data budeme zobrazovat pomocí Google charts \cite{google}.
 
 \section{Rozšiřitelnost}
 Výsledná aplikace je díky MVC architektuře a třídám, které zajišťují dynamické načítání komponentů, snadno rozšiřitelná.
