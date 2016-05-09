@@ -21,8 +21,8 @@ V úvodu této kapitoly je uvedena definice souborového systému, která je ná
     \end{itemize}
 
 \section{Porovnání}
-    V tabulce \ref{fscompare} můžeme vidět porovnání vybraných souborových systémů z hlediska maximální délky názvu souboru, maximální velikosti souboru a maximální velikosti svazku, který dokáží spravovat \cite{data}.
-    \begin{table}[]
+    V tabulce \ref{fscompare} můžeme vidět porovnání vybraných souborových systémů z hlediska maximální délky názvu souboru, maximální velikosti souboru a maximální velikosti svazku, který dokáží spravovat \cite{data}. Hodnoty, které jsou uvedeny v rozmezí od do jsou závislé na velikosti datového bloku.
+    \begin{table}
     \centering
     \caption{Porovnání systémů souborů}
     \label{fscompare}
@@ -30,7 +30,8 @@ V úvodu této kapitoly je uvedena definice souborového systému, která je ná
     \hline
     Název & Max. délka názvu & Max. velikost souboru & Max. velikost svazku \\ \hline
     UFS & 255b & 4 GiB až 256 TiB & 256 TiB \\ \hline
-    ext2 & 255b & 16GB až 2TB & 2TB až 32TB \\ \hline
+    ext2 & 255b & 16GB až 2TB & 4TB až 32TB \\ \hline
+    ext3 & 255b & 16GB až 2TB & 4TB až 32TB \\ \hline
     ext4 & 255b & 16TB & 1EB \\ \hline
     NTFS & 255b & 16TB & 16EB \\ \hline
     ZFS & 255b & 16EB & 16EB \\ \hline
