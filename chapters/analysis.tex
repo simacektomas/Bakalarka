@@ -2,7 +2,7 @@ V následující kapitole je rozebráno několik nástrojů sloužících pro mo
 \section{zfsmon}
 V analýze implementovaných řešení je kladen důraz především na nástroj \emph{zfsmon}. Tento nástroj slouží pro monitorování souborových systémů ZFS na více oddělených souborových serverech. Aplikace se dá rozdělit na dvě hlavní části, které spolu spolupracují.
 
-První částí je skript, který běží na počítači se souborovým systémem ZFS. Tento skript je spouštěn pomocí \emph{crontabu} a zajišťuje aktualizaci informací v databázi, která je součástí webové aplikace. V unixových operační systémech \emph{crontab} zajišťuje automatické spouštění programů v určitých intervalech. Doporučený interval spouštění skriptu nástroje \emph{zfsmon} je 15 minut \cite{zfsmon}.
+První částí je skript, který běží na počítači se souborovým systémem ZFS. Tento skript je spouštěn pomocí \emph{crontabu} a zajišťuje aktualizaci informací v databázi, která je součástí webové aplikace. V unixových operační systémech \emph{crontab} zajišťuje automatické spouštění programů v určitých intervalech. Doporučený interval pro spouštění skriptu nástroje \emph{zfsmon} je 15 minut \cite{zfsmon}.
 
 Druhou částí aplikace \emph{zfsmon} je samotná webová aplikace, která se stará o zobrazování dat z databáze. V databázi se nacházejí informace o stavu jednotlivých souborových systémů z různých serverů. Aplikace zobrazuje tyto informace klientovi v podobě HTML stránek.
 
@@ -12,6 +12,6 @@ Tento nástroj nám tedy umožňuje kvalitně monitorovat informace z více zdro
 \section{zfswatcher}
 Druhým nástrojem, který slouží pro monitorování souborového systému ZFS, je nástroj jménem \emph{zfswatcher}.
 
-Tento nástroj slouží jako webové rozhraní pro sledování souborového systému ZFS. Stejně jako předchozí nástroj zpracovává periodicky data a zobrazuje je pomocí HTML stránek, s čímž souvisí stejný problém, který se vyskytuje u předchozího nástroje. Oproti nástroji \emph{zfsmon} umí zobrazovat informace pouze z jednoho souborového serveru. Na druhou stranu tento nástroj umí poslat upozornění v podobě e-mailu nebo zalogování do logu vždy, když dojde ke změně stavu ZFS \cite{zfswatcher}.
+Tento nástroj slouží jako webové rozhraní pro sledování souborového systému ZFS. Stejně jako předchozí nástroj zpracovává periodicky data a zobrazuje je pomocí HTML stránek, s čímž souvisí stejný problém, který se vyskytuje u předchozího nástroje. Oproti nástroji \emph{zfsmon} umí zobrazovat informace pouze z jednoho souborového serveru ale na druhou stranu umí poslat upozornění v podobě e-mailu nebo zalogování do logu vždy, když dojde ke změně stavu ZFS \cite{zfswatcher}.
 \section{ZFS administration console}
 Na závěr této kapitoly zmíníme ještě nástroj \emph{smcwebserver}. Tento nástroj je součástí operačního systému Solaris 10 6/06 a umožňuje administrátorovi spravovat některé funkce tohoto operačního systému. Mimo jiné se část tohoto nástroje věnuje právě správě souborového systému ZFS \cite{smc}. Bohužel v novější verzi Solarisu 11 se tento nástroj již nevyskytuje. Jako jediný ze zmíněných nástrojů právě \emph{smcwebserver} nabízí administrátorovi funkce pro správu souborového systému ZFS. 
