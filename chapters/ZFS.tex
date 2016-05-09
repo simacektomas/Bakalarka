@@ -17,7 +17,7 @@
     Díky zveřejnění zdrojových kódů ZFS, došlo k adaptaci souborového systému i na jiné operační systémy než je Solaris. Hlavním příkladem jsou systémy s Linuxovým jádrem jako je například Debian, Fedora nebo CentOS.
 
 \section{Struktura}
-Většina tradičních souborových systémů se váže na jedno konkrétní zařízení. Aby bylo možné spojit se souborovým systémem více zařízení, byl zaveden takzvaný volume manager, který souborovému systému poskytoval iluzi, že se jedná o samostatné zařízení \cite{traditional}. Ve skutečnosti se pod touto vrstvou mohlo skrývat více disků, které se tváří jako jeden. ZFS se v tomto směru vydalo svojí vlastní cestou a zařízení agreguje do takzvaných poolů, které slouží jako datový základ pro jednotlivé souborové systémy.
+Většina tradičních souborových systémů se váže na jedno konkrétní zařízení. Aby bylo možné spojit se souborovým systémem více zařízení, byl zaveden takzvaný volume manager, který souborovému systému poskytoval iluzi, že se jedná o samostatné zařízení \cite{traditional}. Ve skutečnosti se pod touto vrstvou může skrývat více disků, které se tváří jako jeden. ZFS se v tomto směru vydalo svojí vlastní cestou a zařízení agreguje do takzvaných poolů, které slouží jako datový základ pro jednotlivé souborové systémy.
 \begin{figure}[!h]
     \caption{Agregace zařízení do poolu}
     \label{agregation}
@@ -25,7 +25,7 @@ Většina tradičních souborových systémů se váže na jedno konkrétní za�
     \includegraphics[scale=0.8]{agregation.pdf}
 \end{figure}
 \section{Pool}
-Souborový systém ZFS se skládá ze dvou hlavních stavebních kamenů. Prvním z nich je takzvaný pool. V terminologii ZFS je to logické sdružení virtuálních zařízení, které popisuje rozložení a fyzické vlastnosti těchto zařízení \cite{terminology}. Pool je tedy spojení fyzických nebo virtuálních zařízení, která poskytuje základ pro souborové systémy ZFS.
+Souborový systém ZFS se skládá ze dvou hlavních stavebních kamenů. Prvním z nich je takzvaný pool. V terminologii ZFS je to logické sdružení virtuálních zařízení, které popisuje rozložení a fyzické vlastnosti těchto zařízení \cite{terminology}. Pool je tedy spojení fyzických nebo virtuálních zařízení, které poskytuje základ pro souborové systémy ZFS.
 
 Souborové systémy v ZFS se už neváží přímo na konkrétní fyzické zařízení, jak tomu bylo dříve, ale na pool jako celek. Historické spojení souborového systému s konkrétním fyzickým zařízením přinášela mnohá omezení. Například pokud jsme souborový systém chtěli rozšířit, museli jsme ho celý znovu vytvořit. Tato operace mohla být časově náročná, ale
 v ZFS tomu tak není.
@@ -37,7 +37,7 @@ Vlastnosti můžeme rozdělit na dvě skupiny. Na jedné straně jsou statické 
 
 Na druhé straně jsou vlastnosti, které můžeme měnit dynamicky. Některé z těchto vlastností se dají nastavovat pouze v okamžiku, kdy daný pool vytváříme nebo importujeme. Nastavit můžeme například vlastnost \emph{read-only}. Tato vlastnost zajistí, že od doby, kdy byla nastavena, lze z daného poolu data pouze číst a nikoliv data zapisovat. Další zajímavou vlastností je vlastnost \emph{bootfs}, která odkazuje na souborový systém uvnitř poolu, který slouží pro načítání operačního systému. Manuální nastavovaní této vlastnosti se nedoporučuje, protože špatné nastavení může vést k nenačtení operačního systému.
 
-Pro stručnost jsem z následujícího příkazu, který administrátorovi zobrazuje dostupné informace o poolu, vybral pouze základní vlastnosti.
+Následující příkaz umožňuje administrátorovi vypsat všechny vlastnosti daného poolu. Pro stručnost jsou vybrány pouze základní vlastnosti.
 \begin{verbatim}
 # zpool get all rpool
 NAME   PROPERTY       VALUE                SOURCE
@@ -52,15 +52,15 @@ rpool  size           30.8G                -
 \end{verbatim}
 
 \subsection{Vytváření poolu}
-Výše popsaný pool můžeme v systému ZFS kdykoli dynamicky vytvořit bez potřeby zásahu do operačního systému. Stačí když máme k dispozici potřebné zdroje (disk, partition, soubor) k vytvoření námi požadovaného poolu. Pokud máme požadované zdroje, stačí už jen vybrat unikátní jméno pro pool v kontextu ZFS a provést například následující příkaz.
+Pool můžeme v systému ZFS kdykoli dynamicky vytvořit bez potřeby zásahu do operačního systému. Stačí když máme k dispozici potřebné zdroje (disk, partition, soubor) k vytvoření námi požadovaného poolu. Pokud máme požadované zdroje, stačí už jen vybrat unikátní jméno pro pool v kontextu ZFS a provést například následující příkaz.
 \begin{verbatim}
 $ zpool create tank c1t2d0 c2t1d0
 \end{verbatim}
-V případě dostupnosti disků c1t2d0 a c2t1d0, tento příkaz vytvoří pool jménem tank, do kterého tyto disky přiřadí. Výsledná velikost bude součtem velikostí těchto disků. Takto vytvořený pool neobsahuje žádnou redundanci a v případě selhání disku, může dojít ke ztrátě dat. Druhým typem, které ZFS podporuje, jsou redundandní pooly.
+V případě dostupnosti disků c1t2d0 a c2t1d0, tento příkaz vytvoří pool jménem \verb|tank|đ, do kterého tyto disky přiřadí. Výsledná velikost bude součtem velikostí těchto disků. Takto vytvořený pool neobsahuje žádnou redundanci a v případě selhání disku, může dojít ke ztrátě dat. Druhým typem, které ZFS podporuje, jsou redundandní pooly.
 \subsection{Zrcadlení}
 Prvním druhem redundadních poolů jsou ty, které obsahují virtuální zařízení \emph{mirror} nebo-li zdcadlení. Tento typ virtuálního zařízení můžeme pomocí ZFS vytvořit nad dvěma a více zařízeními. Uvnitř zařízení dochází k replikaci dat na všechny disky v zařízení. Výsledná kapacita virtuálního zařízení je tedy rovna kapacitě jednoho disku. Pokud zrcadlení vytvoříme nad třemi disky, nakonec budou data na všech třech discích stejná a v případě výpadku dvou z nich o data nepřijdeme. Jiná situace je samozřejmě v případě výpadku všech tří disků najednou. Zrcadlení nám v tomto případě nepomůže a všechny data ztratíme. Nicméně pravděpodobnost, že dojde k výpadku všech tří disků najednou, než stihneme alespoň jeden vyměnit, je malá.
 
-Následující příkaz demonstruje jak vytvořit pool s redundantním zařízením \emph{mirror} o třech discích.
+Následující příkaz demonstruje vytvoření poolu s redundantním zařízením \emph{mirror} o třech discích.
 \begin{verbatim}
 # zpool create Pool mirror c1t1d0 c1t2d0 c2t1d0
 \end{verbatim}
@@ -73,7 +73,7 @@ Druhým typem redundantních poolů, které ZFS umožňuje vytvářet, jsou pool
   \item \emph{raidz3} - stripování se třemi paritními disky
 \end{itemize}
 
-Zápis dat na disk se provádí v pevně stanovených jednotkách tzv. stripech. Jeden stripe je rovnoměrně rozprostřen po všech datových discích virtuálního zařízení \emph{raidz}. Pokud bychom tedy zapisovali na disky soubor, který by měl přesně velikost stripu, bude soubor rovnoměrně rozprostřen na všech discích. Pokud by došlo k výpadku jednoho disku z virtuálního zařízení, dojde tím i k poškození určité části souboru a nebude možné tyto data přečíst. Pro tento účel se využívá paritních disků. Při zápisu stripu na disky se ze zapisovaných dat vypočte jedna hodnota, která se následně uloží na paritní disk. V případě výpadku jednoho disku z virtuálního zařízení, jsme schopni dopočítat chybějící data z hodnoty parity. Zvýšením počtu paritních disků jsme schopni dopočítat data při výpadku stejného počtu disků jako máme k dispozici paritních disků.
+Zápis dat na disk se provádí v pevně stanovených jednotkách tzv. stripech. Jeden stripe je rovnoměrně rozprostřen po všech datových discích virtuálního zařízení \emph{raidz}. Pokud bychom tedy zapisovali na disky soubor, který by měl přesně velikost stripu, soubor bude rovnoměrně rozprostřen na všech discích. Pokud by došlo k výpadku jednoho disku z virtuálního zařízení, dojde tím i k poškození určité části souboru a nebude možné tyto data přečíst. Pro tento účel se využívá paritních disků. Při zápisu stripu na disky se ze zapisovaných dat vypočte jedna hodnota, která se následně uloží na paritní disk. V případě výpadku jednoho disku z virtuálního zařízení, jsme schopni dopočítat chybějící data z hodnoty parity. Zvýšením počtu paritních disků jsme schopni dopočítat data při výpadku stejného počtu disků jako máme k dispozici paritních disků.
 Pokud dojde v jednom okamžiku k výpadku více disků, než máme k dispozici paritních disků, dojde k nenávratné ztrátě dat.
 
 Jelikož jsou data rovnoměrně rozmístěna na všechny disky ve virtuálním zařízení, můžeme při čtení dat využívat více disků najednou. Tím dokážeme docílit vyšší rychlosti čtení.
@@ -84,15 +84,11 @@ Následující příkaz ukazuje, jak jednoduše se dá v souborovém systému ZF
 \end{verbatim}
 
 \subsection{Rozšiřování poolu}
-Výhodou architektury poolů je možnost dynamického fyzických nebo virtuálních zařízení do poolu. Tím získáváme možnost dynamického rozšiřování kapacity celého poolu, která u tradičních souborových systému byla komplikovaná (nutnost použití VM) nebo nebyla dostupná vůbec. Souborové systémy v ZFS, které jsou vytvořené nad stejným poolem, sdílejí jeho prostředky, a proto při rozšíření kapacity tohoto poolu budou mít jeho souborové systémy k dispozici více místa pro ukládání dat.
+Výhodou architektury poolů je možnost dynamického přidávání fyzických nebo virtuálních zařízení do poolu. Tím získáváme možnost dynamického rozšiřování kapacity celého poolu, která u tradičních souborových systému byla komplikovaná (nutnost použití VM) nebo nebyla dostupná vůbec. Souborové systémy v ZFS, které jsou vytvořené nad stejným poolem, sdílejí jeho prostředky, a proto při rozšiřování kapacity tohoto poolu budou mít k dispozici více místa pro ukládání dat.
 
 V případě neredundantích poolů, které neobsahují virtuální zařízení typu \emph{mirror} nebo \emph{raidz}, můžeme pro rozšíření použít soubor, disk nebo část disku (partition). ZFS nám pro tento účel nabízí příkaz \verb|zfs add|, kterým můžeme dynamicky pool rozšiřovat.
 
-Pokud pool obsahuje redundantní zařízení \emph{mirror} nebo \emph{raidz}, je doporučené pool rozšiřovat pouze o stejný typ zařízení. Pokud se do poolu typu \emph{mirror} pokusíme přidat virtuální zařízení \emph{raidz}, ZFS nás nám vypíše následující varovnou hlášku.
-\begin{verbatim}
-# zpool add Pool raidz1 c1t1d0 c1t2d0
-mismatched replication level: pool uses mirror and vdev is raidz
-\end{verbatim}
+Pokud pool obsahuje redundantní zařízení \emph{mirror} nebo \emph{raidz}, je doporučené pool rozšiřovat pouze o stejný typ zařízení. Pokud se do poolu typu \emph{mirror} pokusíme přidat virtuální zařízení \emph{raidz}, ZFS nás nám vypíše varovnou hlášku.
 
 Využití souboru jako zdroje pro ZFS pool se v praxi téměř nevyužívá. Znamená to přidání další vrstvy mezi ZFS a samotný zdroj dat. Hlavní nevýhodou tohoto způsobu je značné zpomalení procesu čtení a zápisu dat, ale na druhou stranu se tato volba výborně hodí pro testování funkcí souborového systému ZFS.
 
@@ -101,11 +97,11 @@ Stejně jako můžeme dynamicky pool vytvářet a rozšiřovat, můžeme pool i 
 \begin{verbatim}
 # zpool -r destroy tank
 \end{verbatim}
-Pokud v systému existuje pool jménem tank, příkaz ho zničí bez ohledu na to, kolik souborových systému nad tímto poolem bylo vytvořeno.
+Pokud v systému existuje pool jménem \verb|tank|, příkaz ho zničí bez ohledu na to, kolik souborových systému nad tímto poolem bylo vytvořeno.
 
 \section{Souborový systém}
 Druhým ze stavebních kamenů ZFS jsou samotné souborové systémy. Jak bylo zmíněno v kapitole \ref{fs}, souborový systém je způsob organizace dat do souborů v datových úložištích.
-Tradiční souborové systémy využívají k organizaci různých datových struktur. Souborový UFS využívá tzv. inodů, což je datová struktura držící atributy souboru a ukazatele na jednotlivé datové bloky \cite{ufs}. Souborový systém FAT k organizaci dat využívá tzv. file allocation table \cite{fat}. ZFS k tomuto účelu využívá stromové datové struktury, kterou znázorněna na obrázku \ref{structure}. Jedná se v podstatě o systém odkazů, který zároveň udržuje informace o souborech a adresářích. Bloky s daty se nacházejí v listech stromu.
+Tradiční souborové systémy využívají k organizaci různých datových struktur. Souborový UFS využívá tzv. inodů, což je datová struktura držící atributy souboru a ukazatele na jednotlivé datové bloky \cite{ufs}. Souborový systém FAT k organizaci dat využívá tzv. file allocation table \cite{fat}. ZFS k tomuto účelu využívá stromové datové struktury, která je znázorněna na obrázku \ref{structure}. Jedná se v podstatě o systém odkazů, který zároveň udržuje informace o souborech a adresářích. Bloky s daty se nacházejí v listech stromu.
 \begin{figure}[!h]
     \caption{Struktura souborového systému ZFS}
     \label{structure}
@@ -134,9 +130,9 @@ Pool tedy tvoří hlavní uzel v této hierarchické posloupnosti a všechny sou
 \end{figure}
 
 \subsection{Vlastnosti souborového systému}
-Stejně jako si ZFS udržuje u každého poolu jeho vlastnosti, udržuje si je také u každého souborového systému. Nastavováním těchto vlastností je administrátor schopen určit specifické chování konkrétního souborového systému. V kontextu ZFS má každý souborový systému jednoznačný identifikátor, který je odvozen z hierarchie souborových systémů. Skládá se z názvu systému a názvu jeho rodičů. Identifikátor by mohl vypadat následovně \emph{rpool/ROOT/solaris}.
+Stejně jako si ZFS udržuje u každého poolu jeho vlastnosti, udržuje si je také u každého souborového systému. Nastavováním těchto vlastností je administrátor schopen určit specifické chování konkrétního souborového systému. V kontextu ZFS má každý souborový systému jednoznačný identifikátor, který je odvozen z hierarchie souborových systémů. Skládá se z názvu systému a jeho rodičů. Identifikátor by mohl vypadat následovně \emph{rpool/ROOT/solaris}.
 
-Vlastnosti souborových systému můžeme rozdělit, stejně jako u vlastností poolu, na dvě kategorie. První kategorií jsou vlastnosti, které se dají pouze číst. Velkou část této skupiny tvoří vlastnosti popisující využití místa v souborovém systému. Příkladem může být místo spotřebováno vnořenými souborovými systémy nebo souborovým systémem samotným. V této skupině vlastností můžeme najít také datum vytvoření daného souborového systému nebo poměr deduplikace a komprese dat.
+Vlastnosti souborových systémů můžeme rozdělit, stejně jako u vlastností poolu, na dvě kategorie. První kategorií jsou vlastnosti, které se dají pouze číst. Velkou část této skupiny tvoří vlastnosti popisující využití místa v souborovém systému. Příkladem může být místo spotřebované vnořenými souborovými systémy nebo souborovým systémem samotným. V této skupině vlastností můžeme najít také datum vytvoření nebo poměr deduplikace a komprese dat.
 
 V druhé kategorii jsou vlastnosti, které může administrátor změnit za běhu nebo při vytváření souborových systémů. Stejně jako na úrovni poolu, tak i na úrovni souborového systému, můžeme nastavit vlastnost \emph{read-only}, která znemožní uživatelům zapisovat nebo měnit data v souborovém systému. Za povšimnutí dále stojí vlastnost \emph{exec}, která dovoluje v souborovém systému spouštět procesy.
 
@@ -145,7 +141,7 @@ Administrátor může jednoduše zapínat, vypínat či měnit vlastnosti soubor
 \subsection{Dědičnost}
 Díky hierarchické struktuře se dá jednoduše zjistit, kdo je předkem daného souborového systému a kdo je jeho potomkem. Všechny nastavitelné vlastnosti, kromě kvót a rezervací, se dědí od rodičovského souborového systému. Pokud žádný rodič nemá vlastnost nastavenou explicitně, je použita standardní hodnota \cite{inheriting}.
 
-Pokud chceme explicitně říci, aby některá vlastnost byla převzata od rodiče, můžeme použít příkaz \verb|zfs inherit property rpool|. Tento příkaz odnastaví danou vlastnost ze souborového systému a pokusí se převzít hodnotu z rodiče. Pokud v žádném z rodičů není hodnota nastavena explicitně, je použita standardní hodnota.
+Pokud chceme explicitně říci, aby některá vlastnost byla převzata od rodiče, můžeme použít příkaz \verb|zfs inherit property rpool|. Tento příkaz odnastaví danou vlastnost ze souborového systému a pokusí se převzít hodnotu z rodiče. Pokud v žádném z rodičů není hodnota nastavena explicitně, je použita standardní hodnota \cite{inheriting}.
 \subsection{Vytváření souborového systému}
 \label{createfs}
 Vytváření souborových systémů v ZFS je velice jednoduché. Jediné co potřebujeme k vytovření souborového systému je jednoznačný identifikátor. ZFS umožnuje vytvoření těchto systémů pomocí příkazu \verb|zfs create pool|, kde \emph{pool} je indentifikátor. Pokud neexistují všichni předci, je potřeba použít přepínač \verb|-p|, jinak příkaz selže.
@@ -171,7 +167,7 @@ Obecné kvóty omezují místo, které může souborový systém využít jako c
 
 Vzhledem k faktu, že souborové systémy v jednom poolu sdílí diskové místo, ZFS přichází s vlastností \emph{reservation}. Tato vlastnost oproti kvótám garantuje souborovému systému diskové místo dané velikosti \cite{quotas}. Stejně jako v případě vlastnosti \emph{quota} je toto místo vyhrazeno pro souborový systém a všechny jeho potomky. Pokud bychom chtěli garantovat místo přímo souborovému systému, bez ohledu na to kolik místa využívají jeho potomci, musíme využít vlastnost \emph{refreservation}.
 
-Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reservation} resp. \emph{refreservation} jsou vlastnostmi souborového systému, můžeme je nastavit stejně jako jakoukoli jinou vlastnost pomocí následujících příkazů.
+Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reservation} resp. \emph{refreservation} jsou vlastnostmi souborového systému, můžeme je nastavit stejně jako kteroukoliv jinou vlastnost pomocí následujících příkazů.
 \begin{verbatim}
 # zfs set quota=10G rpool/export/home
 # zfs set reservation=10G rpool/export/home
@@ -188,7 +184,7 @@ Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation} jsou vyznačeny na obr
 %% Uživatelské a skupinové kvóty
 
 Další možností, jak omezit využití diskového místa, je pomocí uživatelských resp. skupinových kvót. Tyto kvóty limitují uživatele resp. skupinu v tom, kolik místa můžou v souborovém systému využít. Každý souborový systém má svůj vlastní \emph{userspace} resp. \emph{groupspace}, kde si udržuje informace o tom jaké mají limity jednotlivé skupiny resp. uživatelé.
-Administrátor si může hodnoty uživatelských resp. skupinových kvót vypsat pomocí \verb|zfs userspace filesystem| resp. \verb|zfs groupspace filesystem|. Následující příkaz demonstruje, jak vypadá výpis uživatelských kvót pro domovský adresář.
+Administrátor si může hodnoty uživatelských resp. skupinových kvót vypsat pomocí \verb|zfs userspace| resp. \verb|zfs groupspace|. Následující příkaz demonstruje, jak vypadá výpis uživatelských kvót pro domovský adresář.
 \begin{verbatim}
 # zfs userspace rpool/export/home/simactom
 TYPE        NAME       USED  QUOTA  SOURCE
@@ -228,15 +224,15 @@ ZFS z výše uvedených možností nabízí právě deduplikaci na úrovni datov
 \end{figure}
 \section{Konzistence}
 \label{consitence}
-Starší souborové systémy, jako například UFS, zapisují data přímo do bloku, který mění. To může v některých případech, jako je selhání systému nebo výpadek proudu, vést k nekonzistenci souborového systémů. V takovém případě je nutné celý souborový systém zkontrolovat například pomocí příkazu \verb|fsck|. Bohužel ani tento nástroj v některých případech nedokáže některé nekonzistence opravit \cite{transaction}.
+Starší souborové systémy zapisují data přímo do bloku, který mění. To může v některých případech, jako je selhání systému nebo výpadek proudu, vést k nekonzistenci souborového systémů. V takovém případě je nutné celý souborový systém zkontrolovat například pomocí příkazu \verb|fsck|. Bohužel ani tento nástroj v některých případech nedokáže některé nekonzistence opravit \cite{transaction}.
 
 Některé souborové systémy využívají tzv. žurnálů k pomoci s udržování konzistence dat. Žurnál je speciální záznam, kam se ukládají informace o tom, co a kde se bude měnit. Po provedení popisované akce se do žurnálu zapíše, že daná operace byla provedena. Když systém zkolabuje v jakémkoli kroku tohoto postupu, je možné ho při startu sytému dostat do konzistentního stavu. K tomuto účelu se opět využívá nástroj \verb|fsck|.
 
 ZFS přichází s transakčním systémem a technikou copy on write. Tato technika zajišťuje neustálou konzistenci souborového systému i v okamžiku výpadku, a proto není třeba žurnálu. Data na disku nejsou nikdy přímo přepisována \cite{transaction}.
 
-Transakce může vypadat následovně. Nejprve se vytvoří kopie bloků, které mají být změněny. V těchto kopiích dojde k vlastní změně dat, zatímco původní data jsou stále na disku a nejsou nijak změněna. Následně se provede kopie potřebných metadat, které se týkají měněných datových bloků. Tyto metadata jsou následně přepočítána podle nových datových bloků a konečně v poslední řadě se provede atomická operace, která připojí větev s novými resp. změněnými bloky do stromu souborového systémů.
+Transakce může vypadat následovně. Nejprve se vytvoří kopie bloků, které mají být změněny. V těchto kopiích dojde k vlastní změně dat, zatímco původní data jsou stále na disku a nejsou nijak změněna. Následně se provede kopie potřebných metadat, které se týkají měněných datových bloků. Tyto metadata jsou následně přepočítána podle nových datových bloků a konečně v poslední řadě se provede atomická operace, která připojí větev s novými resp. změněnými bloky do stromu souborového systémů. Stará data jsou smazána.
 
-Průběh transakce je naznačen na obrázku \ref{cow}. Celá transakce buď proběhla v pořádku nebo nebyla přijata vůbec. Pokud v průběhu transakce dojde k výpadku, celý souborový systém zůstává konzistentní, protože původní data jsou stále na disku a nemohla se provést atomická operace, která by připojila nové data.
+Průběh transakce je naznačen na obrázku \ref{cow}. Celá transakce buď proběhne v pořádku nebo nebude přijata vůbec. Pokud v průběhu transakce dojde k výpadku, celý souborový systém zůstává konzistentní, protože původní data jsou stále na disku a nemohla se provést atomická operace, která by připojila nové data.
 \begin{figure}[h]
     \caption{Demostrace copy on write}
     \label{cow}
@@ -254,8 +250,8 @@ Díky těmto kontrolním součtům se souborový systém dokáže v určitých s
 
 Ačkoliv dochází k ověřování integrity dat automaticky při každém čtení z disku, je možné tento proces manuálně vyvolat a ověřit pomocí následující sekvence příkazů.
 \begin{verbatim}
-$ zpool scrub pool
-$ zpool status pool
+# zpool scrub pool
+# zpool status pool
 pool: pool
 state: ONLINE
 scan: scrub repaired 0 in 6s with 0 errors
@@ -269,14 +265,14 @@ Jelikož se ZFS snaží administrátorům maximálně ulehčit práci, stará se
 
 Pro připojování souborových systémů ZFS se dají použít i tradiční nástroje \emph{mount} a \emph{umount}. V tradičních souborových systémech se pro automatické připojování používal soubor \emph{/etc/vsfstab}, kde administrátor specifikoval co a kam se má připojit. Operační systém po svém startu tento soubor zpracoval a vyznačené souborové systémy automaticky připojil.
 
-Jak již bylo zmíněno ZFS proces automatického připojování provádí samo. Pokud by administrátor chtěl využívat tradičního připojování pomocí souboru \emph{/etc/vsfstab}, je možné nastavit vlastnost \emph{mountpoint} souborového systému na hodnotu \emph{legacy} \cite{mountpoint}. Tím administrátor řekne, že se o souborový systému bude starat sám a ZFS ho již automaticky připojovat nebude.
+Jak již bylo zmíněno, ZFS proces automatického připojování provádí samo. Pokud by administrátor chtěl využívat tradičního připojování pomocí souboru \emph{/etc/vsfstab}, je možné nastavit vlastnost \emph{mountpoint} souborového systému na hodnotu \emph{legacy} \cite{mountpoint}. Tím administrátor řekne, že se o souborový systému bude starat sám a ZFS ho již automaticky připojovat nebude.
 \section{Snapshot}
 \label{snapshot}
 ZFS snapshot je stav daného souborového systému v čase, kdy byl snapshot pořízen. Jedná se read-only instanci daného souborového systému \cite{snapshot}.
 
 Díky stromové architektuře souborového systému ZFS je pořizování snapshotů velice elegantní a nenáročné. Pro vytvoření můžeme použít příkaz \verb|zfs snapshot filesystem@snapshot|, kde \emph{filesystem} je jméno souborového systémů, jehož stav chceme zachytit a \emph{snapshot} je pojmenování konkrétního stavu tohoto systému.
 
-Po provedení příkazu k vytvoření snapshotu si ZFS zapamatuje odkaz na vrchol souborového systému, jehož snapshot tvoříme. Tento odkaz se stane hlavním kořenem snapshotu jakožto nového souborového systému. Jelikož snapshot je souborový systém určený pouze ke čtení, nemůžeme pomocí něj změnit data v aktivním souborovém systému. Po vytvoření snapshotu je jeho velikost nulová, protože se provedlo pouze zapamatování odkazu a nebyly vytvořeny žádné kopie. Pokud se ovšem data v aktivním souborovém systému změní, je nutné, aby snapshot stále odkazoval na stará data. Toho docílíme tak, že stará data zkopírujeme a zvětšíme tak velikost snapshotu \cite{snapshot}. Rozšiřování velikosti snapshotu tedy závisí na množství změněných dat od chvíle, kdy byl snapshot vytvořen. Proces vytváření snapshotu a rozšiřování jeho velikosti je názorně ukázán na obrázku \ref{snapshotproces}.
+Po provedení příkazu si ZFS zapamatuje odkaz na vrchol souborového systému, jehož snapshot tvoříme. Tento odkaz se stane hlavním kořenem snapshotu jakožto nového souborového systému. Jelikož snapshot je souborový systém určený pouze ke čtení, nemůžeme pomocí něj změnit data v aktivním souborovém systému. Po vytvoření snapshotu je jeho velikost nulová, protože se provedlo pouze zapamatování odkazu a nebyly vytvořeny žádné kopie. Pokud se ovšem data v aktivním souborovém systému změní, je nutné, aby snapshot stále odkazoval na stará data. Toho docílíme tak, že stará data zkopírujeme a zvětšíme tak velikost snapshotu \cite{snapshot}. Rozšiřování velikosti snapshotu tedy závisí na množství změněných dat od chvíle, kdy byl snapshot vytvořen. Proces vytváření snapshotu a rozšiřování jeho velikosti je názorně ukázán na obrázku \ref{snapshotproces}.
 \begin{figure}[h]
     \caption{Vytváření snapshotu}
     \label{snapshotproces}
