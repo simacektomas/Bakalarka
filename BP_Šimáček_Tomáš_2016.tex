@@ -19,7 +19,7 @@
 % \usepackage{amsmath} %advanced maths
 % \usepackage{amssymb} %additional math symbols
 
-\usepackage{indentfirst}
+%\usepackage{indentfirst}
 
 \usepackage{dirtree} %directory tree visualisation
 
@@ -42,12 +42,12 @@
 \authorWithDegrees{Tomáš Šimáček} %jméno autora včetně současných akademických titulů
 \supervisor{Ing. Zdeněk Muzikář, CSc.}
 \acknowledgements{Doplňte, máte-li komu a za co děkovat. V~opačném případě úplně odstraňte tento příkaz.}
-\abstractCS{V~několika větách shrňte obsah a přínos této práce v~češtině. Po přečtení abstraktu by se čtenář měl mít čtenář dost informací pro rozhodnutí, zda chce Vaši práci číst.}
-\abstractEN{Sem doplňte ekvivalent abstraktu Vaší práce v~angličtině.}
+\abstractCS{\input{chapters/abstract_cs.tex}}
+\abstractEN{\input{chapters/abstract_en.tex}}
 \placeForDeclarationOfAuthenticity{V~Praze}
 \declarationOfAuthenticityOption{4} %volba Prohlášení (číslo 1-6)
-\keywordsCS{Nahraďte seznamem klíčových slov v češtině oddělených čárkou.}
-\keywordsEN{Nahraďte seznamem klíčových slov v angličtině oddělených čárkou.}
+\keywordsCS{Souborový systém Zettabyte, Solaris, webové rozhraní, administrace, monitorování \clearpage }
+\keywordsEN{Zettabyte file system, Solaris, web interface, administration, monitoring}
 
 \begin{document}
 
@@ -62,7 +62,7 @@
     \input{chapters/goals.tex}
 
 \chapter{Souborové systémy}
-    \input{chapters/Souborove_systemy.tex}
+    \input{chapters/filesystems.tex}
 
 \chapter{ZFS}
     \input{chapters/zfs.tex}
@@ -71,9 +71,9 @@
     \input{chapters/analysis.tex}
 
 \chapter{Návrh řešení}
-    \input{chapters/Návrh.tex}
+    \input{chapters/design.tex}
 \chapter{Implementace}
-    \input{chapters/Implementace.tex}
+    \input{chapters/implementation.tex}
 \begin{conclusion}
 	\input{chapters/conclusion.tex}
 \end{conclusion}
@@ -86,11 +86,15 @@
 \chapter{Seznam použitých zkratek}
 % \printglossaries
 \begin{description}
+    \item[AJAX] Asynchronous JavaScript and XML
 	\item[HTML] Hypertext markup language
     \item[HTTP] Hypertext transfer protocol
     \item[HTTPS] Hypertext transfer protocol secure
 	\item[RBAC] Role-Based Access Control
     \item[RAID] Redundant array of independent disks
+    \item[SMF] Solaris Management Facility
+    \item[PID] Process ID
+    \item[RFC] Request For Comments
 	\item[XML] Extensible markup language
     \item[ZFS] Zettabyte file system
 \end{description}
