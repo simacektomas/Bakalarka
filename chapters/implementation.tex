@@ -4,11 +4,11 @@ Než začneme s implementací, je nutné si ujasnit v jakém jazyce budeme aplik
 
 V operační systému Solaris interpretuje příkazovou řádku shell. ZFS je součástí Solarisu a shell nám dovoluje využívat jeho rozhraní, které je dostupné právě z příkazové řádky. Z počátku se tedy možnost skriptování v shellu zdála jako dobrá volba. Nicméně shell nám nedovoluje využívat výhody objektového programování, protože nepodporuje třídy. To je v rozporu s naším návrhem, který využívá objektové architektury MVC.
 
-Proto sáhneme po skriptovacím jazyku Python, který nám umožní implementaci objektově orientované architektury MVC. Další výhodou tohoto jazyka je jeho přenositelnost. Interpret Pythonu existuje pro nejrůznější operační systému jako je Linux, Windows a samozřejmě náš Solaris. Tento fakt nám v konečném důsledku nebude moc užitečný, protože ZFS je dostupné primárně jen pro Solaris a implementace našeho nástroje se bude ubírat právě tímto směrem.
+Proto sáhneme po skriptovacím jazyku Python, který nám umožní implementaci objektově orientované architektury MVC. Další výhodou tohoto jazyka je jeho přenositelnost. Interpret Pythonu existuje pro nejrůznější operační systémy jako je Linux, Windows a samozřejmě Solaris. Tento fakt nám v konečném důsledku nebude moc užitečný, protože ZFS je dostupné primárně jen pro Solaris a implementace našeho nástroje se bude ubírat právě tímto směrem.
 \section{HTTP Server}
 Při návrhu aplikace jsme zvolili webové rozhraní. Pro implementaci tohoto řešení budeme muset zvolit nějaký webový server, který nám bude zprostředkovávát komunikaci mezi naší aplikací a webovým klientem (prohlížečem). Od našeho webového serveru budeme požadovat podporu HTTPS protokolu a možnost autentizace uživatelů pomocí metody Basic protokolu HTTP.
     \subsection{Implementované řešení}
-    Mezi nejznámější a nejrozšířenější zástupce webových serverů patří například \emph{Apache}. Tato komplexní implementace webového serveru by dokázala splnit všechny požadavky, které požadujeme. Nevýhodou této volby je zbytečná obsáhlost implementace a nutnost složitější konfigurace. Z tohoto důvodu zvolíme vlastní řešení webového serveru, které bude přesně odpovídat požadavkům aplikace.
+    Mezi nejznámější a nejrozšířenější zástupce webových serverů patří například \emph{Apache}. Tato komplexní implementace webového serveru by dokázala splnit všechny požadavky, které požadujeme. Nevýhodou této volby je zbytečná obsáhlost a nutnost složitější konfigurace. Z tohoto důvodu zvolíme vlastní řešení webového serveru, které bude přesně odpovídat požadavkům aplikace.
     \subsection{Vlastní řešení webového serveru}
     Implementace vlastního řešení webového serveru bude využívat dvou standardních knihoven jazyka Python a bude se skládat z následujícíh tříd.
     \begin{itemize}
@@ -29,18 +29,18 @@ Při návrhu aplikace jsme zvolili webové rozhraní. Pro implementaci tohoto ř
 
     Ke spuštění serveru stačí vytvořit instanci třídy \verb|WzfsadmServer|, které předáme port a adresu síťového rozhraní a následně na této instanci zavolat metodu \verb|serve_forever()|. Od této chvíle bude server naslouchat na stanovené adrese a portu dokud nebude ukončen.
     \subsubsection{Třída WzfsadmRequestHandler}
-    Hlavní součástí webového serveru je již zmíněná třída \verb|WzfsadmRequestHandler|. Tato třída je potomkem třídy \verb|BaseHTTPRequestHandler|, která je součástí standardní knihovny \verb|BaseHTTPServer| a zajišťuje komunikaci pomocí HTTP protokolu. Šifrování komunikačního kanálu je zajištěno na úrovni třídy \verb|WzfsadmServer|. Součástí této třídy bude i implementace autentizační metody Basic.
+    Hlavní součástí webového serveru je již zmíněná třída \verb|WzfsadmRequestHandler|. Tato třída je potomkem třídy \verb|BaseHTTPRequestHandler|, která je součástí standardní knihovny \verb|BaseHTTPServer| a zajišťuje komunikaci pomocí HTTP protokolu. Součástí této třídy bude i implementace autentizační metody Basic.
 
     Při ověřování požadavku ověříme, jestli klient poslal autentizační údaje. Na všechny požadavky, které nebudou obsahovat hlavičku \emph{Authorization} se správnými uživatelskými údaji, odpovíme HTTP kódem 401(Unauthorize).
-    K ověření validity uživatelského jména a hesla budeme využívat třídu \verb|Authenticator| a její metodu \verb|authenticate()|.
+    K ověření validity uživatelského jména a hesla budeme využívat třídu \verb|Authenticator|.
 
     V případě, že požadavek úspěšně projde procesem autentizace, dojde ke zpracování požadované HTTP metody. Jelikož pro naše účely naší aplikace budou stačit prostředky, které nabízí metoda GET, ostatní metody nebude náš webový server podporovat. V případě, že klient pošle požadavek na jinou HTTP metodu, server odpoví kódem 501 (Not Implemented).
 
     Uvnitř metody, která reprezentuje HTTP metodu GET, server ověří, zda požadovaná URL odpovídá souboru. Pokud URL odpovídá nějakému souboru, je jeho obsah odeslán klientovi a volání metody ukončeno. V opačném případě server vytvoří instanci třídy \verb|App| reprezentující naší aplikaci, které předá URL požadovanou klientem. Aplikace požadavek zpracuje a server v konečné fázi odešle výsledek zpět uživateli.
     \subsubsection{Třída Authenticator}
-    Poslední třídou, která přímo souvisí s funkcionalitou webového serveru, je třída \verb|Authenticator|. Metoda \verb|authenticate()| této třídy má za úkol zkontrolovat validitu uživatelského jména a hesla, které přišli spolu s požadavkem. Tyto uživatelské údaje ověří oproti lokální databázi uložené v předem určeném souboru s předepsanou strukturou.
+    Poslední třídou, která přímo souvisí s funkcionalitou webového serveru, je třída \verb|Authenticator|. Tato třída má za úkol zkontrolovat validitu uživatelského jména a hesla, které přišli spolu s požadavkem. Tyto uživatelské údaje ověří oproti lokální databázi uložené v předem určeném souboru s danou strukturou.
 
-    Každá řádka tohoto souboru bude reprezentovat uživatele, který se k aplikaci bude moci připojit. Formát dat uložených v souboru bude následující. Řádka se bude skládat ze tří sloupců oddělených dvojtečkou. V prvním sloupci bude uloženo uživatelské jméno. Ve druhém sloupci bude následovat jméno hešovací funkce použité při tvorbě heše uživatelského hesla a konečně v posledním sloupci pak bude hexadecimální reprezentace tohoto heše. Soubor bude postupně procházen a uživatelské údaje porovnány. Pokud nebude nalezena shoda, autentizace uživatele bude vyhodnocena jako chybná.
+    Každá řádka tohoto souboru bude reprezentovat uživatele, který se k aplikaci bude moci připojit. Formát dat uložených v souboru bude následující. Řádka se bude skládat ze tří sloupců oddělených dvojtečkou. V prvním sloupci bude uloženo uživatelské jméno. Ve druhém sloupci bude následovat jméno hašovací funkce použité při tvorbě haše uživatelského hesla a konečně v posledním sloupci pak bude hexadecimální reprezentace tohoto haše. Soubor bude postupně procházen a uživatelské údaje porovnány. Pokud nebude nalezena shoda, autentizace uživatele bude vyhodnocena jako chybná.
 \section{Směrování}
 \label{route}
 Druhou částí aplikace bude logická část, kde bude docházet ke zpracovávání jednotlivých požadavků. Tato část bude implementována pomocí MVC architektury, která nám pomůže oddělit logiku aplikace od vrstvy, které bude interagovat se souborovým systémem ZFS. Po zpracování požadavku dojde k vygenerování HTML stránky, která bude prostřednictvím webového serveru odeslána uživateli.
@@ -53,24 +53,26 @@ Z hlavní části URL adresy určíme jméno třídy a metody, kterou budeme vol
 \end{verbatim}
 Při požadavku na tuto adresu dojde k vytvoření instance třídy \verb|zpool|, na které se pokusíme zavolat metodu \verb|detail()| s dostupnými parametry. Tato metoda bude zobrazovat detailní přehled informací o poolu jménem \emph{rpool}.
     \subsection{Třída App}
-    Princip směrování požadavků k jednotlivým třídám v naší aplikaci zajišťuje třída \verb|App|. Této třídě při jejím vytváření předáme URL, která je vyžadována od klienta a webový server zavolá její metodu \verb|route()|. Uvnitř dojde ke zpracování adresy výše popsaným způsobem, což nám zajistí jméno třídy logické vrstvy aplikace a jméno metody, kterou máme na této třídě zavolat. Pokud požadovaná třída a metoda neexistují je klientovi vrácena odpověď s kódem 404 (Not found). V opačném případě je třída dynamicky načtena z předem stanoveného adresáře a následně vytvořena její instance. V posledním kroku se na této instanci zavolá požadovaná metoda, které předáme dostupné parametry. Volání teto metody povede k vygenerování HTML stránky, která je následně předána webovému serveru k odeslání.
+    Princip směrování požadavků k jednotlivým třídám v naší aplikaci zajišťuje třída \verb|App|. Této třídě při jejím vytváření předáme URL. Třída zpracuje URL způsobem popsaným v kapitole \ref{route}, což nám zajistí jméno třídy logické vrstvy aplikace a jméno metody, kterou máme na této třídě zavolat. Pokud požadovaná třída a metoda neexistují je klientovi vrácena odpověď s kódem 404 (Not found). V opačném případě je třída dynamicky načtena z předem stanoveného adresáře a následně vytvořena její instance. V posledním kroku se na této instanci zavolá požadovaná metoda, které předáme dostupné parametry. Volání teto metody povede k vygenerování HTML stránky, která je následně předána webovému serveru k odeslání.
 
     Hlavním účelem třídy \verb|App| je tedy zpracovat URL adresu a následně vytvořit třídu, která se postará o zpracování požadavku.
 
 \section{Datová vrstva}
-Datová vrstva je v terminologi MVC architektury vrstva, která pracuje s daty. Naše aplikace si přímo žádná data držet nebude, protože ZFS si všechny datové struktury spravuje samo. Datová vrstva naší aplikace bude tedy zprostředkovávát komunikaci a tok dat mezi ZFS a logickou vrstvou aplikace. Třídy této vrstvy budou využívat ZFS rozhraní na příkazové řádce. Metody těchto tříd na základě dat obdržených z logické vrstvy sestaví potřebný ZFS příkaz a pomocí shellu ho vykonají na příkazové řádce. Výsledek operace a požadovaná data pak předají zpět do logické vrstvy, kde se zpracují.
+Datová vrstva je v terminologi MVC architektury vrstva, která pracuje s daty. Naše aplikace si přímo žádná data držet nebude, protože ZFS si všechny datové struktury spravuje samo. Datová vrstva naší aplikace bude tedy zprostředkovávát komunikaci a tok dat mezi ZFS a logickou vrstvou aplikace. Třídy této vrstvy budou využívat rozhraní ZFS. Metody těchto tříd na základě dat obdržených z logické vrstvy sestaví potřebný ZFS příkaz a pomocí shellu ho vykonají na příkazové řádce. Výsledek operace a požadovaná data pak předají zpět do logické vrstvy, kde se zpracují.
 
 Jelikož nástroj nebude implementovat všechny funkce souborového systému ZFS, bylo by vhodné navrhnout tuto vrstvu způsobem, který by umožňoval jednoduché rozšíření její funkcionality.
 Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou specializovat na určitou oblast ZFS. V každém z modulů bude hlavní třída, která bude poskytovat logické vrstvě rozhraní pro komunikaci se souborovým systémem. V okamžiku, kdy logická vrstva bude chtít komunikovat se souborovým systémem, bude požadovaný modul (jeho hlavní třída) dynamicky načten do aplikace.
     \subsection{Třída ModuleInterface}
-    Abychom zajistili třídám logické vrstvy jednotný přístup k metodám datové vrstvy, vytvoříme třídu \verb|ModuleInterface|, která bude zajišťovat dynamické načítání tříd z datové vrstvy. Logická vrstva jednoduše zavolá na instanci této třídy metodu \verb|load_module()|, které předá název požadovaného modulu. Tato metoda zkontroluje zda daný modul existuje a splňuje požadavky stanovené v kapitole \ref{package}. V případě úspěchu daný modul načte. Následně dojde k vytvoření instance hlavní třídy modulu a k jejímu předání do logické vrstvy.
+    Abychom zajistili třídám logické vrstvy jednotný přístup k metodám datové vrstvy, vytvoříme třídu \verb|ModuleInterface|, která bude zajišťovat dynamické načítání tříd z datové vrstvy. Tato třída zkontroluje zda požadovaný modul existuje a splňuje požadavky stanovené v kapitole \ref{package}. V případě úspěchu daný modul načte.
 
     Velkou výhodou toho přístupu je fakt, že po dobu zpracovávání požadavku můžeme načítat pouze moduly, které nutně potřebujeme k jeho zpracování. Dynamické načítání modulů nám tedy poskytne jistou úsporu ve využití operační paměti systému.
     \subsection{Struktura modulu}
     \label{package}
-    Všechny moduly a jejich součásti budou součástí adresářového stromu aplikace. Budou se nacházet v adresáři \emph{app/model/modules} a budou mít následující strukturu.
+    Všechny moduly a jejich součásti budou součástí adresářového stromu aplikace. Budou se nacházet v adresáři \emph{app/model/modules} a jejich struktura bude odpovídat struktuře na obrázku \ref{module}.
     \begin{figure}
       \centering
+      \caption{Struktura modulu}
+      \label{module}
       \dirtree{%
 		.1 app.\DTcomment{Adresář v kořenovém adresáři aplikace}.
         .2 model.\DTcomment{Adresář datové vrstvy aplikace}.
@@ -79,20 +81,14 @@ Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
         .5 \_\_init\_\_.py.\DTcomment{Soubor pro inicializaci modulu}.
         .5 SystemSource.py.\DTcomment{Hlavní třída modulu}.
 	  }
-      \caption{Struktura modulu}
-      \label{module}
     \end{figure}
 
-    Každý modul bude uložen ve svém adresáři, jehož jméno se bude skládat ze jména modulu a klíčového slova \emph{Module}. Pro popis struktury adresáře modulu na obrázku \ref{module} budeme používat modul \emph{System}. V první řadě adresář modulu musí obsahovat soubor \verb|__init__.py|. Tento soubor říká interpretu pythonu, že se jedná o modul a umožní nám ho jednoduše načítat.
+    Pro popis struktury adresáře modulu na obrázku \ref{module} budeme používat modul \emph{System}. Každý modul bude uložen ve svém adresáři, jehož jméno se bude skládat ze jména modulu a klíčového slova \emph{Module}. V první řadě adresář modulu musí obsahovat soubor \verb|__init__.py|. Tento soubor říká interpretu pythonu, že se jedná o modul a umožní nám ho jednoduše načítat.
 
     Hlavní součástí modulu bude soubor se zdorjovými kódy. Název souboru bude opět odpovídat názvu modulu, ale tentokrát bude následovat klíčové slovo \emph{Source}.
     V tomto souboru bude uložena definice hlavní třídy modulu, která bude logické vrstvě nabízet požadované funkce. Název této třídy se musí shodovat s názvem modulu. Obsahem adresáře modulu mohou být i soubory s definicemi vedlejších tříd nebo jiné pomocné skripty. V tomto případě si musí modul samostatně zajistit jejich načtení, protože třída \verb|ModuleInterface| umožňuje načítat pouze hlavní třídy modulů.
 
     Konfigurační soubory modulů budou standardně dostupné v adresáři \emph{/etc/wzfsadm}, kde se bude nacházet i hlavní konfigurační soubor aplikace. Každý modul, který bude využívat konfiguračních souborů, je sám odpovědný za jejich načtení a zpracování. Aplikace se stará pouze o načítání hlavního konfiguračního souboru.
-
-    \subsubsection{Třída BaseModule}
-    Pro sjednocení modulů a jejich metod vytvoříme třídu \verb|BaseModule|. Každý modul aplikace zdědí základní metody z této třídy.
-    Jednou z těchto metod je například metoda \verb|init_module()|, která je zavolána na modulu pokaždé, když je do aplikace načten. V této metodě může modul provádět například načítání konfiguračních souborů nebo inicializaci proměnných.
 
     \subsection{Základní moduly}
     V základní verzi výsledné aplikace jsou implementované následující moduly.
@@ -103,7 +99,7 @@ Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
       \item \verb|SystemModule|
     \end{itemize}
 
-    Každý z těchto modulů implementuje metody, které umožňují práci s operačním systémem nebo specifickou částí souborového systému ZettaByte. Modul \verb|PoolModule| obsahuje metody, které se týkají správy ZFS poolů. Umožňuje především shromažďovat informace o požadovaných poolech, vytvářet nové nebo vytvořené pooly zničit. Hlavní součástí tohoto modulu je třída \verb|Pool|, která shromažďuje a drží všechny informace o konkrétním ZFS poolu.
+    Každý z těchto modulů implementuje metody, které umožňují práci s operačním systémem Solaris nebo specifickou částí souborového systému ZettaByte. Modul \verb|PoolModule| obsahuje metody, které se týkají správy ZFS poolů. Umožňuje především shromažďovat informace o požadovaných poolech, vytvářet nové nebo vytvořené pooly zničit. Hlavní součástí tohoto modulu je třída \verb|Pool|, která shromažďuje a drží všechny informace o konkrétním ZFS poolu.
 
     Druhý modul \verb|DeviceModule| umožňuje manipulovat se zařízením uvnitř poolu. Doplňuje především funkcionalitu modulu \verb|PoolModule| o možnosti přidávat zařízení do poolů, změnit stav konkrétního zařízení popřípadě provádět funkce \emph{attach} a \emph{detach}.
 
@@ -115,14 +111,12 @@ Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
 \section{Logická vrstva}
 Hlavní vrstvou aplikace bude logická vrstva. Tato část bude mít za úkol provádět požadované akce na souborovém systému ZFS za pomoci ostatních vrstev aplikace. Data obdržené od datové vrstvy zpracuje a požádá prezentační vrstvu o vygenerování HTML stránky. Výsledek je prostřednictvím webového serveru odeslán uživateli, který si ho pomocí webového prohlížeče může zobrazit.
 
-Třídy logické vrstvy se obecně nazývají kontroléry. Kontroléry budou obsahovat metody, které budou představovat jednotlivé akce nabízené uživateli. Na základě směrování popsaného v \ref{route} dojde k dynamickému načtení kontroléru a vyvolání požadované metody. Volaná metoda přesně definuje, které moduly datové vrstvy využije a jak obdržená data zpracuje.
+Třídy logické vrstvy se obecně nazývají kontroléry. Kontroléry budou obsahovat metody, které budou představovat jednotlivé akce nabízené uživateli. Na základě směrování popsaného v \ref{route} dojde k dynamickému načtení kontroléru a vyvolání požadované metody. Volaná metoda přesně definuje, které moduly datové vrstvy budou načteny a jak obdržená data zpracuje.
     \subsection{Kontrolér}
     V adresářové struktuře aplikace opět stanovíme adresář, kde najdeme jednotlivé definice kontrolerů. V tomto případě veškeré zdrojové kódy tříd logické vrstvy najdeme v adresáři \emph{app/controllers}.
 
     Právě odtud bude třída \emph{App}, která se stará o směrování, dynamicky načítat požadované kontroléry. Stejně jako v případě datové vrstvy nám dynamické načítání umožní načítat pouze ten kontrolér, který potřebujeme ke zpracování daného požadavku a opět ušetříme operační paměť.
 
-    \subsection{Třída BaseController}
-    Abychom dosáhli jednotnosti logické vrstvy, vytvoříme nadtřídu \verb|BaseController|, ze které budou všechny kontroléry logické vrstvy dědit. Tato třída bude nabízet rozhraní pro odesílání vygenerovaných stránek prostřednictvím webového serveru a také jednotné rozhraní pro řešení chybových situací, které mohou nastat zejména v datové vrstvě. Pokud dojde k nějaké chybě během vykonávání nějakého příkazu nad souborovým systémem, datová vrstva tento stav ohlásí a předá logické vrstvě zprávu o tom co se stalo. V této situaci dojde k vygenerování speciální stránky, které uživatele informuje o tom co se stalo.
     \subsection{Základní kontroléry}
     Do výsledné aplikace budou zařazeny následující kontroléry.
     \begin{itemize}
@@ -141,15 +135,16 @@ Třídy logické vrstvy se obecně nazývají kontroléry. Kontroléry budou obs
     Výsledná aplikace bude generovat HTML stránky, které v sobě ponesou odkazy na metody výše zmíněných kontrolerů. Uživatel tedy vůbec nemusí znát strukturu aplikace a jednotlivé metody kontolerů, protože mu budou nabídnuty prostřednictvím těchto stránek. Stránky mezi sebou budou logicky provázané tak, aby se uživatel mohl po aplikaci libovolně a pohodlně pohybovat.
 
 \section{Prezentační vrstva}
-Poslední vrstvou aplikace je tzv. prezentační vrstva. Jediným úkolem této vrstvy je na základě obdržených dat vygenerovat požadovanou HTML srtánku. Tato vrstva bude v naší aplikaci zastoupena jedinou třídou \verb|BaseView|. Vzhledem k dynamické povaze dat, které budeme v aplikaci zobrazovat, využijeme šablonovací systém \emph{Jinja2} \cite{jinja2}, který je pro Python dostupný. Tento systém nám umožní vytvoření jedné šablony, která bude následně použita k zobrazování více různých stránek. Stránka zobrazující detail souborového systému se bude vždy skládat ze stejných komponentů a bude mít stejné rozložení bez ohledu na to jaký souborový systém právě zobrazujeme. Šabloně předáme data specifická pro konkrétní souborový systém a následně vygeneruje výslednou HTML stránku.
-    \subsection{Třída BaseView}
-    Třída \verb|BaseView| bude mít jedinou metodu \verb|render_template()|, která vyplní požadovanou šablonu daty. Kontroléry logické vrstvy se tak mohou rozhodnout jakou šablonu chtějí vykreslit a která data mají být použita pro její naplnění. Výsledek je předán zpět do logické vrstvy, která se postará o jeho odeslání.
+Poslední vrstvou aplikace je tzv. prezentační vrstva. Jediným úkolem této vrstvy je na základě obdržených dat vygenerovat požadovanou HTML srtánku. Tato vrstva bude v naší aplikaci zastoupena jedinou třídou \verb|BaseView|. Vzhledem k dynamické povaze dat, které budeme v aplikaci zobrazovat, využijeme šablonovací systém \emph{Jinja2} \cite{jinja2}, který je pro Python dostupný. Tento systém nám umožní vytvoření jedné šablony, která bude následně použita k zobrazování více různých stránek. Stránka zobrazující detail souborového systému se bude vždy skládat ze stejných komponentů a bude mít stejné rozložení bez ohledu na to, jaký souborový systém právě zobrazujeme. Šabloně předáme data specifická pro konkrétní souborový systém a následně vygenerujeme výslednou HTML stránku.   
     \subsection{Jinja2}
-    Pro generování šablon třída \verb|BaseView| využívá modulu \emph{Jinja2}. Při vytváření instance této třídy dojde k inicializaci potřebných proměnných a stanovení adresáře, ze kterého se budou šablony načítat. Tento adresář se v našem případě bude jmenovat \emph{template} a bude se nacházet v kořenovém adresáři aplikace. Modul při každém požadavku na vykreslení šablony z tohoto adresáře dynamicky načte potřebnou šablonu. Ta je následně vyplněna daty a vrácena jako textový řetězec.
+    Generování šablon ve třídě \verb|BaseView| je zajištěno pomocí modulu \emph{Jinja2}. Při vytváření instance této třídy dojde k inicializaci tohoto modulu a stanovení adresáře, ze kterého se budou šablony načítat. Tento adresář se v našem případě bude jmenovat \emph{template} a bude se nacházet v kořenovém adresáři aplikace. Modul při každém požadavku na vykreslení šablony z tohoto adresáře dynamicky načte potřebnou šablonu. Ta je následně vyplněna daty a vrácena jako textový řetězec.
     \subsection{Google charts}
     Pro demonstraci dynamického zobrazování dat v HTML dokumentu využijeme jazyka JavaScript a technologie AJAX. Tato technologie nám umožní posílat HTTP požadavky z již načtené stránky v klientském webovém prohlížeči. V požadavku klasicky specifikujeme požadovanou URL adresu a odešleme ho webovému serveru. Server zpracuje požadavek klasickým způsobem a odpoví klientovi. V klientském prohlížeči data zpracujeme a dynamicky změníme část načtené stránky. Pro lepší práci s JavaScriptem budeme využívat knihovnu jQuery \cite{jquery} a data dynamická data budeme zobrazovat pomocí Google charts \cite{google}.
 
-    Součástí implementované verze aplikace je funkce pro dynamické zobrazování procentuálního využití procesoru. Hlavním zdrojem dynamických informací o systému je nástroj \emph{sar}.
+    Součástí implementované verze aplikace je funkce pro dynamické zobrazování procentuálního využití procesoru. Hlavním zdrojem dynamických informací o systému je nástroj \emph{sar}.    
+    \subsection{Bootstrap}
+    
+    
 
 \section{Rozšiřitelnost}
 Výsledná aplikace je díky MVC architektuře a třídám, které zajišťují dynamické načítání komponentů, snadno rozšiřitelná.
