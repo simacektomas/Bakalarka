@@ -2,6 +2,8 @@ Cílem této bakalářské práce bylo vytvořit graficky orientovaný administr
 
 Nástroj je implementován pomocí webového rozhraní, které se uživateli prezentuje pomocí jednotlivých HTML stránek. Uživatel se může po těchto stránkách libovolně pohybovat bez nutnosti hlubší znalostí architektury aplikace. Stránky jsou přenášeny prostřednictvím počítačové sítě mezi webovým serverm a klientským prohlížečem, a proto je aplikace dostupná i ze vzdáleného počítače.
 
+Aplikace umožňuje administrátorovi jednoduše a komfortně spravovat a sledovat souborový systém ZFS. Poskytuje funkce pro administraci, zobrazování okamžitého stavu ZFS nebo dynamické zobrazení procentuálního využití procesoru. Nástroj má dva režimy bezpečnosti, které povolují resp. zakazují práci se systémovým poolem. Administrátor může tyto režimy přepínat pomocí konfiguračního souboru. V poslední řadě nástroj umožňuje sledovat historii jednotlivých příkazů, které byly v ZFS provedeny.
+
 Při vývoji aplikace byl kladen důraz především na bezpečnost, jednoduchost používání a budoucí rozšiřitelnost. Bezpečnost přenosu dat mezi klientem a webovým serverem je zajišťována pomocí HTTPS protokolu, který data šifruje. Do aplikace je umožněn vstup pouze autentizovaným uživatelům, jelikož nástroj umožňuje provádět nebezpečné příkazy. Autentizace uživatelů se provádí oproti lokální databázi uložené v souboru.
 
 Celá aplikace byla integrována do operačního systému Solaris, pro který byl souborový systém ZFS původně vyvíjen. Integrace do systému umožňuje administrátorovi aplikaci jednoduše ovládat a v případě nějaké chyby mu poskytne informace potřebné k jejímu odstranění. Některé funkce a vlastnosti aplikace se dají nastavovat pomocí konfiguračních souborů. Tato možnost administrátorovi umožňuje aplikace přizpůsobit jeho požadavkům. Dále byl v operačním systému Solaris vytvořen speciální uživatel, pod kterým se výsledný nástroj spouští. Tento krok aplikaci zajišťuje práva k vykonávání potřebných příkazů a minimalizuje bezpečnostní rizika.
@@ -10,7 +12,7 @@ Výsledná implementace administrátorkého nástroje neobsahuje všechny funkce
 
 V budoucnu bylo možné aplikaci rozšířit o zbytek funkcí, které ZFS nabízí. Vzhledem ke struktuře aplikace by to neměl být větší problém. Výsledná implementace aplikace umožňuje správu jednoho souborového serveru. Vylepšení aplikace by mohlo spočívat ve správě více těchto serverů. Bylo by nutné centralizovat sběr dat a na jednotlivé souborové servery umístit sondy, které by zajišťovaly sběr dat.
 
-Pro usnadnění byl vytvořen balíček \emph{wzfsadm-i386.pkg}, který obsahuje všechny zdrojové kódy aplikace a zajišťuje celkovou instalaci nástroje se všemi potřebnými komponenty.
+Pro usnadnění instalace byl vytvořen balíček \emph{wzfsadm-i386.pkg}, který obsahuje všechny zdrojové kódy aplikace a zajišťuje celkovou instalaci nástroje se všemi potřebnými komponenty.
 
 Všechny cíle bakalářské práce a požadavky stanovené na aplikaci se podařilo splnit. Výsledná implementace administrátorského nástroje sloužícího pro správu souborového systému ZFS je dostupná na přiloženém médiu.
 
