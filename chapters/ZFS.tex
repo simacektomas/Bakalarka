@@ -3,7 +3,7 @@
 \section{Úvod}
     %NICM MOC
     Souborový systém Zettabyte byl původně vyvinut společností Sun Microsystems a následně integrován do operačního systémů Solaris od stejnojmenné společnosti.
-    Jak už to tak v dnešním světě bývá v roce 2010 společnost Oracle akvizicí společnosti Sun Microsystem získala operační systém Solaris a tím i vlastnictví ZFS \cite{suns}. V dnešní době tedy veškerý vývoj a podpora pro tyto systémy pochází právě od firmy Oracle \cite{guide}. Tyto dokumenty byly i hlavním zdrojem informací pro tuto bakalářskou práci.
+    Jak už to tak v dnešním světě bývá v roce 2010 společnost Oracle akvizicí společnosti Sun Microsystem získala operační systém Solaris a tím i vlastnictví ZFS \cite{suns}. V dnešní době tedy veškerý vývoj a podpora pro tyto systémy pochází právě od firmy Oracle. Oficiální dokumenty a návody od této firmy byly hlavním zdrojem informací pro tuto bakalářskou práci \cite{guide}.
 
     Systém byl původně navrhnut pro použití čistě v operační systém Solaris, s čímž se pojily i minimální požadavky pro provoz ZFS, které jsou představeny v následujícím seznamu \cite{requirements}.
     \begin{itemize}
@@ -101,7 +101,7 @@ Pokud v systému existuje pool jménem \verb|tank|, příkaz ho zničí bez ohle
 
 \section{Souborový systém}
 Druhým ze stavebních kamenů ZFS jsou samotné souborové systémy. Jak bylo zmíněno v kapitole \ref{fs}, souborový systém je způsob organizace dat do souborů v datových úložištích.
-Tradiční souborové systémy využívají k organizaci různých datových struktur. Souborový UFS využívá tzv. inodů, což je datová struktura držící atributy souboru a ukazatele na jednotlivé datové bloky \cite{ufs}. Souborový systém FAT k organizaci dat využívá tzv. file allocation table \cite{fat}. ZFS k tomuto účelu využívá stromové datové struktury, která je znázorněna na obrázku \ref{structure}. Jedná se v podstatě o systém odkazů, který zároveň udržuje informace o souborech a adresářích. Bloky s daty se nacházejí v listech stromu.
+Tradiční souborové systémy využívají k organizaci různých datových struktur. Některé systémy využívají tzv. inodů, což je datová struktura držící atributy souboru a ukazatele na jednotlivé datové bloky \cite{fs}. Souborový systém FAT k organizaci dat využívá tzv. file allocation table \cite{fs}. ZFS k tomuto účelu využívá stromové datové struktury, která je znázorněna na obrázku \ref{structure}. Jedná se v podstatě o systém odkazů, který zároveň udržuje informace o souborech a adresářích. Bloky s daty se nacházejí v listech stromu.
 \begin{figure}[!h]
     \caption{Struktura souborového systému ZFS}
     \label{structure}
@@ -234,7 +234,7 @@ Transakce může vypadat následovně. Nejprve se vytvoří kopie bloků, které
 
 Průběh transakce je naznačen na obrázku \ref{cow}. Celá transakce buď proběhne v pořádku nebo nebude přijata vůbec. Pokud v průběhu transakce dojde k výpadku, celý souborový systém zůstává konzistentní, protože původní data jsou stále na disku a nemohla se provést atomická operace, která by připojila nové data.
 \begin{figure}[h]
-    \caption{Demostrace copy on write}
+    \caption{Demonstrace copy on write}
     \label{cow}
     \includegraphics[scale=0.8]{cow.pdf}
 \end{figure}
