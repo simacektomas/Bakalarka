@@ -18,11 +18,11 @@
 
 \section{Struktura}
 Většina tradičních souborových systémů se váže na jedno konkrétní zařízení. Aby bylo možné spojit se souborovým systémem více zařízení, byl zaveden takzvaný volume manager, který souborovému systému poskytoval iluzi, že se jedná o samostatné zařízení \cite{traditional}. Ve skutečnosti se pod touto vrstvou může skrývat více disků, které se tváří jako jeden. ZFS se v tomto směru vydalo svojí vlastní cestou a zařízení agreguje do takzvaných poolů, které slouží jako datový základ pro jednotlivé souborové systémy.
-\begin{figure}[!h]
-    \caption{Agregace zařízení do poolu}
-    \label{agregation}
+\begin{figure}    
     \centering
     \includegraphics[scale=0.8]{agregation.pdf}
+    \caption{Agregace zařízení do poolu}
+    \label{agregation}
 \end{figure}
 \section{Pool}
 Souborový systém ZFS se skládá ze dvou hlavních stavebních kamenů. Prvním z nich je takzvaný pool. V terminologii ZFS je to logické sdružení virtuálních zařízení, které popisuje rozložení a fyzické vlastnosti těchto zařízení \cite{terminology}. Pool je tedy spojení fyzických nebo virtuálních zařízení, které poskytuje základ pro souborové systémy ZFS.
@@ -101,11 +101,11 @@ Pokud v systému existuje pool jménem \verb|tank|, příkaz ho zničí bez ohle
 \section{Souborový systém}
 Druhým ze stavebních kamenů ZFS jsou samotné souborové systémy. Jak bylo zmíněno v kapitole \ref{fs}, souborový systém je způsob organizace dat do souborů v datových úložištích.
 Tradiční souborové systémy využívají k organizaci různých datových struktur. Některé systémy využívají tzv. inodů, což je datová struktura držící atributy souboru a ukazatele na jednotlivé datové bloky \cite{fs}. Souborový systém FAT k organizaci dat využívá tzv. file allocation table \cite{fs}. ZFS k tomuto účelu využívá stromové datové struktury, která je znázorněna na obrázku \ref{structure}. Jedná se v podstatě o systém odkazů, který zároveň udržuje informace o souborech a adresářích. Bloky s daty se nacházejí v listech stromu.
-\begin{figure}[!h]
-    \caption{Struktura souborového systému ZFS}
-    \label{structure}
+\begin{figure}    
     \centering
     \includegraphics[scale=0.8]{zfsstructure.pdf}
+    \caption{Struktura souborového systému ZFS}
+    \label{structure}
 \end{figure}
 
 Tato stromová struktura přináší zajímavé výhody, které budou podrobněji popsány v dalších kapitolách.
@@ -121,11 +121,11 @@ rpool  12.1G  18.2G  4.85M  /rpool
 Pokud by zmíněný souborový systém neexistoval, příkaz by vrátil chybovou hlášku.
 
 Pool tedy tvoří hlavní uzel v této hierarchické posloupnosti a všechny souborové systémy vytvořené nad tímto poolem jsou jeho potomkem. V jednom poolu můžeme vytvořit více souborových systémů a také je do sebe můžeme libovolně vnořovat. Nejlépe si můžeme tuto hierarchii souborových systémů ukázat na obrázku \ref{fshierarchy}, kde můžeme vidět jak se do sebe jednotlivé souborové systémy vnořují.
-\begin{figure}[h]
-    \caption{Hierarchie souborových systémů ZFS}
-    \label{fshierarchy}
+\begin{figure}    
     \centering
     \includegraphics[scale=0.8]{hierarchy.pdf}
+    \caption{Hierarchie souborových systémů ZFS}
+    \label{fshierarchy}
 \end{figure}
 
 \subsection{Vlastnosti souborového systému}
@@ -174,11 +174,11 @@ Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reserv
 
 Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation} jsou vyznačeny na obrázku \ref{quotavsreserv}.
 %% Obrázek
-\begin{figure}[h]
-    \caption{Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation}}
-    \label{quotavsreserv}
+\begin{figure}   
     \centering
     \includegraphics[scale=0.8]{quota.pdf}
+    \caption{Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation}}
+    \label{quotavsreserv}
 \end{figure}
 %% Uživatelské a skupinové kvóty
 
@@ -216,10 +216,10 @@ Deduplikace datových bloků vyžaduje oproti deduplikaci souborů vyšší vyu�
 V poslední řadě existuje deduplikace na úrovni bajtů, která je ze všech uvedených úrovní nejnáročnější na využití výpočetních prostředků. Tato možnost se používá jen ve speciálních případech.
 
 ZFS z výše uvedených možností nabízí právě deduplikaci na úrovni datových bloků, protože tato jednotka deduplikace přináší nejvíce výhod v obecných případech použití \cite{dedup}. Na obrázku \ref{blockdedup} můžeme vidět porovnání souborového systému při zapnuté a vypnuté vlastnosti deduplikace.
-\begin{figure}[!h]
+\begin{figure}    
+    \includegraphics[scale=0.8]{dedup.pdf}
     \caption{Ukázka deduplikce na úrovni datový bloků}
     \label{blockdedup}
-    \includegraphics[scale=0.8]{dedup.pdf}
 \end{figure}
 \section{Konzistence}
 \label{consitence}
@@ -232,10 +232,11 @@ ZFS přichází s transakčním systémem a technikou copy on write. Tato techni
 Transakce může vypadat následovně. Nejprve se vytvoří kopie bloků, které mají být změněny. V těchto kopiích dojde k vlastní změně dat, zatímco původní data jsou stále na disku a nejsou nijak změněna. Následně se provede kopie potřebných metadat, které se týkají měněných datových bloků. Tyto metadata jsou následně přepočítána podle nových datových bloků a konečně v poslední řadě se provede atomická operace, která připojí větev s novými resp. změněnými bloky do stromu souborového systémů. Stará data jsou smazána.
 
 Průběh transakce je naznačen na obrázku \ref{cow}. Celá transakce buď proběhne v pořádku nebo nebude přijata vůbec. Pokud v průběhu transakce dojde k výpadku, celý souborový systém zůstává konzistentní, protože původní data jsou stále na disku a nemohla se provést atomická operace, která by připojila nové data.
-\begin{figure}[h]
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.8]{cow.pdf}
     \caption{Demonstrace copy on write}
     \label{cow}
-    \includegraphics[scale=0.8]{cow.pdf}
 \end{figure}
 \section{Integrita dat}
 \label{checksum}
@@ -272,10 +273,11 @@ ZFS snapshot je stav daného souborového systému v čase, kdy byl snapshot po�
 Díky stromové architektuře souborového systému ZFS je pořizování snapshotů velice elegantní a nenáročné. Pro vytvoření můžeme použít příkaz \verb|zfs snapshot filesystem@snapshot|, kde \emph{filesystem} je jméno souborového systémů, jehož stav chceme zachytit a \emph{snapshot} je pojmenování konkrétního stavu tohoto systému.
 
 Po provedení příkazu si ZFS zapamatuje odkaz na vrchol souborového systému, jehož snapshot tvoříme. Tento odkaz se stane hlavním kořenem snapshotu jakožto nového souborového systému. Jelikož snapshot je souborový systém určený pouze ke čtení, nemůžeme pomocí něj změnit data v aktivním souborovém systému. Po vytvoření snapshotu je jeho velikost nulová, protože se provedlo pouze zapamatování odkazu a nebyly vytvořeny žádné kopie. Pokud se ovšem data v aktivním souborovém systému změní, je nutné, aby snapshot stále odkazoval na stará data. Toho docílíme tak, že stará data zkopírujeme a zvětšíme tak velikost snapshotu \cite{snapshot}. Rozšiřování velikosti snapshotu tedy závisí na množství změněných dat od chvíle, kdy byl snapshot vytvořen. Proces vytváření snapshotu a rozšiřování jeho velikosti je názorně ukázán na obrázku \ref{snapshotproces}.
-\begin{figure}[h]
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.8]{snapshot.pdf}
     \caption{Vytváření snapshotu}
     \label{snapshotproces}
-    \includegraphics[scale=0.8]{snapshot.pdf}
 \end{figure}
 
 Rekurzivní tvorba snapshotů se provádí rychle pomocí jedné atomické operace. Snapshoty jsou vytvořeny naráz všechny dohromady nebo nejsou vytvořeny vůbec. Výhodou atomické operace je fakt, že data ve všech snapshotech jsou konzistentní vzhledem k jednomu časovému okamžiku \cite{snapshot}.
