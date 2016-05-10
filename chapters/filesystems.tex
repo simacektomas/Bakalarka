@@ -1,8 +1,7 @@
 V úvodu této kapitoly je uvedena definice souborového systému, která je následována výčtem nejznámějších zástupců souborových systémů. V závěru této kapitoly porovnáme několik vlastností vybraných souborových systémů.
 \section{Souborový systém}
     \label{fs}
-    Souborový systém označuje způsob, kterým se organizují data v datových úložištích. Jak už název napovídá, data jsou v úložišti organizována do souborů \cite{fs}.
-    Tento systém si o každém souboru udržuje informace, aby bylo později možné zjistit, kde se soubor nachází nebo jak je velký. Dále tento systém umožňuje tyto data číst, měnit nebo vytvářet.
+    Souborový systém označuje způsob, kterým se organizují data v datových úložištích. Jak už název napovídá, data jsou v úložišti organizována do souborů. Soubory umožňují ukládání informací na disku a adresáře tyto informace umožňují hierarchicky uspořádat \cite{fs}. Tento systém si o každém souboru udržuje informace, aby bylo později možné zjistit, kde se soubor nachází nebo jak je velký. Dále tento systém umožňuje tyto data číst, měnit nebo vytvářet.
 
     V dnešní době existuje mnoho způsobů organizace dat, a proto máme k dispozici i mnoho různých souborových systémů. Ty se liší nejenom ve způsobu jak data organizují,
     ale také v možnostech jak velké datové úložiště dokáží adresovat nebo jak velké soubory dokáží spravovat. Dalším rozlišovacím prvkem může být závislost na operačním systémů.
@@ -21,19 +20,16 @@ V úvodu této kapitoly je uvedena definice souborového systému, která je ná
     \end{itemize}
 
 \section{Porovnání}
-    V tabulce \ref{fscompare} můžeme vidět porovnání vybraných souborových systémů z hlediska maximální délky názvu souboru, maximální velikosti souboru a maximální velikosti svazku, který dokáží spravovat \cite{data}. Hodnoty, které jsou uvedeny v rozmezí od do jsou závislé na velikosti datového bloku.
+    V tabulce \ref{fscompare} můžeme vidět porovnání vybraných souborových systémů z hlediska velikosti diskové adresy, velikosti datových bloků a maximální velikosti svazku, který dokáží spravovat \cite{fs}.
     \begin{table}
     \centering
-    \caption{Porovnání systémů souborů}
+    \caption{Porovnání souborových systémů}
     \label{fscompare}
     \begin{tabular}{|c|c|c|c|}
     \hline
-    Název & Max. délka názvu & Max. velikost souboru & Max. velikost svazku \\ \hline
-    UFS & 255b & 4 GiB až 256 TiB & 256 TiB \\ \hline
-    ext2 & 255b & 16GB až 2TB & 4TB až 32TB \\ \hline
-    ext3 & 255b & 16GB až 2TB & 4TB až 32TB \\ \hline
-    ext4 & 255b & 16TB & 1EB \\ \hline
-    NTFS & 255b & 16TB & 16EB \\ \hline
-    ZFS & 255b & 16EB & 16EB \\ \hline
+    Název & Velikost diskové adresy & Velikost datového bloku & Max. velikost svazku \\ \hline   
+    FAT-32 & 28b & 4KB-32KB & 2TB \\ \hline
+    NTFS & 64b & 512B-64KB & 16EB \\ \hline
+    ZFS & 128b & 512B-128KB & 256ZB \\ \hline
     \end{tabular}
     \end{table} 
