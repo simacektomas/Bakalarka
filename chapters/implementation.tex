@@ -1,4 +1,4 @@
-Obsahem následující kapitoly je popis vlastní implementace nástroje pro správu ZFS. Pozornost je věnována především spolupráci jednotlivých vrstev aplikace, stručnému popisu hlavních tříd a integraci aplikace do operačního systému Solaris.
+Obsahem následující kapitoly je popis vla\-stní implementace nástroje pro sprá\-vu ZFS. Pozornost je věnována především spolupráci jednotlivých vrstev aplikace, stručnému popisu hlavních tříd a integraci aplikace do operačního systému Solaris.
 \section{Python}
 Než začneme s implementací, je nutné si ujasnit v jakém jazyce budeme aplikaci psát.
 
@@ -29,10 +29,10 @@ Při návrhu aplikace jsme zvolili webové rozhraní. Pro implementaci tohoto ř
 
     Ke spuštění serveru stačí vytvořit instanci třídy \verb|WzfsadmServer|, které předáme port a adresu síťového rozhraní a následně na této instanci zavolat metodu \verb|serve_forever()|. Od této chvíle bude server naslouchat na stanovené adrese a portu dokud nebude ukončen.
     \subsubsection{Třída WzfsadmRequestHandler}
-    Hlavní součástí webového serveru je již zmíněná třída \verb|WzfsadmRequestHandler|. Tato třída je potomkem třídy \verb|BaseHTTPRequestHandler|, která je součástí standardní knihovny \verb|BaseHTTPServer| a zajišťuje komunikaci pomocí HTTP protokolu. Součástí této třídy bude i implementace autentizační metody Basic.
+    Hlavní součástí webového serveru je zmíněná třída \verb|WzfsadmRequestHandler|. Tato třída je potomkem třídy \verb|BaseHTTPRequestHandler|, která je součástí standardní knihovny \verb|BaseHTTPServer| a zajišťuje komunikaci pomocí HTTP protokolu. Součástí této třídy bude i implementace autentizační metody Basic.
 
     Při ověřování požadavku ověříme, jestli klient poslal autentizační údaje. Na všechny požadavky, které nebudou obsahovat hlavičku \emph{Authorization} se správnými uživatelskými údaji, odpovíme HTTP kódem 401(Unauthorize).
-    K ověření validity uživatelského jména a hesla budeme využívat třídu \verb|Authenticator|.
+    K ověření validity uživatelských údajů budeme využívat třídu \verb|Authenticator|.
 
     V případě, že požadavek úspěšně projde procesem autentizace, dojde ke zpracování požadované HTTP metody. Jelikož pro naše účely naší aplikace budou stačit prostředky, které nabízí metoda GET, ostatní metody nebude náš webový server podporovat. V případě, že klient pošle požadavek na jinou HTTP metodu, server odpoví kódem 501 (Not Implemented).
 
@@ -70,9 +70,7 @@ Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
     \label{package}
     Všechny moduly a jejich součásti budou součástí adresářového stromu aplikace. Budou se nacházet v adresáři \emph{app/model/modules} a jejich struktura bude odpovídat struktuře na obrázku \ref{module}.
     \begin{figure}
-      \centering
-      \caption{Struktura modulu}
-      \label{module}
+      \centering     
       \dirtree{%
 		.1 app.\DTcomment{Adresář v kořenovém adresáři aplikace}.
         .2 model.\DTcomment{Adresář datové vrstvy aplikace}.
@@ -81,6 +79,8 @@ Z tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
         .5 \_\_init\_\_.py.\DTcomment{Soubor pro inicializaci modulu}.
         .5 SystemSource.py.\DTcomment{Hlavní třída modulu}.
 	  }
+      \caption{Struktura modulu}
+      \label{module}
     \end{figure}
 
     Pro popis struktury adresáře modulu na obrázku \ref{module} budeme používat modul \emph{System}. Každý modul bude uložen ve svém adresáři, jehož jméno se bude skládat ze jména modulu a klíčového slova \emph{Module}. V první řadě adresář modulu musí obsahovat soubor \verb|__init__.py|. Tento soubor říká interpretu pythonu, že se jedná o modul a umožní nám ho jednoduše načítat.
@@ -158,7 +158,7 @@ Celá aplikace bude zaregistrována v SMF, abychom docílili jednoduché manipul
 \subsection{Role}
 Role se v operačním systému Solaris vytvářejí pomocí příkazu \verb|roleadd|. Naše role se bude jmenovat \emph{wzfsadm} a nebude mít žádný domovský adresář. Nebudeme ji přiřazovat ani heslo. Tím dosáhneme toho, že se na ní bude moci přepnout pouze uživatel \emph{root} a nikdo jiný. Další výhodou je, že se na roli nedá přihlásit přímo při přihlašování do operačního systému, což omezuje některá bezpečnostní rizika.
 
-Pomocí RBAC přiřadíme roli bezpečnostní profil, který bude sdružovat práva na vykonávání potřebných příkazů. V systémovém souboru \emph{/etc/\-security/\-prof\_attr.d/\-core-os}, který obsahuje definice bezpečnostních profilů, vytvoříme nový profil \emph{wzfsadm}. Na tento profil se budeme odkazovat při vytváření práv na vykonávání příkazů v souboru \emph{/etc/\-security/\-exec\_attr.d/\-core-os}. Na konec tohoto souboru vložíme seznam příkazů, které bude majitel tohoto profilu moci vykonávat s identitou uživatele \emph{root}. Pro ukázku je zde uveden jeden řádek, který budeme přidávat na konec souboru s právy.
+Pomocí RBAC přiřadíme roli bezpečnostní profil, který bude sdružovat práva na vykonávání potřebných příkazů. V systémovém souboru \emph{/etc/\-se\-cu\-ri\-ty/\-prof\_attr.d/\-core-os}, který obsahuje definice bezpečnostních profilů, vytvoříme nový profil \emph{wzfsadm}. Na tento profil se budeme odkazovat při vytváření práv na vykonávání příkazů v souboru \emph{/etc/\-se\-cu\-ri\-ty/\-exec\_attr.d/\-core-os}. Na konec tohoto souboru vložíme seznam příkazů, které bude majitel tohoto profilu moci vykonávat s identitou uživatele \emph{root}. Pro ukázku je zde uveden jeden řádek, který budeme přidávat na konec souboru s právy.
 \begin{verbatim}
 wzfsadm:solaris:cmd:RO::/usr/sbin/zfs:euid=0
 \end{verbatim}
