@@ -16,6 +16,8 @@
 \usepackage{listings}
 
 
+
+
 % \usepackage{amsmath} %advanced maths
 % \usepackage{amssymb} %additional math symbols
 
@@ -87,15 +89,20 @@
 % \printglossaries
 \begin{description}
     \item[AJAX] Asynchronous Javascript And XML
-	\item[HTML] HyperText Markup Language
+    \item[FAT] File Alocation Table
+    \item[HTML] HyperText Markup Language
     \item[HTTP] HyperText Transfer Protocol
     \item[HTTPS] HyperText Transfer Protocol Secure
+    \item[MVC] Model View Controller	
     \item[PID] Process ID	
     \item[RAID] Redundant Array of Independent Disks
     \item[RBAC] Role-Based Access Control
     \item[RFC] Request For Comments
-    \item[SMF] Solaris Management Facility        
-	\item[XML] Extensible Markup Language
+    \item[SMF] Solaris Management Facility
+    \item[SSL] Secure Socket Layer
+    \item[URL] Uniform Resource Locator
+    \item[VM] Volume Manager
+    \item[XML] Extensible Markup Language
     \item[ZFS] Zettabyte File System
 \end{description}
 
@@ -108,14 +115,13 @@
 
 \begin{figure}
 	\dirtree{%
-		.1 readme.txt\DTcomment{stručný popis obsahu CD}.
-		.1 exe\DTcomment{adresář se spustitelnou formou implementace}.
-		.1 src.
-		.2 impl\DTcomment{zdrojové kódy implementace}.
-		.2 thesis\DTcomment{zdrojová forma práce ve formátu \LaTeX{}}.
-		.1 text\DTcomment{text práce}.
-		.2 thesis.pdf\DTcomment{text práce ve formátu PDF}.
-		.2 thesis.ps\DTcomment{text práce ve formátu PS}.
+		.1 readme.txt\DTcomment{stručný popis obsahu CD}.		
+		.1 package\DTcomment{zdrojové kódy instalačního balíčku}.	
+        .2 wzfsamd\DTcomment{zdrojové kódy aplikace wzfsadm}.
+        .2 wzfsamd-i386.pkg\DTcomment{instalační balíček aplikace wzfsadm}.	        
+		.1 text.
+		.2 BP\_Simacek\_Tomas\_2016.pdf\DTcomment{text práce ve formátu PDF}.
+		.2 src\DTcomment{zdrojová soubory práce ve formátu \LaTeX{}}.
 	}
 \end{figure}
 
