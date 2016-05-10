@@ -41,7 +41,8 @@
 \chapterstyle{madsen}
 
 \RequirePackage{babel}[2008/07/06]
-\RequirePackage{hyperref}
+\RequirePackage[unicode]{hyperref}
+\RequirePackage{pdfpages}
 
 \RequirePackage{chngcntr}
 \counterwithout*{footnote}{chapter}
@@ -194,7 +195,7 @@
 		}\else\if\@lang2{%
 		Prehlasujem, \v ze som predlo\v zen\'u pr\'acu vypracoval(a) samostatne a \v ze som uviedol(uviedla) v\v setky informa\v cn\'e zdroje v~s\'ulade s~Metodick\'ym pokynom o~etickej pr\'iprave vysoko\v skolsk\'ych z\'avere\v cn\'ych pr\'ac.
 
-		Beriem na vedomie, \v ze sa na moju pr\'acu vz\v tahuj\'u pr\'ava a povinnosti vypl\'yvaj\'uce zo z\'akona \v c.~121/2000~Sb, autorsk\'eho z\'akona, v znen\'\i\ neskor\v s\'\i ch predpisov. V s\'ulade s ustanoven\'\i m \S{}~46 odst.~6 tohoto z\'akona t\'ymto ude\v lujem bezv\'yhradn\'e opr\'avnenie (licenciu) k~pou\v z\'\i vaniu tejto mojej pr\'ace, a to vr\'atane v\v setk\'ych po\v c\'\i ta\v cov\'ych programov ktor\'e s\'u jej s\'u\v cas\v tou alebo pr\'\i lohou a tie\v z v\v setkej ich dokument\'acie (\v dalej len \uv{Dielo}), a to v\v setk\'ym osob\'am, ktor\'e si praj\'u Dielo pou\v z\'iva\v t. Tieto osoby s\'u opr\'avnen\'e Dielo pou\v z\'\i va\v t ak\'ymko\v lvek 
+		Beriem na vedomie, \v ze sa na moju pr\'acu vz\v tahuj\'u pr\'ava a povinnosti vypl\'yvaj\'uce zo z\'akona \v c.~121/2000~Sb, autorsk\'eho z\'akona, v znen\'\i\ neskor\v s\'\i ch predpisov. V s\'ulade s ustanoven\'\i m \S{}~46 odst.~6 tohoto z\'akona t\'ymto ude\v lujem bezv\'yhradn\'e opr\'avnenie (licenciu) k~pou\v z\'\i vaniu tejto mojej pr\'ace, a to vr\'atane v\v setk\'ych po\v c\'\i ta\v cov\'ych programov ktor\'e s\'u jej s\'u\v cas\v tou alebo pr\'\i lohou a tie\v z v\v setkej ich dokument\'acie (\v dalej len \uv{Dielo}), a to v\v setk\'ym osob\'am, ktor\'e si praj\'u Dielo pou\v z\'iva\v t. Tieto osoby s\'u opr\'avnen\'e Dielo pou\v z\'\i va\v t ak\'ymko\v lvek
 sp\^ osobom, ktor\'y nezni\v zuje hodnotu Diela, ale len pre~nez\'arobkov\'e \'u\v cely. Toto opr\'avnenie je \v casovo, \'uzemne a mno\v zstevne ne\-ob\-me\-dze\-n\'e.
 		}\else{%
 		I hereby declare that the presented thesis is my own work and that I have cited all sources of information in accordance with the Guideline for adhering to ethical principles when elaborating an academic final thesis.
@@ -224,9 +225,9 @@ uvedenou licenci, se v\v sak zavazuje ud\v elit ke ka\v zd\'emu d\'\i{}lu, kter\
 		}\else\if\@lang2{%
 		Prehlasujem, \v ze som predlo\v zen\'u pr\'acu vypracoval(a) samostatne a \v ze som uviedol(uviedla) v\v setky informa\v cn\'e zdroje v~s\'ulade s~Metodick\'ym pokynom o~etickej pr\'iprave vysoko\v skolsk\'ych z\'avere\v cn\'ych pr\'ac.
 
-		Beriem na vedomie, \v ze sa na moju pr\'acu vz\v tahuj\'u pr\'ava a povinnosti vypl\'yvaj\'uce zo z\'akona \v c.~121/2000~Sb., autorsk\'eho z\'akona, v znen\'\i\ neskor\v s\'\i ch predpisov.  V~s\'ulade s ustanoven\'\i m \S{}~46 odst.~6 tohoto z\'akona t\'ymto ude\v lujem bezv\'yhradn\'e opr\'avnenie (licenciu) k~u\v z\'\i vaniu tejto mojej pr\'ace, a to vr\'atane v\v setk\'ych po\v c\'\i ta\v cov\'ych programov ktor\'e s\'u jej s\'u\v cas\v tou alebo pr\'\i lohou a tie\v z v\v setkej ich dokument\'acie (\v dalej len \uv{Dielo}), a to v\v setk\'ym osob\'am, ktor\'e si praj\'u Dielo u\v z\'iva\v t. 
+		Beriem na vedomie, \v ze sa na moju pr\'acu vz\v tahuj\'u pr\'ava a povinnosti vypl\'yvaj\'uce zo z\'akona \v c.~121/2000~Sb., autorsk\'eho z\'akona, v znen\'\i\ neskor\v s\'\i ch predpisov.  V~s\'ulade s ustanoven\'\i m \S{}~46 odst.~6 tohoto z\'akona t\'ymto ude\v lujem bezv\'yhradn\'e opr\'avnenie (licenciu) k~u\v z\'\i vaniu tejto mojej pr\'ace, a to vr\'atane v\v setk\'ych po\v c\'\i ta\v cov\'ych programov ktor\'e s\'u jej s\'u\v cas\v tou alebo pr\'\i lohou a tie\v z v\v setkej ich dokument\'acie (\v dalej len \uv{Dielo}), a to v\v setk\'ym osob\'am, ktor\'e si praj\'u Dielo u\v z\'iva\v t.
 
-Tieto osoby s\'u opr\'avnen\'e Dielo pou\v z\'\i va\v t ak\'ymko\v lvek 
+Tieto osoby s\'u opr\'avnen\'e Dielo pou\v z\'\i va\v t ak\'ymko\v lvek
 sp\^ osobom, ktor\'y nezni\v zuje hodnotu Diela, a za ak\'ymko\v lvek \'u\v celom (vr\'atane komer\v cn\'eho vyu\v zitia). Toto opr\'avnenie je \v casovo, \'uzemne a mno\v zstevne neobmedzen\'e.
 Ka\v zd\'a osoba, ktor\'a vyu\v zije vy\v s\v sie uveden\'u licenciu, sa v\v sak zav\"azuje priradi\v t ka\v zd\'emu dielu, ktor\'e vznikne (\v co i len \v ciasto\v cne) na z\'aklade Diela, \'upravou
 Diela, spojen\'\i m Diela s~in\'ym dielom, zaraden\'\i m Diela do diela s\'uborn\'eho \v ci zpracovan\'\i m Diela (vr\'atane prekladu), licenciu aspo\v n vo vy\v s\v sie uvedenom rozsahu
@@ -234,7 +235,7 @@ a~z\'arove\v n sa zav\"azuje spr\'\i stupni\v t zdrojov\'y k\'od tak\'eho diela 
 		}\else{%
 		I hereby declare that the presented thesis is my own work and that I have cited all sources of information in accordance with the Guideline for adhering to ethical principles when elaborating an academic final thesis.
 		
-		I acknowledge that my thesis is subject to the rights and obligations stipulated by the Act No.~121/2000 Coll., the Copyright Act, as amended. In accordance with Article~46(6) of the Act, I hereby grant a nonexclusive authorization (license) to utilize this thesis, including any and all computer programs incorporated therein or attached thereto and all corresponding documentation (hereinafter collectively referred to as the ``Work''), to any and all persons that wish to utilize the Work. Such persons are entitled to use the Work in any way (including for-profit purposes) that does not detract from its value. This authorization is not limited in terms of time, location and quantity. However, all persons that makes use of the above license shall be obliged to grant a license at least in the same scope as defined above with respect to each and every work that is created (wholly or in part) based on the Work, by modifying the Work, by combining the Work with another work, by including the Work in a collection 
+		I acknowledge that my thesis is subject to the rights and obligations stipulated by the Act No.~121/2000 Coll., the Copyright Act, as amended. In accordance with Article~46(6) of the Act, I hereby grant a nonexclusive authorization (license) to utilize this thesis, including any and all computer programs incorporated therein or attached thereto and all corresponding documentation (hereinafter collectively referred to as the ``Work''), to any and all persons that wish to utilize the Work. Such persons are entitled to use the Work in any way (including for-profit purposes) that does not detract from its value. This authorization is not limited in terms of time, location and quantity. However, all persons that makes use of the above license shall be obliged to grant a license at least in the same scope as defined above with respect to each and every work that is created (wholly or in part) based on the Work, by modifying the Work, by combining the Work with another work, by including the Work in a collection
 of works or by adapting the Work (including translation), and at the same time make available the source code of such work at least in a way and scope that are comparable to the way and scope in which the source code of the Work is made available.
 		}\fi\fi
 	}\@declarationOptionSelectedtrue\fi
@@ -245,7 +246,7 @@ of works or by adapting the Work (including translation), and at the same time m
 		}\else\if\@lang2{%
 		Prehlasujem, \v ze som predlo\v zen\'u pr\'acu vypracoval(a) samostatne a \v ze som uviedol(uviedla) v\v setky informa\v cn\'e zdroje v~s\'ulade s~Metodick\'ym pokynom o~etickej pr\'iprave vysoko\v skolsk\'ych z\'avere\v cn\'ych pr\'ac.
 
-		Beriem na vedomie, \v ze sa na moju pr\'acu vz\v tahuj\'u pr\'ava a povinnosti vypl\'yvaj\'uce zo z\'akona \v c.~121/2000~Sb., autorsk\'eho z\'akona, v znen\'\i\ neskor\v s\'\i ch predpisov.  V~s\'ulade s ustanoven\'\i m \S{}~46 odst.~6 tohoto z\'akona t\'ymto ude\v lujem bezv\'yhradn\'e opr\'avnenie (licenciu) k~u\v z\'\i vaniu tejto mojej pr\'ace, a to vr\'atane v\v setk\'ych po\v c\'\i ta\v cov\'ych programov ktor\'e s\'u jej s\'u\v cas\v tou alebo pr\'\i lohou a tie\v z v\v setkej ich dokument\'acie (\v dalej len \uv{Dielo}), a to v\v setk\'ym osob\'am, ktor\'e si praj\'u Dielo u\v z\'iva\v t. Tieto osoby s\'u opr\'avnen\'e Dielo pou\v z\'\i va\v t ak\'ymko\v lvek 
+		Beriem na vedomie, \v ze sa na moju pr\'acu vz\v tahuj\'u pr\'ava a povinnosti vypl\'yvaj\'uce zo z\'akona \v c.~121/2000~Sb., autorsk\'eho z\'akona, v znen\'\i\ neskor\v s\'\i ch predpisov.  V~s\'ulade s ustanoven\'\i m \S{}~46 odst.~6 tohoto z\'akona t\'ymto ude\v lujem bezv\'yhradn\'e opr\'avnenie (licenciu) k~u\v z\'\i vaniu tejto mojej pr\'ace, a to vr\'atane v\v setk\'ych po\v c\'\i ta\v cov\'ych programov ktor\'e s\'u jej s\'u\v cas\v tou alebo pr\'\i lohou a tie\v z v\v setkej ich dokument\'acie (\v dalej len \uv{Dielo}), a to v\v setk\'ym osob\'am, ktor\'e si praj\'u Dielo u\v z\'iva\v t. Tieto osoby s\'u opr\'avnen\'e Dielo pou\v z\'\i va\v t ak\'ymko\v lvek
 sp\^ osobom, ktor\'y nezni\v zuje hodnotu Diela (vr\'atane komer\v cn\'eho vyu\v zitia). Toto opr\'avnenie je \v casovo, \'uzemne a~mno\v zstevne neobmedzen\'e.
 		}\else{
 		I hereby declare that the presented thesis is my own work and that I have cited all sources of information in accordance with the Guideline for adhering to ethical principles when elaborating an academic final thesis.
@@ -264,7 +265,7 @@ sp\^ osobom, ktor\'y nezni\v zuje hodnotu Diela (vr\'atane komer\v cn\'eho vyu\v
 		}\else{
 		I hereby declare that the presented thesis is my own work and that I have cited all sources of information in accordance with the Guideline for adhering to ethical principles when elaborating an academic final thesis.
 		
-		I acknowledge that my thesis is subject to the rights and obligations stipulated by the Act No.~121/2000 Coll., the Copyright Act, as amended. I further declare that I have concluded an agreement with the Czech Technical University in Prague, on the basis of which the Czech Technical University in Prague has waived its right to conclude a license agreement on the utilization of this thesis as school work under the provisions of Article~60(1) of the Act. This fact shall not affect the provisions of Article~47b of the Act No.~111/1998 Coll., the Higher Education Act, as amended. 
+		I acknowledge that my thesis is subject to the rights and obligations stipulated by the Act No.~121/2000 Coll., the Copyright Act, as amended. I further declare that I have concluded an agreement with the Czech Technical University in Prague, on the basis of which the Czech Technical University in Prague has waived its right to conclude a license agreement on the utilization of this thesis as school work under the provisions of Article~60(1) of the Act. This fact shall not affect the provisions of Article~47b of the Act No.~111/1998 Coll., the Higher Education Act, as amended.
 		}\fi\fi
 	}\@declarationOptionSelectedtrue\fi
 	
@@ -440,8 +441,8 @@ sp\^ osobom, ktor\'y nezni\v zuje hodnotu Diela (vr\'atane komer\v cn\'eho vyu\v
 
 \AfterEndPreamble{
 	\frontmatter
-	\thispagestyle{empty}
-	\if\@lang1{Sem vlo{\v z}te zad{\' a}n{\' i} Va{\v s}{\' i} pr{\' a}ce.}\else\if\@lang2{Sem vlo{\v z}te zadanie Va{\v s}ej pr{\' a}ce.}\else{Insert here your thesis' task.}\fi\fi
+    \includepdf[pages={1}]{zadani.pdf}
+
 
 	\pagestyle{plain}
 	\cleardoublepage
