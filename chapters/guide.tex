@@ -1,19 +1,19 @@
 \section{Požadavky}
-Instalaci aplikace je nutné provádět na operačním systému Solaris, který využívá souborový systém ZFS. To znamená, že v systému budou dostupné příkazy \verb|zfs| a \verb|zpool|. Aplikace je napsána v jazyku Python 2.7, a proto je nutné mít nainstalovaný jeho interpret. Pro vytvoření balíčku \emph{wzfsadm-i386.pkg} ze zdrojových kódů je potřeba program \verb|make|. Virtuální obraz operačního systému Solaris \cite{vb}, který byl použitý pro testování a vývoj aplikace, všechny tyto požadavky splňuje již v základu.
+Instalaci aplikace je nutné provádět na operačním systému Solaris, který využívá souborový systém ZFS. To znamená, že v~systému budou dostupné příkazy \verb|zfs| a \verb|zpool|. Aplikace je napsána v~jazyku Python 2.7, a proto je nutné mít nainstalovaný jeho interpret. Pro vytvoření balíčku \emph{wzfsadm-i386.pkg} ze zdrojových kódů je potřeba program \verb|make|. Virtuální obraz operačního systému Solaris \cite{vb}, který byl použitý pro testování a vývoj aplikace, všechny tyto požadavky splňuje již v~základu.
 \section{Instalace}
-Vytvoření balíčku ze zdrojových kódů aplikace se provádí pomocí \verb|make pkg| v adresáři se zdrojovými kódy balíčku. Po provedení předchozího příkazu se vytvoří balíček \emph{wzfsadm-i386.pkg}, který nainstalujeme příkazem \verb|pkgadd -d|. Instalaci aplikace je nutné provádět pod uživatelem \emph{root}, protože součástí instalace jsou i skripty, které připraví potřebnou roli, zaregistrují aplikaci v SMF a nainstalují šablonovací modul \emph{Jinja2}.
+Vytvoření balíčku ze zdrojových kódů aplikace se provádí pomocí \verb|make pkg| v~adresáři se zdrojovými kódy balíčku. Po provedení předchozího příkazu se vytvoří balíček \emph{wzfsadm-i386.pkg}, který nainstalujeme příkazem \verb|pkgadd -d|. Instalaci aplikace je nutné provádět pod uživatelem \emph{root}, protože součástí instalace jsou i skripty, které připraví potřebnou roli, zaregistrují aplikaci v~SMF a nainstalují šablonovací modul \emph{Jinja2}.
 \section{Spuštění}
-V případě bezproblémové instalace by se aplikace měla automaticky spustit. Přesvědčit se o tom můžeme pomocí následujícího příkazu, který nám ukazuje, jestli je daná služba spuštěná či nikoliv.
+V~případě bezproblémové instalace by se aplikace měla automaticky spustit. Přesvědčit se o~tom můžeme pomocí následujícího příkazu, který nám ukazuje, jestli je daná služba spuštěná či nikoliv.
 \begin{verbatim}
 # svcs -a | grep wzfsadm
 online  9:25:22 svc:/system/filesystem/wzfsadm:default
 \end{verbatim}
-Aplikaci můžeme ovládat pomocí příkazu \verb|svcadm enable/disable wzfsadm| stejně jako jiné služby. Informace o běhu aplikace, chybách a varováních jsou uloženy v souborech \emph{default\_log} a \emph{error\_log}, které se nacházejí v adresáři \emph{/var/log/wzfsadm}.
+Aplikaci můžeme ovládat pomocí příkazu \verb|svcadm enable/disable wzfsadm| stejně jako jiné služby. Informace o~běhu aplikace, chybách a varováních jsou uloženy v~souborech \emph{default\_log} a \emph{error\_log}, které se nacházejí v~adresáři \emph{/var/log/wzfsadm}.
 
 Podobně můžeme aplikaci spouštět přímo pomocí skriptu \emph{run.py}. Tento skript je součástí kořenového adresáře aplikace \emph{/usr/wzfsadm}. Zde si musíme dát pozor na práva uživatele, pod kterým aplikaci spouštíme.
 
 \section{Konfigurace}
-Všechny konfigurační soubory aplikace budou uloženy v adresáři \emph{/etc/wzfsadm}. Aplikace se řídí hlavním konfiguračním souborem \emph{main.conf}, který v základu vypadá následovně.
+Všechny konfigurační soubory aplikace budou uloženy v~adresáři \emph{/etc/wzfsadm}. Aplikace se řídí hlavním konfiguračním souborem \emph{main.conf}, který v~základu vypadá následovně.
 \begin{verbatim}
 [server]
 address = 0.0.0.0
@@ -31,12 +31,12 @@ user_database = /etc/wzfsadm/.auth_file
 [app]
 safe_mode = yes
 \end{verbatim}
-Pod direktivou \verb|server| lze nastavovat síťové rozhraní a port, na kterém bude aplikace přijímat spojení. Položka \verb|address_filter| slouží ke stanovení IP adres, které budou moci k aplikaci přistupovat. Direktiva \verb|ssl| stanovuje, zda má být využito šifrování komunikačního kanálu a určuje cestu k souborům s certifikátem a privátním klíčem. Položka \verb|user_database| představuje soubor s databází uživatelských jmen a hesel, které slouží k ověřování identity uživatelů. Poslední položka \verb|safe_mode| určuje, zda bude aplikace zobrazovat informace o systémovém poolu. V případě nedostupnosti hlavního konfiguračního souboru \emph{main.conf} jsou použity předefinované hodnoty.
+Pod direktivou \verb|server| lze nastavovat síťové rozhraní a port, na kterém bude aplikace přijímat spojení. Položka \verb|address_filter| slouží ke stanovení IP adres, které budou moci k~aplikaci přistupovat. Direktiva \verb|ssl| stanovuje, zda má být využito šifrování komunikačního kanálu a určuje cestu k~souborům s~certifikátem a privátním klíčem. Položka \verb|user_database| představuje soubor s~databází uživatelských jmen a hesel, které slouží k~ověřování identity uživatelů. Poslední položka \verb|safe_mode| určuje, zda bude aplikace zobrazovat informace o~systémovém poolu. V~případě nedostupnosti hlavního konfiguračního souboru \emph{main.conf} jsou použity předefinované hodnoty.
 
 Druhý konfigurační soubor \verb|poolmodule.conf| se týká implementovaného modulu \verb|PoolModule|. Obsahuje jedinou položku \verb|file_sources|, která určuje adresář pro soubory sloužící jako zdroje pro ZFS.
 
 \section{Přístup do aplikace}
-Do spuštěné aplikace se připojíme pomocí webového prohlížeče, do kterého zadáme adresu, na které je aplikace dostupná. Standardně je to \url{https://localhost:4443}. Při vstupu do aplikace bude uživatel požádán o zadání uživatelského jména a hesla. Počáteční uživatelské jméno je \emph{admin} a heslo také \emph{admin}. Administrátor může tyto údaje modifikovat v souboru s uživatelskou databází, která se standardně nachází v souboru \emph{/etc/wzfsadm/.auth\_file}. Při modifikaci tohoto souboru je nutné dodržet jeho strukturu.
+Do spuštěné aplikace se připojíme pomocí webového prohlížeče, do kterého zadáme adresu, na které je aplikace dostupná. Standardně je to \url{https://localhost:4443}. Při vstupu do aplikace bude uživatel požádán o~zadání uživatelského jména a hesla. Počáteční uživatelské jméno je \emph{admin} a heslo také \emph{admin}. Administrátor může tyto údaje modifikovat v~souboru s~uživatelskou databází, která se standardně nachází v~souboru \emph{/etc/wzfsadm/.auth\_file}. Při modifikaci tohoto souboru je nutné dodržet jeho strukturu.
 
 \section{Odstranění aplikace}
 Aplikaci lze odstranit pomocí příkazu \verb|pkgrm wzfsadm|, který ze systému odstraní vytvořenou roli společně se všemi zdrojovými kódy aplikace. 
