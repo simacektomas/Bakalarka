@@ -6,11 +6,11 @@ V~operační systému Solaris interpretuje příkazovou řádku shell. ZFS je so
 
 Proto sáhneme po skriptovacím jazyku Python, který nám umožní implementaci objektově orientované architektury MVC.
 \section{HTTP Server}
-Při návrhu aplikace jsme zvolili webové rozhraní. Pro implementaci tohoto řešení budeme muset zvolit nějaký webový server, který nám bude 0 komunikaci mezi naší aplikací a webovým klientem (prohlížečem). Od našeho webového serveru budeme požadovat podporu HTTPS protokolu a možnost autentizace uživatelů pomocí metody Basic protokolu HTTP.
+Při návrhu aplikace jsme zvolili webové rozhraní. Pro implementaci tohoto řešení budeme muset zvolit nějaký webový server, který nám bude zprostředkovávat komunikaci mezi naší aplikací a webovým klientem (prohlížečem). Od našeho webového serveru budeme požadovat podporu HTTPS protokolu a možnost autentizace uživatelů pomocí metody Basic protokolu HTTP.
     \subsection{Implementované řešení}
     Mezi nejznámější a nejrozšířenější zástupce webových serverů patří například \emph{Apache}. Tato komplexní implementace webového serveru by jistě dokázala splnit všechny požadavky, které požadujeme. Nevýhodou této volby je však zbytečná obsáhlost a nutnost složitější konfigurace. Z~tohoto důvodu zvolíme vlastní řešení webového serveru, které bude přesně odpovídat požadavkům aplikace.
     \subsection{Vlastní řešení webového serveru}
-    Implementace vlastního řešení webového serveru bude využívat dvou standardních knihoven jazyka Python a bude se skládat z~1 tříd:
+    Implementace vlastního řešení webového serveru bude využívat dvou standardních knihoven jazyka Python a bude se skládat z~následujících tříd:
     \begin{itemize}
       \item \verb|WzfsadmServer|
       \item \verb|WzfsadmRequestHandler|
@@ -54,7 +54,7 @@ Při požadavku na tuto adresu dojde k~vytvoření instance třídy \verb|zpool|
     Hlavním účelem třídy \verb|App| je tedy zpracovat URL adresu a následně vytvořit třídu, která se postará o~zpracování požadavku.
 
 \section{Datová vrstva}
-Datová vrstva je v~3 MVC architektury vrstva, která pracuje s~daty. Naše aplikace si přímo žádná data držet nebude, protože ZFS si všechny datové struktury spravuje sám. Datová vrstva naší aplikace bude tedy 0 komunikaci a tok dat mezi ZFS a logickou vrstvou aplikace. Třídy této vrstvy budou využívat rozhraní ZFS. Metody těchto tříd na základě dat obdržených z~logické vrstvy sestaví potřebný ZFS příkaz a pomocí shellu ho vykonají na příkazové řádce. Výsledek operace a požadovaná data pak předají zpět do logické vrstvy, kde se zpracují.
+Datová vrstva je v~terminologii MVC architektury vrstva, která pracuje s~daty. Naše aplikace si přímo žádná data držet nebude, protože ZFS si všechny datové struktury spravuje sám. Datová vrstva naší aplikace bude tedy zprostředkovávat komunikaci a tok dat mezi ZFS a logickou vrstvou aplikace. Třídy této vrstvy budou využívat rozhraní ZFS. Metody těchto tříd na základě dat obdržených z~logické vrstvy sestaví potřebný ZFS příkaz a pomocí shellu ho vykonají na příkazové řádce. Výsledek operace a požadovaná data pak předají zpět do logické vrstvy, kde se zpracují.
 
 Jelikož nástroj nebude implementovat všechny funkce souborového systému ZFS, bylo by vhodné navrhnout tuto vrstvu způsobem, který by umožňoval jednoduché rozšíření její funkcionality.
 Z~tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou specializovat na určitou oblast administrace ZFS. V~každém z~modulů bude hlavní třída, která bude poskytovat logické vrstvě rozhraní pro komunikaci se souborovým systémem. V~okamžiku, kdy logická vrstva bude chtít komunikovat se souborovým systémem, bude požadovaný modul (jeho hlavní třída) dynamicky načten do aplikace.
@@ -117,7 +117,7 @@ Hlavní vrstvou aplikace bude logická vrstva. Tato část bude mít za úkol pr
 
 Třídy logické vrstvy se obecně nazývají kontroléry. Kontroléry budou obsahovat metody, které budou představovat jednotlivé akce nabízené uživateli. Na základě směrování popsaného v~\ref{route} dojde k~dynamickému načtení kontroléru a vyvolání požadované metody. Volaná metoda přesně definuje, které moduly datové vrstvy budou načteny a jak obdržená data zpracuje.
     \subsection{Kontrolér}
-    V~adresářové struktuře aplikace opět stanovíme adresář, kde najdeme jednotlivé definice 2. V~tomto případě veškeré zdrojové kódy tříd logické vrstvy najdeme v~adresáři \emph{app/controllers}.
+    V~adresářové struktuře aplikace opět stanovíme adresář, kde najdeme jednotlivé definice kontrolérů. V~tomto případě veškeré zdrojové kódy tříd logické vrstvy najdeme v~adresáři \emph{app/controllers}.
 
     Právě odtud bude třída \emph{App}, která se stará o~směrování, dynamicky načítat požadované kontroléry. Stejně jako v~případě datové vrstvy nám dynamické načítání umožní načítat pouze ten kontrolér, který potřebujeme ke zpracování daného požadavku a opět ušetříme operační paměť.
 
@@ -132,11 +132,11 @@ Třídy logické vrstvy se obecně nazývají kontroléry. Kontroléry budou obs
 
     Třída \verb|DashboardConroller| bude zajišťovat zobrazování úvodní stránky aplikace. Obsahem této stránky bude přehled základních informací týkajících se souborového systému obecně, vytvořených poolů nebo například všech dostupných souborových systémů.
 
-    Stránky, které se týkají administrace souborových systémů v~ZFS, bude řídit třída \verb|DatasetConroller|. Tento 0 bude umožňovat zobrazit detailní informace o~jednotlivých souborových systémech a bude také nabízet funkce pro jejich administraci. Nebude tedy chybět možnost souborové systémy ničit, vytvářet, nastavovat nebo vytvářet jejich snapshoty.
+    Stránky, které se týkají administrace souborových systémů v~ZFS, bude řídit třída \verb|DatasetConroller|. Tento kontrolér bude umožňovat zobrazit detailní informace o~jednotlivých souborových systémech a bude také nabízet funkce pro jejich administraci. Nebude tedy chybět možnost souborové systémy ničit, vytvářet, nastavovat nebo vytvářet jejich snapshoty.
 
     V~případě kontrolérů \verb|DeviceConroller| a \verb|ZpoolConroller| se bude jednat o~podobné funkce týkající se správy zařízení a ZFS poolů.
 
-    Výsledná aplikace bude generovat HTML stránky, které v~sobě ponesou odkazy na metody výše zmíněných kontrolérů. Uživatel tedy vůbec nemusí znát strukturu aplikace a jednotlivé metody 0, protože mu budou nabídnuty prostřednictvím těchto stránek. Stránky mezi sebou budou logicky provázané tak, aby se uživatel mohl po aplikaci libovolně a pohodlně pohybovat.
+    Výsledná aplikace bude generovat HTML stránky, které v~sobě ponesou odkazy na metody výše zmíněných kontrolérů. Uživatel tedy vůbec nemusí znát strukturu aplikace a jednotlivé metody kontrolérů, protože mu budou nabídnuty prostřednictvím těchto stránek. Stránky mezi sebou budou logicky provázané tak, aby se uživatel mohl po aplikaci libovolně a pohodlně pohybovat.
     
     \begin{figure}
         \centering
@@ -148,7 +148,7 @@ Třídy logické vrstvy se obecně nazývají kontroléry. Kontroléry budou obs
     Struktura logické vrstvy aplikace je představena na obrázku \ref{logiclayer}, kde můžeme vidět jednotlivé kontroléry. Na obrázku je také znázorněno načítání modulů datové vrstvy pomocí třídy \verb|ModuleInterface|.
 
 \section{Prezentační vrstva}
-Poslední vrstvou aplikace je tzv. prezentační vrstva. Jediným úkolem této vrstvy je na základě obdržených dat vygenerovat požadovanou HTML 4. Tato vrstva bude v~naší aplikaci zastoupena jedinou třídou \verb|BaseView|. Vzhledem k~dynamické povaze dat, které budeme v~aplikaci zobrazovat, využijeme šablonovací systém \emph{Jinja2} \cite{jinja2}, který je pro Python dostupný. Tento systém nám umožní vytvoření univerzálních šablon, které budou použity k~zobrazování více různých stránek. Stránka zobrazující detail souborového systému se bude vždy skládat ze stejných komponentů a bude mít stejné rozložení bez ohledu na to, jaký souborový systém právě zobrazujeme. Šabloně předáme data specifická pro konkrétní souborový systém a následně vygenerujeme výslednou HTML stránku.
+Poslední vrstvou aplikace je tzv. prezentační vrstva. Jediným úkolem této vrstvy je na základě obdržených dat vygenerovat požadovanou HTML stránku. Tato vrstva bude v~naší aplikaci zastoupena jedinou třídou \verb|BaseView|. Vzhledem k~dynamické povaze dat, které budeme v~aplikaci zobrazovat, využijeme šablonovací systém \emph{Jinja2} \cite{jinja2}, který je pro Python dostupný. Tento systém nám umožní vytvoření univerzálních šablon, které budou použity k~zobrazování více různých stránek. Stránka zobrazující detail souborového systému se bude vždy skládat ze stejných komponentů a bude mít stejné rozložení bez ohledu na to, jaký souborový systém právě zobrazujeme. Šabloně předáme data specifická pro konkrétní souborový systém a následně vygenerujeme výslednou HTML stránku.
     \subsection{Jinja2}
     Generování šablon ve třídě \verb|BaseView| je zajištěno pomocí modulu \emph{Jinja2}. Při vytváření instance této třídy dojde k~inicializaci tohoto modulu a stanovení adresáře, ze kterého se budou šablony načítat. Tento adresář se v~našem případě bude jmenovat \emph{template} a bude se nacházet v~kořenovém adresáři aplikace. Modul při každém požadavku na vykreslení šablony z~tohoto adresáře dynamicky načte potřebnou šablonu. Ta je následně vyplněna daty a vrácena jako textový řetězec.
     \subsection{Google charts}
@@ -156,7 +156,7 @@ Poslední vrstvou aplikace je tzv. prezentační vrstva. Jediným úkolem této 
 
     Součástí implementované verze aplikace je funkce pro dynamické zobrazování procentuálního využití procesoru. Hlavním zdrojem dynamických informací o~systému je nástroj \emph{sar}.
     \subsection{Bootstrap}
-    Designu webových stránek bylo dosaženo s~pomocí webového frameworku Bootstrap. Tento framework 0 rychlou tvorbu responzivních webových stránek. Hlavní důvod volby tohoto frameworku je možnost jednoduchého rozložení elementů stránky do řádků a sloupců \cite{bootstrap}.
+    Designu webových stránek bylo dosaženo s~pomocí webového frameworku Bootstrap. Tento framework umožňuje rychlou tvorbu responzivních webových stránek. Hlavní důvod volby tohoto frameworku je možnost jednoduchého rozložení elementů stránky do řádků a sloupců \cite{bootstrap}.
 
 
 \section{Rozšiřitelnost}
