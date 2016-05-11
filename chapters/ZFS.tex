@@ -17,7 +17,7 @@
     Díky zveřejnění zdrojových kódů ZFS, došlo k~adaptaci souborového systému i na jiné operační systémy než je Solaris. Hlavním příkladem jsou systémy s~Linuxovým jádrem jako je například Debian, Fedora nebo CentOS.
 
 \section{Struktura}
-Většina tradičních souborových systémů se váže na jedno konkrétní zařízení. Aby bylo možné spojit se souborovým systémem více zařízení, byl zaveden tzv. volume manager, který souborovému systému poskytoval iluzi, že se jedná o~samostatné zařízení \cite{traditional}. Ve skutečnosti se pod touto vrstvou může skrývat více disků, které se tváří jako jeden. ZFS se v~tomto směru vydalo svojí vlastní cestou a zařízení agreguje do takzvaných poolů, které slouží jako datový základ pro jednotlivé souborové systémy.
+Většina tradičních souborových systémů se váže na jedno konkrétní zařízení. Aby bylo možné spojit se souborovým systémem více zařízení, byl zaveden tzv. volume manager, který souborovému systému poskytoval iluzi, že se jedná o~samostatné zařízení \cite{traditional}. Ve skutečnosti se pod touto vrstvou může skrývat více disků, které se tváří jako jeden. ZFS se v~tomto směru vydalo svojí vlastní cestou a zařízení agreguje do takzvaných poolů, které slouží jako datový základ pro jednotlivé souborové systémy. Tento proces je naznačen na obrázku \ref{agregation}.
 \begin{figure}
     \centering
     \includegraphics[scale=0.8]{agregation.pdf}
@@ -55,7 +55,7 @@ Pool můžeme v~systému ZFS kdykoli dynamicky vytvořit bez potřeby zásahu do
 \begin{verbatim}
 # zpool create tank c1t2d0 c2t1d0
 \end{verbatim}
-V~případě dostupnosti disků c1t2d0 a c2t1d0, tento příkaz vytvoří pool jménem \verb|tank|, do kterého tyto disky přiřadí. Výsledná velikost bude součtem velikostí těchto disků. Takto vytvořený pool neobsahuje žádnou redundanci a v~případě selhání disku, může dojít ke ztrátě dat. Druhým typem, které ZFS podporuje, jsou redundantní pooly.
+V~případě dostupnosti disků c1t2d0 a c2t1d0, tento příkaz vytvoří pool jménem \verb|tank|, do kterého tyto disky přiřadí. Výsledná velikost bude součtem velikostí těchto disků. Takto vytvořený pool neobsahuje žádnou redundanci a v~případě selhání disku může dojít ke ztrátě dat. Druhým typem, které ZFS podporuje, jsou redundantní pooly.
 \subsection{Zrcadlení}
 Prvním druhem redundantních poolů jsou ty, které obsahují virtuální zařízení \emph{mirror} nebo-li zrcadlení. Tento typ virtuálního zařízení můžeme pomocí ZFS vytvořit nad dvěma a více zařízeními. Uvnitř zařízení dochází k~replikaci dat na všechny disky v~zařízení. Výsledná kapacita virtuálního zařízení je tedy rovna kapacitě jednoho disku. Pokud zrcadlení vytvoříme nad třemi disky, nakonec budou data na všech třech discích stejná a v~případě výpadku dvou z~nich o~data nepřijdeme. Jiná situace je samozřejmě v~případě výpadku všech tří disků najednou. Zrcadlení nám v~tomto případě nepomůže a všechny data ztratíme. Nicméně pravděpodobnost, že dojde k~výpadku všech tří disků najednou je malá.
 
@@ -91,7 +91,7 @@ Pokud pool obsahuje redundantní zařízení \emph{mirror} nebo \emph{raidz}, je
 Využití souboru jako zdroje pro ZFS pool se v~praxi téměř nevyužívá. Znamená to přidání další vrstvy mezi ZFS a samotný zdroj dat. Hlavní nevýhodou tohoto způsobu je značné zpomalení procesu čtení a zápisu dat, ale na druhou stranu se tato volba výborně hodí pro testování funkcí souborového systému ZFS.
 
 \subsection{Zrušení poolu}
-Stejně jako můžeme dynamicky pool vytvářet a rozšiřovat, můžeme pool i kdykoli zničit a uvolnit tak prostředky, které využíval. Tyto prostředky jsou ihned k~dispozici a můžeme z~nich vytvořit nový pool. Jelikož všechny souborové systémy vytvořené nad poolem sdílejí jeho prostředky, jsou tyto souborové systémy zničeny spolu s~tímto poolem. Ke zničení poolu, který jsme dříve vytvořili, můžeme použít následující příkaz.
+Stejně jako můžeme dynamicky pool vytvářet a rozšiřovat, můžeme pool i kdykoli zničit a uvolnit tak prostředky, které využíval. Tyto prostředky jsou ihned k~dispozici a můžeme z~nich vytvořit nový pool. Jelikož všechny souborové systémy vytvořené nad poolem sdílejí jeho prostředky, jsou tyto systémy zničeny spolu s~tímto poolem. Ke zničení poolu, který jsme dříve vytvořili, můžeme použít následující příkaz.
 \begin{verbatim}
 # zpool -r destroy tank
 \end{verbatim}
@@ -149,23 +149,23 @@ Při vytváření je možné specifikovat, které vlastnosti daný souborový sy
 # zfs create -o enryption=on tank/pool/pool
 \end{verbatim}
 \subsection{Zrušení souborového systému}
-Rušení souborových systému je v~ZFS stejně snadné jako jejich vytváření. Je důležité mít na paměti, že zrušením souborového systému, který má nějaké potomky, zrušíme i všechny vnořené souborové systémy. Pro zrušení souborového systému již stačí použít příkaz \verb|zfs destroy| s~příslušným identifikátorem, popřípadě přepínačem \verb|-r| pro zrušení všech potomků.
-\subsection{Kvóty}
+Rušení souborových systému je v~ZFS stejně snadné jako jejich vytváření. Je důležité mít na paměti, že zrušením souborového systému, který má nějaké potomky, zrušíme i všechny vnořené souborové systémy. Pro zrušení souborového systému již stačí použít příkaz \verb|zfs destroy| s~příslušným identifikátorem popřípadě přepínačem \verb|-r| pro zrušení všech potomků.
+\section{Kvóty}
 \label{quota}
 
 Kvóty v~ZFS umožňují administrátorovi spravovat limity souborových systémů týkajících se využitého místa. Tyto limity omezují možnosti využití dostupného místa v~souborovém systému. Kvóty můžeme rozdělit do následujících kategorií podle toho, koho omezují:
 \begin{itemize}
-  \item Obecné - týkající se souborového systému
-  \item Uživatelské - omezují jednotlivé uživatele
-  \item Skupinové - omezují celé skupiny uživatelů
+  \item \textbf{Obecné} - týkající se souborového systému
+  \item \textbf{Uživatelské} - omezují jednotlivé uživatele
+  \item \textbf{Skupinové} - omezují celé skupiny uživatelů
 \end{itemize}
 
-Obecné kvóty omezují místo, které může souborový systém využít jako celek. K~tomuto účelu v~ZFS slouží vlastnost \emph{quota}, která stanovuje limit místa, které může daný souborový systém využít. V~tomto případě se do využitého místa započítává i místo spotřebované potomky \cite{quotas}. Pokud bychom chtěli omezit souborový systém bez ohledu na to kolik místa využijí jeho potomci, musíme použít vlastnost \emph{refquota}.
+\textbf{Obecné kvóty} omezují místo, které může souborový systém využít jako celek. K~tomuto účelu v~ZFS slouží vlastnost \emph{quota}, která stanovuje limit místa, které může daný souborový systém využít. V~tomto případě se do využitého místa započítává i místo spotřebované potomky \cite{quotas}. Pokud bychom chtěli omezit souborový systém bez ohledu na to kolik místa využijí jeho potomci, musíme použít vlastnost \emph{refquota}.
 %% Rezervace
 
 Vzhledem k~faktu, že souborové systémy v~jednom poolu sdílí diskové místo, ZFS přichází s~vlastností \emph{reservation}. Tato vlastnost oproti kvótám garantuje souborovému systému diskové místo dané velikosti \cite{quotas}. Stejně jako v~případě vlastnosti \emph{quota} je toto místo vyhrazeno pro souborový systém a všechny jeho potomky. Pokud bychom chtěli garantovat místo přímo souborovému systému, bez ohledu na to kolik místa využívají jeho potomci, musíme využít vlastnost \emph{refreservation}.
 
-Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reservation} resp. \emph{refreservation} jsou vlastnostmi souborového systému, můžeme je nastavit stejně jako kteroukoli jinou vlastnost pomocí následujících příkazů.
+Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reservation} resp. \emph{refreservation} jsou vlastnostmi souborového systému, můžeme je nastavit stejně jako kteroukoli jinou vlastnost pomocí následujících příkazů:
 \begin{verbatim}
 # zfs set quota=10G rpool/export/home
 # zfs set reservation=10G rpool/export/home
@@ -181,7 +181,7 @@ Vztahy mezi vlastnostmi \emph{quota} a \emph{reservation} jsou vyznačeny na obr
 \end{figure}
 %% Uživatelské a skupinové kvóty
 
-Dále můžeme omezit využití diskového místa pomocí uživatelských resp. skupinových kvót. Tyto kvóty limitují uživatele resp. skupinu v~tom, kolik místa můžou v~souborovém systému využít. Každý souborový systém má svůj vlastní \emph{userspace} resp. \emph{groupspace}, kde si udržuje informace o~tom, jaké mají limity jednotlivé skupiny resp. uživatelé.
+Dále můžeme omezit využití diskového místa pomocí \textbf{uživatelských} resp. \textbf{skupinových kvót}. Tyto kvóty limitují uživatele resp. skupinu v~tom, kolik místa můžou v~souborovém systému využít. Každý souborový systém má svůj vlastní \emph{userspace} resp. \emph{groupspace}, kde si udržuje informace o~tom, jaké mají limity jednotlivé skupiny resp. uživatelé.
 Administrátor si může hodnoty uživatelských resp. skupinových kvót vypsat pomocí \verb|zfs userspace| resp. \verb|zfs groupspace|. Následující příkaz demonstruje, jak vypadá výpis uživatelských kvót pro domovský adresář.
 \begin{verbatim}
 # zfs userspace rpool/export/home/simactom
@@ -201,18 +201,18 @@ ZFS nabízí ještě vlastnost \emph{defaultuserquota} resp. \emph{defaultgroupq
 \label{dedup}
 Jednou z~další vlastností, které ZFS nabízí, je deduplikace. Jak již z~názvu vyplývá, jedná se o~proces, který zabraňuje duplikaci stejných dat na disku a tím šetří i místo. Deduplikace se obecně dá rozdělit na následující úrovně:
 \begin{itemize}
-  \item Úroveň souborů
-  \item Úroveň datových bloků
-  \item Úroveň bajtů
+  \item \textbf{Úroveň souborů}
+  \item \textbf{Úroveň datových bloků}
+  \item \textbf{Úroveň bajtů}
 \end{itemize}
 
 K~identifikaci stejných dat se v~ZFS využívá hašovací funkce. Z~porovnávaných dat jsou vytvořeny haše, které jsou následně porovnány. Pokud se haše rovnají a používáme kvalitní hašovací funkci, můžeme s~velkou pravděpodobností říci, že jsou porovnávaná data opravdu totožná \cite{dedup}. Pokud je administrátor z~nějakého důvodu stále nedůvěřivý, může u~vlastnosti deduplikace nastavit hodnotu \emph{verify}, která zajistí celkové porovnání datových částí bajt po bajtu.
 
-Deduplikace na úrovni souborů využívá nejméně systémových prostředků, protože se data hašují a porovnávají po velkých částech. Na druhou stranu sebemenší změna v~souboru vyžaduje přepočítání haše, který se již bude lišit od původního \cite{dedup}. Souborový systém pak rozpozná, že se soubory liší a uspořené místo bude zaplněno změněným souborem.
+Deduplikace \textbf{souborů} využívá nejméně systémových prostředků, protože se data hašují a porovnávají po velkých částech. Na druhou stranu sebemenší změna v~souboru vyžaduje přepočítání haše, který se již bude lišit od původního \cite{dedup}. Souborový systém pak rozpozná, že se soubory liší a uspořené místo bude zaplněno změněným souborem.
 
-Deduplikace datových bloků vyžaduje oproti deduplikaci souborů vyšší využití systémových prostředků, ale na druhou stranu přináší v~jistých situacích lepší úsporu místa \cite{dedup}.
+Deduplikace \textbf{datových bloků} vyžaduje oproti deduplikaci souborů vyšší využití systémových prostředků, ale na druhou stranu přináší v~jistých situacích lepší úsporu místa \cite{dedup}.
 
-V~poslední řadě existuje deduplikace na úrovni bajtů, která je ze všech uvedených úrovní nejnáročnější na využití výpočetních prostředků. Tato možnost se používá jen ve speciálních případech.
+V~poslední řadě existuje deduplikace na úrovni \textbf{bajtů}, která je ze všech uvedených úrovní nejnáročnější na využití výpočetních prostředků. Tato možnost se používá jen ve speciálních případech.
 
 ZFS z~výše uvedených možností nabízí právě deduplikaci na úrovni datových bloků, protože tato jednotka deduplikace přináší nejvíce výhod v~obecných případech použití \cite{dedup}. Na obrázku \ref{blockdedup} můžeme vidět porovnání souborového systému při zapnuté a vypnuté vlastnosti deduplikace.
 \begin{figure}
