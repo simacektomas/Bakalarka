@@ -3,17 +3,17 @@ V úvodu této kapitoly je uvedena definice souborového systému, která je ná
     \label{fs}
     Souborový systém označuje způsob, kterým se organizují data v datových úložištích. Jak už název napovídá, data jsou v úložišti organizována do souborů. Soubory umožňují ukládání informací na disku a adresáře tyto informace umožňují hierarchicky uspořádat \cite{fs}. Tento systém si o každém souboru udržuje informace, aby bylo později možné zjistit, kde se soubor nachází nebo jak je velký. Dále tento systém umožňuje tyto data číst, měnit nebo vytvářet.
 
-    V dnešní době existuje mnoho způsobů organizace dat, a proto máme k dispozici i mnoho různých souborových systémů. Ty se liší nejenom ve způsobu jak data organizují,
-    ale také v možnostech jak velké datové úložiště dokáží adresovat nebo jak velké soubory dokáží spravovat. Dalším rozlišovacím prvkem může být závislost na operačním systémů.
-    Jelikož nejrozšířenější operační systémy jsou systémy typu Unix a Windows, uvedeme několik typických zástupců souborových systémů pro tyto platformy.
+    V dnešní době existuje mnoho způsobů organizace dat, a proto máme k dispozici i mnoho různých souborových systémů. Ty se liší nejenom ve způsobu organizace dat,
+    ale také ve velikosti datového úložiště, které dokáží adresovat. Dalším rozlišovacím prvkem může být závislost na operačním systému.
+    Jelikož nejrozšířenější operační systémy jsou systémy typu UNIX a Windows, uvedeme několik typických zástupců souborových systémů pro tyto platformy.
 
-    Mezi nejznámější zástupce unixových souborových systémů patří následující systémy.
+    Mezi nejznámější zástupce UNIXových souborových systémů patří následující systémy:
     \begin{itemize}
       \item UFS
       \item ext2, ext3, ext4
     \end{itemize}
 
-    Naopak mezi nejznámější zástupce souborových systémů pro platformu Windows se řadí následující systémy.
+    Mezi nejznámější zástupce souborových systémů pro platformu Windows se řadí následující systémy:
     \begin{itemize}
       \item FAT12, FAT16, FAT32
       \item NTFS
@@ -27,7 +27,7 @@ V úvodu této kapitoly je uvedena definice souborového systému, která je ná
     \label{fscompare}
     \begin{tabular}{|c|c|c|c|}
     \hline
-    Název & Velikost diskové adresy & Velikost datového bloku & Max. velikost svazku \\ \hline   
+    Název & Velikost adresy & Velikost bloku & Max. velikost svazku \\ \hline
     FAT-32 & 28b & 4KB-32KB & 2TB \\ \hline
     NTFS & 64b & 512B-64KB & 16EB \\ \hline
     ZFS & 128b & 512B-128KB & 256ZB \\ \hline
