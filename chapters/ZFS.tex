@@ -142,7 +142,7 @@ Díky hierarchické struktuře se dá jednoduše zjistit, kdo je předkem danéh
 Pokud chceme explicitně říci, aby některá vlastnost byla převzata od rodiče, můžeme použít příkaz \verb|zfs inherit property rpool|. Tento příkaz odnastaví danou vlastnost ze souborového systému a pokusí se převzít hodnotu z~rodiče. Pokud v~žádném z~rodičů není hodnota nastavena explicitně, je použita standardní hodnota \cite{inheriting}.
 \subsection{Vytváření souborového systému}
 \label{createfs}
-Vytváření souborových systémů v~ZFS je velice jednoduché. Jediné co potřebujeme k~vytvoření souborového systému je jednoznačný identifikátor. ZFS umožňuje vytvoření těchto systémů pomocí příkazu \verb|zfs create pool|, kde \emph{pool} je 0. Pokud neexistují všichni předci, je potřeba použít přepínač \verb|-p|, jinak příkaz selže.
+Vytváření souborových systémů v~ZFS je velice jednoduché. Jediné co potřebujeme k~vytvoření souborového systému je jednoznačný identifikátor. ZFS umožňuje vytvoření těchto systémů pomocí příkazu \verb|zfs create pool|, kde \emph{pool} je identifikátor. Pokud neexistují všichni předci, je potřeba použít přepínač \verb|-p|, jinak příkaz selže.
 
 Při vytváření je možné specifikovat, které vlastnosti daný souborový systém bude mít. Mimo jiné existují vlastnosti, které se dají nastavit pouze při vytváření. Po vytvoření souborového systému jsou tyto vlastnosti vedeny jako read-only a nedají se změnit. Příkladem může být vlastnost \emph{encryption}, která umožňuje šifrování souborového systému pomocí různých kryptografických funkcí. Pro využití této vlastnosti můžeme při vytváření poolu použít následující příkaz.
 \begin{verbatim}
@@ -165,7 +165,7 @@ Obecné kvóty omezují místo, které může souborový systém využít jako c
 
 Vzhledem k~faktu, že souborové systémy v~jednom poolu sdílí diskové místo, ZFS přichází s~vlastností \emph{reservation}. Tato vlastnost oproti kvótám garantuje souborovému systému diskové místo dané velikosti \cite{quotas}. Stejně jako v~případě vlastnosti \emph{quota} je toto místo vyhrazeno pro souborový systém a všechny jeho potomky. Pokud bychom chtěli garantovat místo přímo souborovému systému, bez ohledu na to kolik místa využívají jeho potomci, musíme využít vlastnost \emph{refreservation}.
 
-Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reservation} resp. \emph{refreservation} jsou vlastnostmi souborového systému, můžeme je nastavit stejně jako kteroukoliv jinou vlastnost pomocí následujících příkazů.
+Jelikož vlastnosti \emph{quota} resp. \emph{refquota} a vlastnosti \emph{reservation} resp. \emph{refreservation} jsou vlastnostmi souborového systému, můžeme je nastavit stejně jako kteroukoli jinou vlastnost pomocí následujících příkazů.
 \begin{verbatim}
 # zfs set quota=10G rpool/export/home
 # zfs set reservation=10G rpool/export/home
@@ -202,7 +202,7 @@ ZFS nabízí ještě vlastnost \emph{defaultuserquota} resp. \emph{defaultgroupq
 Jednou z~další vlastností, které ZFS nabízí, je deduplikace. Jak již z~názvu vyplývá, jedná se o~proces, který zabraňuje duplikaci stejných dat na disku a tím šetří i místo. Deduplikace se obecně dá rozdělit na následující úrovně:
 \begin{itemize}
   \item Úroveň souborů
-  \item Úroveň 2 bloků
+  \item Úroveň datových bloků
   \item Úroveň bajtů
 \end{itemize}
 
@@ -217,7 +217,7 @@ V~poslední řadě existuje deduplikace na úrovni bajtů, která je ze všech u
 ZFS z~výše uvedených možností nabízí právě deduplikaci na úrovni datových bloků, protože tato jednotka deduplikace přináší nejvíce výhod v~obecných případech použití \cite{dedup}. Na obrázku \ref{blockdedup} můžeme vidět porovnání souborového systému při zapnuté a vypnuté vlastnosti deduplikace.
 \begin{figure}
     \includegraphics[scale=0.8]{dedup.pdf}
-    \caption{Ukázka 0 na úrovni datových bloků}
+    \caption{Ukázka deduplikace na úrovni datových bloků}
     \label{blockdedup}
 \end{figure}
 \section{Konzistence}
@@ -258,7 +258,7 @@ scan: scrub repaired 0 in 6s with 0 errors
 
 \section{Mountpoint}
 \label{mountpoint}
-0 je jednou ze základních vlastností všech souborových systémů. Je to vlastně cesta k~bodu v~adresářovém stromu operačního systému, kde má být daný souborový systém připojen.
+Mountpoint je jednou ze základních vlastností všech souborových systémů. Je to vlastně cesta k~bodu v~adresářovém stromu operačního systému, kde má být daný souborový systém připojen.
 
 Jelikož se ZFS snaží administrátorům maximálně ulehčit práci, stará se o~automatické připojování souborových systémů sám. K~účelům připojování souborových systémů v~ZFS slouží jejich vlastnost \emph{mountpoint}, kde administrátor může specifikovat, kam se má daný souborový systém připojit. Pokud administrátor tuto vlastnost explicitně neurčí, je odvozena od vlastnosti rodičovského souborového systému.
 
@@ -281,7 +281,7 @@ Po provedení příkazu si ZFS zapamatuje odkaz na vrchol souborového systému,
 
 Rekurzivní tvorba snapshotů se provádí rychle pomocí jedné atomické operace. Snapshoty jsou vytvořeny naráz všechny dohromady nebo nejsou vytvořeny vůbec. Výhodou atomické operace je fakt, že data ve všech snapshotech jsou konzistentní vzhledem k~jednomu časovému okamžiku \cite{snapshot}.
 
-Snapshot pro souborový systém a všechny jeho potomky můžeme vytvořit a ověřit jeho existenci pomocí následujících příkazů:
+Snapshot pro souborový systém a všechny jeho potomky můžeme vytvořit a ověřit pomocí následujících příkazů:
 \begin{verbatim}
 # zfs snapshot -r rpool/export/home@snap
 # zfs list -t snapshot -r rpool/export/home
