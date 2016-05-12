@@ -2,29 +2,29 @@ Následující kapitola popisuje návrh nástroje pro administraci souborového 
 \section{Požadavky}
 Na začátku bychom měli stanovit funkcionalitu, která bude od aplikace vyžadována. Ještě jednou si připomeneme, že hlavním cílem této práce je vytvořit graficky orientovaný administrační nástroj pro správu souborového systému ZFS.
 
-Souborový systém ZFS byl původně integrován do operačního systému Solaris. I~přes to, že dnes již existují operační systémy, na které bylo ZFS přeneseno, hlavní platformou aplikace bude právě operační systém Solaris.
+Souborový systém ZFS byl původně integrován do operačního systému Solaris. I~přes to, že dnes již existují operační systémy, na které bylo ZFS přeneseno, hlavní platformou aplikace bude právě operační systém \textbf{Solaris}.
 
-Jelikož má nástroj být grafického charakteru, můžeme brát jako první požadavek na aplikaci přítomnost uživatelského rozhraní.
+Jelikož má nástroj být grafického charakteru, můžeme brát jako první požadavek na aplikaci přítomnost \textbf{uživatelského rozhraní}.
 
-Jak bylo zmíněno v~úvodu, účelem toho nástroje má být ulehčení a zpřehlednění správy souborového systému ZFS a to i pro začínajícího administrátora. Bylo by tedy vhodné, aby zvolené uživatelské rozhraní bylo přehledné a jednoduché na používání.
+Jak bylo zmíněno v~úvodu, účelem toho nástroje má být ulehčení a zpřehlednění správy souborového systému ZFS a to i pro začínajícího administrátora. Bylo by tedy vhodné, aby zvolené uživatelské rozhraní bylo \textbf{přehledné a jednoduché} na používání.
 
-ZFS je souborový systém určený především pro servery. Tyto počítače mohou být v~mnohých situacích pro administrátora fyzicky nedostupné. Abychom umožnili administrátorovi správu i v~těchto situacích, bude náš nástroj poskytovat možnost vzdáleného přístupu ke správě ZFS.
+ZFS je souborový systém určený především pro servery. Tyto počítače mohou být v~mnohých situacích pro administrátora fyzicky nedostupné. Abychom umožnili administrátorovi správu i v~těchto situacích, bude náš nástroj poskytovat možnost \textbf{vzdáleného přístupu} ke správě ZFS.
 
-Na konci předchozí kapitoly jsme se dozvěděli, že většina nástrojů využívá takový způsob sběru dat, který uživateli v~některých situacích znemožňuje vidět přímo aktuální data. Tohoto problému bychom se při návrhu měli vyvarovat a zvolit takový způsob, který by uživateli zobrazil aktuální data při každém jeho požadavku.
+Na konci předchozí kapitoly jsme se dozvěděli, že většina nástrojů využívá takový způsob sběru dat, který uživateli v~některých situacích znemožňuje vidět přímo aktuální data. Tohoto problému bychom se při návrhu měli vyvarovat a zvolit takový způsob, který by uživateli zobrazil \textbf{aktuální data} při každém jeho požadavku.
 
-Další nedostatek objevený při analýze již vytvořených nástrojů pro správu ZFS, je ten, že většina těchto nástrojů vůbec neposkytuje funkce pro administraci. Dovolují nám tedy daný souborový systém sledovat, ale ne ho spravovat. Jelikož je ZFS rozsáhlý souborový systém, obsahuje i velké množství funkcí a příkazů pro jeho správu. Bylo by tedy dobré některé základní funkce a příkazy pro administraci ZFS do tohoto nástroje zahrnout.
+Další nedostatek objevený při analýze již vytvořených nástrojů pro správu ZFS, je ten, že většina těchto nástrojů vůbec neposkytuje funkce pro administraci. Dovolují nám tedy daný souborový systém sledovat, ale ne ho spravovat. Jelikož je ZFS rozsáhlý souborový systém, obsahuje i velké množství funkcí a příkazů pro jeho správu. Bylo by tedy dobré některé \textbf{základní funkce} a příkazy pro administraci ZFS do tohoto nástroje zahrnout.
 
-Posledním bodem požadavků by měla být bezpečnost. Hlavním důvodem proč se starat o~bezpečnost aplikace je fakt, že pomocí ZFS lze jednoduchým příkazem zničit vše, co se na disku nachází. Jelikož se z~disku načítá při startu i operační systém, mohly by následky být fatální. Z~tohoto důvodu bude přístupná pouze specifikovaným uživatelům.
+Posledním bodem požadavků by měla být \textbf{bezpečnost}. Hlavním důvodem proč se starat o~bezpečnost aplikace je fakt, že pomocí ZFS lze jednoduchým příkazem zničit vše, co se na disku nachází. Jelikož se z~disku načítá při startu i operační systém, mohly by následky být fatální. Z~tohoto důvodu bude přístupná pouze specifikovaným uživatelům.
 
 Pro shrnutí můžeme požadavky na administrační nástroj shrnout do následujících bodů:
 \begin{itemize}
-    \item Solaris
-    \item Uživatelské rozhraní
-    \item Jednoduchost a přehlednost
-    \item Vzdálený přístup
-    \item Aktuálnost dat
-    \item Základní funkce pro administraci
-    \item Bezpečnost
+    \item \textbf{Solaris}
+    \item \textbf{Uživatelské rozhraní}
+    \item \textbf{Jednoduchost a přehlednost}
+    \item \textbf{Vzdálený přístup}
+    \item \textbf{Aktuálnost dat}
+    \item \textbf{Základní funkce pro administraci}
+    \item \textbf{Bezpečnost}
 \end{itemize}
 
 Pokud splníme všechny stanovené požadavky, můžeme uživateli zajistit bezpečnou správu souborového systému ZFS, která mu bude poskytovat aktuální informace.
@@ -46,7 +46,7 @@ Pro návrh uživatelského rozhraní aplikace přicházejí v~úvahu následují
 
     Grafické rozhraní nám pomůže vyřešit problém s~uživatelským komfortem. Dále nám podle požadavků zbývá zvážit možnost vzdáleného přístupu. Ano i v~tomto případě bychom byli schopni tento požadavek splnit. Jde o~to, jak by to pro nás bylo pohodlné. Aplikace by musela být nainstalovaná na každém počítači, ze kterého bychom chtěli ZFS administrovat. Tento problém není nepřekonatelný, ale existuje ještě jedno komfortnější a dnes stále populárnější řešení.
     \subsection{Webové rozhraní}
-    Nejkomfortnějším řešením je použití webového rozhraní. Hlavní výhodou toho řešení je fakt, že pro přístup k~aplikaci potřebujeme jen webový prohlížeč. Ten je dnes přítomný v~drtivé většině operačních systémů. Tato skutečnost nám přináší možnost přistupovat k~aplikaci z~webového prohlížeče v~libovolném operačním systému, přestože aplikace poběží na operačním systému Solaris.
+    Nejkomfortnějším řešením je použití webového rozhraní. Hlavní výhodou tohoto řešení je fakt, že pro přístup k~aplikaci potřebujeme jen webový prohlížeč. Ten je dnes přítomný v~drtivé většině operačních systémů. Tato skutečnost nám přináší možnost přistupovat k~aplikaci z~webového prohlížeče v~libovolném operačním systému, přestože aplikace poběží na operačním systému Solaris.
 
     Webové stránky jsou navíc známé pro většinu uživatelů, a tak by při správném návrhu stránek neměl být sebemenší problém s~jednoduchostí a přehledností tohoto nástroje.
 
@@ -66,14 +66,14 @@ Náš nástroj má sloužit pro správu souborového systému ZFS a tak bude nut
 
     K~tomuto účelu použijeme objektový návrh společně s~architekturou MVC. Model-view-controller (MVC) je softwarová architektura, která rozděluje aplikaci do tří vrstev tak, že jsou na sobě minimálně závislé \cite{mvc}. Pokud bychom chtěli naši aplikaci rozšířit o~novou funkcionalitu, jednoduše stačí rozšířit požadovanou vrstvu.
 
-    Komponenty jednotlivých vrstev aplikace rozdělujeme na \emph{model}, \emph{view} a \emph{controller}.
+    Komponenty jednotlivých vrstev aplikace rozdělujeme na \verb|model|, \verb|view| a \verb|controller|.
 
         \subsubsection{Datová vrstva}
         \verb|Model| je označení pro třídu, která je součástí datové vrstvy aplikace. Úkol této třídy, stejně jako i celé datové vrstvy, je manipulace a práce s~daty. Všechny datové struktury si ZFS spravuje sám a my k~nim nemáme přímý přístup. Naše datová vrstva a její třídy nám tedy budou zajišťovat vykonávání ZFS příkazů, které budou sestaveny na základě dat předaných z~logické vrstvy.
         \subsubsection{Prezentační vrstva}
-        Další vrstvou aplikace je tzv. prezentační vrstva. Tato vrstva se skládá ze tříd nesoucích obecný název \verb|View|. Hlavním úkolem této vrstvy je vykreslování dat uživateli. V~našem případě aplikace poběží na počítači se souborovým systémem ZFS a uživatel se k~ní bude připojovat pomocí webového prohlížeče. Naše prezentační vrstva tedy nebude přímo vykreslovat uživatelské rozhraní, protože neví kam. Pro zachování nezávislosti jednotlivých vrstev, bude prezentační vrstva pouze generovat HTML kód stránky z~dat, které jí budou předány. Následně takto vygenerovanou stránku předá zpět do logické vrstvy, která zařídí odeslání stránky uživateli.
+        Další vrstvou aplikace je tzv. prezentační vrstva. Tato vrstva se skládá ze tříd nesoucích obecný název \verb|view|. Hlavním úkolem této vrstvy je vykreslování dat uživateli. V~našem případě aplikace poběží na počítači se souborovým systémem ZFS a uživatel se k~ní bude připojovat pomocí webového prohlížeče. Naše prezentační vrstva tedy nebude přímo vykreslovat uživatelské rozhraní, protože neví kam. Pro zachování nezávislosti jednotlivých vrstev, bude prezentační vrstva pouze generovat HTML kód stránky z~dat, které jí budou předány. Následně takto vygenerovanou stránku předá zpět do logické vrstvy, která zařídí odeslání stránky uživateli.
         \subsubsection{Logická vrstva}
-        Poslední vrstvou aplikace je logická vrstva. Hlavním úkolem této vrstvy je řízení toku dat mezi datovou a prezentační vrstvou. V~okamžiku, kdy webový server obdrží nějaký požadavek od uživatele, aplikace vybere z~logické vrstvy třídu, která dokáže tento požadavek vyřídit. Tato třída, kterou obecně nazýváme \verb|Controller|, může požádat datovou vrstvu, aby provedla potřebné operace se souborovým systémem nebo od souborového systému získala potřebná data. Následně data převede do potřebného formátu a požádá prezentační vrstvu o~jejich vykreslení. V~našem případě vykreslená data opět převezme a odešle klientovi.
+        Poslední vrstvou aplikace je logická vrstva. Hlavním úkolem této vrstvy je řízení toku dat mezi datovou a prezentační vrstvou. V~okamžiku, kdy webový server obdrží nějaký požadavek od uživatele, aplikace vybere z~logické vrstvy třídu, která dokáže tento požadavek vyřídit. Tato třída, kterou obecně nazýváme \verb|controller|, může požádat datovou vrstvu, aby provedla potřebné operace se souborovým systémem nebo od souborového systému získala potřebná data. Následně data převede do potřebného formátu a požádá prezentační vrstvu o~jejich vykreslení. V~našem případě vykreslená data opět převezme a odešle klientovi.
 
         Komunikace mezi jednotlivými vrstvami aplikace je znázorněna na obrázku \ref{mvc}. Na obrázku je také vidět způsob předávání dat mezi webovým serverem a aplikací.
 
@@ -104,13 +104,13 @@ Aplikace bude přístupná jen pro oprávněné uživatele, kteří se autentizu
     \label{sysuser}
     Z~důvodů uvedených výše budeme potřebovat vhodného uživatele, pod kterým budeme tuto aplikaci spouštět. V~úvahu přicházejí následující možnosti:
     \begin{itemize}
-      \item uživatel \emph{root}
-      \item role (RBAC)
+      \item \textbf{uživatel \emph{root}}
+      \item \textbf{role (RBAC)}
     \end{itemize}
 
-    První možností je zvolit uživatele \emph{root}. Tento uživatel má právo na všechny operace v~systému. Tato volba by sice náš problém vyřešila, ale přinesla by další bezpečnostní rizika. Pokud bychom spustili aplikaci s~identitou uživatele \emph{root}, pak by tato aplikace mohla v~systému provádět všechny příkazy. To by bylo pro naši aplikaci zbytečné. Nám bude stačit, pokud aplikace bude moci využívat přesně ty nástroje, které ke své správné funkčnosti potřebuje. Dalším rizikem je fakt, že by potenciální útočník mohl tato práva nějakým způsobem zneužít.
+    První možností je zvolit \textbf{uživatele \emph{root}}. Tento uživatel má právo na všechny operace v~systému. Tato volba by sice náš problém vyřešila, ale přinesla by další bezpečnostní rizika. Pokud bychom spustili aplikaci s~identitou uživatele \emph{root}, pak by tato aplikace mohla v~systému provádět všechny příkazy. To by bylo pro naši aplikaci zbytečné. Nám bude stačit, pokud aplikace bude moci využívat přesně ty nástroje, které ke své správné funkčnosti potřebuje. Dalším rizikem je fakt, že by potenciální útočník mohl tato práva nějakým způsobem zneužít.
 
-    Druhá možnost, která přichází v~úvahu, je použití tzv. RBAC. Jedná se o~rozšíření bezpečnostního modelu, které nám umožňuje kontrolovat přístup uživatelů k~úkonům přístupným pouze pro superuživatele \emph{root}. V~nerozšířeném bezpečnostním modelu jste buď uživatelem s~omezenými možnosti a nebo jste superuživatel a můžete všechno \cite{RBAC}. Ve zkratce RBAC umožňuje vytváření tzv. rolí, které se chovají téměř jako normální uživatel. Rozdíl je v~tom, že na roli se nedá přihlásit přímo. Do systému se nejprve musí přihlásit klasický uživatel, který si poté smí přiřadit určité role. Rolím jsou přiřazovány bezpečnostní profily, které obsahují jednotlivá privilegia.
+    Druhá možnost, která přichází v~úvahu, je použití tzv. \textbf{RBAC}. Jedná se o~rozšíření bezpečnostního modelu, které nám umožňuje kontrolovat přístup uživatelů k~úkonům přístupným pouze pro superuživatele \emph{root}. V~nerozšířeném bezpečnostním modelu jste buď uživatelem s~omezenými možnosti a nebo jste superuživatel a můžete všechno \cite{RBAC}. Ve zkratce RBAC umožňuje vytváření tzv. rolí, které se chovají téměř jako normální uživatel. Rozdíl je v~tom, že na roli se nedá přihlásit přímo. Do systému se nejprve musí přihlásit klasický uživatel, který si poté smí přiřadit určité role. Rolím jsou přiřazovány bezpečnostní profily, které obsahují jednotlivá privilegia.
 
     Pro bezpečnost našeho nástroje si tedy vytvoříme roli, které přiřadíme potřebná oprávnění pro vykonávání následujících příkazů:
     \begin{itemize}
@@ -138,7 +138,7 @@ Aplikace bude přístupná jen pro oprávněné uživatele, kteří se autentizu
 \section{Integrace do systému}
 Pro ulehčení správy celé aplikace ji zaregistrujeme v~operačním systému Solaris jako službu. Docílíme tím toho, že se operační systém bude sám starat o~zapínání, vypínání a restartování celé aplikace. Samozřejmě, že budeme stále schopni explicitně říci, jestli se má daná aplikace spouštět.
 
-Service Management Facility je v~operačním systému Solaris nástroj pro spravování služeb. Nahrazuje tím tradiční způsob spravování služeb pomocí \emph{init} skriptů, který byl běžný v~dřívějších verzí operačního systému Solaris a ostatních UNIXových operačních systémech. Velkou výhodou SMF je možnost definování závislostí dané služby na ostatní službách. Tím dokážeme stanovit, že se daná služba nespustí, dokud nebudou spuštěny všechny služby stanovené v~závislostech. SMF také uchovává veškeré informace o~startu, běhu i ukončování služby v~logu. Administrátor má tedy kdykoli možnost tyto logy prozkoumat a získat požadované informace. V~pozadí každé služby zaregistrované v~SMF je tzv. manifest \cite{SMF}.
+Service Management Facility (SMF) je v~operačním systému Solaris nástroj pro spravování služeb. Nahrazuje tím tradiční způsob spravování služeb pomocí \emph{init} skriptů, který byl běžný v~dřívějších verzí operačního systému Solaris a ostatních UNIXových operačních systémech. Velkou výhodou SMF je možnost definování závislostí dané služby na ostatní službách. Tím dokážeme stanovit, že se daná služba nespustí, dokud nebudou spuštěny všechny služby stanovené v~závislostech. SMF také uchovává veškeré informace o~startu, běhu i ukončování služby v~logu. Administrátor má tedy kdykoli možnost tyto logy prozkoumat a získat požadované informace. V~pozadí každé služby zaregistrované v~SMF je tzv. manifest \cite{SMF}.
     \subsection{Manifest}
     Manifest je XML dokument, který danou službu popisuje. Právě zde administrátor stanovuje, na kterých službách bude tato služba závislá nebo jak se daná služba jmenuje. V~našem případě to znamená, že si budeme muset tento manifest vytvořit a zaregistrovat službu v~SMF.
     \subsection{Metody}
