@@ -84,7 +84,7 @@ Z~tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
     Hlavní součástí modulu bude soubor se zdrojovými kódy. Název souboru bude opět odpovídat názvu modulu, ale tentokrát bude následovat klíčové slovo \emph{Source}.
     V~tomto souboru bude uložena definice hlavní třídy modulu, která bude logické vrstvě nabízet požadované funkce. Název této třídy se musí shodovat s~názvem modulu. Obsahem adresáře modulu mohou být i soubory s~definicemi vedlejších tříd nebo jiné pomocné skripty. V~tomto případě si musí modul samostatně zajistit jejich načtení, protože třída \verb|ModuleInterface| umožňuje načítat pouze hlavní třídy modulů.
 
-    Konfigurační soubory modulů budou standardně dostupné v~adresáři \emph{/etc/wzfsadm}, kde se bude nacházet i hlavní konfigurační soubor aplikace. Každý modul, který bude využívat konfiguračních souborů, je sám odpovědný za jejich načtení a zpracování. Aplikace se stará pouze o~načítání hlavního konfiguračního souboru.        
+    Konfigurační soubory modulů budou standardně dostupné v~adresáři \emph{/etc/wzfsadm}, kde se bude nacházet i hlavní konfigurační soubor aplikace. Každý modul, který bude využívat konfiguračních souborů, je sám odpovědný za jejich načtení a zpracování. Aplikace se stará pouze o~načítání hlavního konfiguračního souboru.
 
     \subsection{Základní moduly}
     V~základní verzi výsledné aplikace jsou implementované následující moduly:
@@ -98,7 +98,7 @@ Z~tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
     Každý z~těchto modulů implementuje metody, které umožňují práci s~operačním systémem Solaris nebo specifickou částí souborového systému ZettaByte. Modul \verb|PoolModule| obsahuje metody, které se týkají správy ZFS poolů. Umožňuje především shromažďovat informace o~požadovaných poolech, vytvářet nové pooly nebo vytvořené pooly zničit. Hlavní součástí tohoto modulu je třída \verb|Pool|, která shromažďuje a drží všechny informace o~konkrétním ZFS poolu.
 
     Druhý modul \verb|DeviceModule| umožňuje manipulovat se zařízením uvnitř poolu. Doplňuje především funkcionalitu modulu \verb|PoolModule| o~možnosti přidávat zařízení do poolů, změnit stav konkrétního zařízení nebo provádět funkce \emph{attach} a \emph{detach}.
-    
+
     \begin{figure}
         \centering
         \includegraphics[scale=0.8]{datalayer.pdf}
@@ -109,9 +109,9 @@ Z~tohoto důvodu rozdělíme datovou vrstvu do modulů, které se budou speciali
     Nejobsáhlejším základním modulem je \verb|DatasetModule|, který poskytuje základní metody pro správu jednotlivých souborových systémů. Tento modul umožňuje administrátorovi vytvářet souborové systémy uvnitř poolu a libovolně je vnořovat. Dále nabízí možnost tyto souborové systémy ničit, upravovat a vytvářet jejich snapshoty. Informace o~souborových systémech shromažďuje a udržuje třída \verb|Dataset|, kterou tento modul využívá.
 
     Posledním implementovaným modulem je \verb|SystemModule|. Tento modul slouží ke shromažďování informací o~systémových prostředcích nebo pro získání informací o~operačním systému.
-    
+
     Celková struktura datové vrstvy je představena na obrázku \ref{datalayer}, kde můžeme vidět jednotlivé moduly. Na obrázku je také vidět jak jsou jednotlivé moduly načítány pomocí třídy \verb|ModuleInterface|.
-    
+
 \section{Logická vrstva}
 Hlavní vrstvou aplikace bude logická vrstva. Tato část bude mít za úkol provádět požadované akce na souborovém systému ZFS za pomoci ostatních vrstev aplikace. Data obdržená od datové vrstvy zpracuje a požádá prezentační vrstvu o~vygenerování HTML stránky. Výsledek je prostřednictvím webového serveru odeslán uživateli, který si ho pomocí webového prohlížeče může zobrazit.
 
@@ -137,14 +137,14 @@ Třídy logické vrstvy se obecně nazývají kontroléry. Kontroléry budou obs
     V~případě kontrolérů \verb|DeviceConroller| a \verb|ZpoolConroller| se bude jednat o~podobné funkce týkající se správy zařízení a ZFS poolů.
 
     Výsledná aplikace bude generovat HTML stránky, které v~sobě ponesou odkazy na metody výše zmíněných kontrolérů. Uživatel tedy vůbec nemusí znát strukturu aplikace a jednotlivé metody kontrolérů, protože mu budou nabídnuty prostřednictvím těchto stránek. Stránky mezi sebou budou logicky provázané tak, aby se uživatel mohl po aplikaci libovolně a pohodlně pohybovat.
-    
+
     \begin{figure}
         \centering
         \includegraphics[scale=0.8]{logiclayer.pdf}
         \caption{Logická vrstva aplikace}
         \label{logiclayer}
     \end{figure}
-    
+
     Struktura logické vrstvy aplikace je představena na obrázku \ref{logiclayer}, kde můžeme vidět jednotlivé kontroléry. Na obrázku je také znázorněno načítání modulů datové vrstvy pomocí třídy \verb|ModuleInterface|.
 
 \section{Prezentační vrstva}
@@ -162,7 +162,7 @@ Poslední vrstvou aplikace je tzv. prezentační vrstva. Jediným úkolem této 
 \section{Rozšiřitelnost}
 Výsledná aplikace je díky MVC architektuře a třídám, které zajišťují dynamické načítání komponentů, snadno rozšiřitelná.
 
-Dynamické načítání logické vrstvy nám umožňuje přidat nově vytvořené třídy do adresářové struktury aplikace, bez nutnosti celou aplikaci restartovat. Pokud se požadovaná třída v~době požadavku v~aplikaci nenachází, jednoduše uživateli sdělíme, že stránka neexistuje. Pro rozšíření funkcionality stačí vytvořit novou třídu s~požadovanými funkcemi, která bude splňovat stanovené požadavky, a následně ji vložit do správného adresáře. Nově vytvořená třída pak může okamžitě využívat funkcí modulů datové vrstvy.
+Dynamické načítání logické vrstvy nám umožňuje přidat nově vytvořené třídy do adresářové struktury aplikace, bez nutnosti celou aplikaci restartovat. Pokud se požadovaná třída v~době požadavku v~aplikaci nenachází, jednoduše uživateli sdělíme, že stránka neexistuje. Pro rozšíření funkcionality stačí vytvořit novou třídu s~požadovanými funkcemi, která bude splňovat stanovené požadavky, a následně ji vložit do správného adresáře.
 
 Jednotlivé moduly datové vrstvy jsou také načítány dynamicky, a proto můžeme datovou vrstvu rozšiřovat stejně lehce jako logickou. Vytvoříme modul podle struktury stanovené v~kapitole \ref{package} a vložíme ho do adresářové struktury aplikace. O~načtení nově vytvořeného modulu se aplikace postará sama.
 
@@ -179,7 +179,7 @@ V~prvním sloupci je název bezpečnostního profilu, ke kterému se právo vzta
 \subsection{Start skript}
 Start skript bude umět aplikaci spustit, zastavit a restartovat. Jelikož jsme použili RBAC práva, bude tento skript napsaný v~tzv. profile shellu, který umí tyto práva interpretovat. Skript bude umět zpracovat parametry \emph{start}, \emph{stop} a \emph{restart}, které budou určovat prováděnou akci.
 
-Při startu aplikace skript spustí soubor \emph{run.py}, který spustí webový server a celou aplikaci. Standardní výstup přesměruje do souboru \emph{default\_log} a chybový výstup do souboru \emph{default\_log}. Oba tyto soubory se budou nacházet v~adresáři \emph{/var/log/wzfsadm}, který bude sloužit pro uchovávání logů aplikace. V~závěru je uloženo PID spuštěného procesu do souboru, aby bylo později možné tento proces ukončit.
+Při startu aplikace skript spustí soubor \emph{run.py}, který spustí webový server a celou aplikaci. Standardní výstup přesměruje do souboru \emph{default\_log} a chybový výstup do souboru \emph{error\_log}. Oba tyto soubory se budou nacházet v~adresáři \emph{/var/log/wzfsadm}, který bude sloužit pro uchovávání logů aplikace. V~závěru je uloženo PID spuštěného procesu do souboru, aby bylo později možné tento proces ukončit.
 
 Zastavení aplikace znamená ukončení procesu webového serveru, jehož PID máme uložené v~souboru. Pro ukončení procesu je zavolán příkaz \verb|kill|.
 \subsection{Manifest}
